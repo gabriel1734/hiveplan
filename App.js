@@ -1,12 +1,15 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import Header from './src/components/Header';
-import Home from './src/pages/Home';
+import { View } from "react-native";
+import Header from "../../components/Header";
+import CalendarPicker from "../../components/CalendarPicker";
+import WeekBtn from "../../components/WeekBtn";
 
-export default function App() {
+
+
+export default function Home() {
   return (
-    <Home />
+    <View>
+      <Header name="Gabriel" />
+      <WeekBtn />
+    </View>
   );
 }
-
-
