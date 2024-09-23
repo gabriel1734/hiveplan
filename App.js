@@ -7,6 +7,6 @@ const Tab = createBottomTabNavigator();
 
 export default function App() {
   return (
-    <HomeScreen />
+    <Agendamento/>
   );
 }
