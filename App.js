@@ -1,15 +1,12 @@
-import { View } from "react-native";
-import Header from "../../components/Header";
-import CalendarPicker from "../../components/CalendarPicker";
-import WeekBtn from "../../components/WeekBtn";
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
+import Agendamento from './src/pages/Agendamento';
+import HomeScreen from './src/pages/HomeScreen';
 
+const Tab = createBottomTabNavigator();
 
-
-export default function Home() {
+export default function App() {
   return (
-    <View>
-      <Header name="Gabriel" />
-      <WeekBtn />
-    </View>
+    <HomeScreen />
   );
 }
