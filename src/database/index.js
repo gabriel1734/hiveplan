@@ -58,20 +58,44 @@ catch{
 export function verTipoAgendamentos(){
     const db = SQLite.openDatabaseSync('database.db');
 
-    const result = db.getAllSync( 'SELECT * from dboTipoAgendamento');
-  
+    const result = db.getAllSync('SELECT * from dboTipoAgendamento');
+
+    return result;
+}
+
+export function verTipoAgendamento(id) {
+    const db = SQLite.openDatabaseSync('database.db');
+
+    const result = db.getSync('SELECT * from dboTipoAgendamento WHERE id = (?)', [id]);
+
+    return result;
 }
 
 export function verAgendamentos(){
     const db = SQLite.openDatabaseSync('database.db');
     
     const result = db.getAllSync( 'SELECT * from dboAgendamentos ORDER BY (dataAgendamento)');
-    for (const item of result){
-        console.log(item.id, item.nomeCliente, item.dataAgendamento, item.telCliente);
-    }
-        
+    
+    return result;
  };
 
+export function verAgendamentosPorDia(data) {
+    const db = SQLite.openDatabaseSync('database.db');
+    const result = db.getAllSync('SELECT * FROM dboAgendamentos WHERE dataAgendamento = (?)', [data]);
+    return result;
+}
+
+export function countAgendamentosPorDia(data) {
+    const db = SQLite.openDatabaseSync('database.db');
+    const result = db.getSync('SELECT COUNT(*) as count FROM dboAgendamentos WHERE dataAgendamento = (?)', [data]);
+    return result;
+}
+
+export function countAgendamentosPorSemana(inicio, fim) {
+    const db = SQLite.openDatabaseSync('database.db');
+    const result = db.getSync('SELECT COUNT(*) as count FROM dboAgendamentos WHERE dataAgendamento BETWEEN (?) AND (?)', [inicio, fim]);
+    return result;
+}
 
 export function excluirAgendamento(id){
     const db = SQLite.openDatabaseSync('database.db');
@@ -80,6 +104,13 @@ export function excluirAgendamento(id){
     if(result.changes > 0)
         Alert.alert('sucesso');            
             
+}
+
+export function editarAgendamento(id, data, hora, tipo, nome, tel, descricao) {
+    const db = SQLite.openDatabaseSync('database.db');
+    const result = db.runSync('UPDATE dboAgendamentos SET dataAgendamento = (?), horaAgendamento = (?), tipoAgendamento = (?), nomeCliente = (?), telCliente = (?), descricao = (?) WHERE id = (?)', [data, hora, tipo, nome, tel, descricao, id]);
+    if(result.changes > 0)
+        Alert.alert('sucesso');
 }
 
 export function excluirTipoAgendamento(id){
