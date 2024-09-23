@@ -3,6 +3,7 @@ import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from
 import RNPickerSelect from 'react-native-picker-select';
 import BtnAgendamento from '../BtnAgendamento';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import DayBtn from '../DayBtn';
 
 const WeekBtn = () => {
   const [value, setValue] = useState(null);
@@ -40,7 +41,7 @@ const WeekBtn = () => {
 
 
   return (
-    <View>
+    <>
       <View style={styles.container}>
         <View style={styles.pickerContainer}>
           <RNPickerSelect
@@ -68,37 +69,31 @@ const WeekBtn = () => {
           <BtnAgendamento />
         </View>
       </View>
-      <View style={styles.container}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={true} contentContainerStyle={{ paddingHorizontal: 5 }} style={styles.scrollView}>
-          {dias.map((item, index) => (
-            <TouchableOpacity key={index} style={styles.btnData}>
-              <Text style={styles.buttonText}>{item.dia}</Text>
-              <Text style={styles.buttonText}>{item.mes}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+      <View style={{marginTop: 30}}>
+        <DayBtn dias={dias} />
       </View>
-    </View>
-    
+    </>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    height: 20,
     padding: 10,
     flexDirection:'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#f0f0f0',
     borderRadius: 10,
-    marginTop: 10,  
+    marginTop: 30,
+    width: Dimensions.get('window').width,
   },
   scrollView: {
     flexDirection: 'row',
   },
   pickerContainer: {
     width: Dimensions.get('window').width / 2,
+    height: 50,
+    color: '#6D6B69',
   },
   pickerSelect: {
     inputAndroid: {
@@ -107,7 +102,7 @@ const styles = StyleSheet.create({
       borderWidth: 1,
       borderColor: '#ccc',
       borderRadius: 50,
-      backgroundColor: '#f5f5f5',
+      
     },
     iconContainer: {
       right: 10,
@@ -116,6 +111,11 @@ const styles = StyleSheet.create({
   button: {
     padding: 10,
     borderRadius: 10,
+    width: 50,
+    height: 50,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#6D6B69',
     borderColor: '#6D6B69',
     shadowColor: '#000',
@@ -161,7 +161,9 @@ const styles = StyleSheet.create({
   containerBtn: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    gap: 10,
+    alignItems: 'center',
+    width: Dimensions.get('window').width / 2.5,
+    gap: 2,
   },
 });
 

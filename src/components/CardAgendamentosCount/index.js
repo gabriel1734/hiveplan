@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, Text } from "react-native";
-import { View } from "react-native-web";
+import { View } from "react-native";
 
 export default function CardAgendamentosCount() {
   return (
@@ -19,12 +19,10 @@ export default function CardAgendamentosCount() {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
+    padding: 5,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#f0f0f0',
-    marginTop: 10,
   },
   card: {
     width: '45%', // Adjust the width as needed
@@ -41,7 +39,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   cardWeekTextNumber: {
-    fontSize: 48,
+    fontSize: 32,
     fontWeight: 'bold',
     color: 'white',
     textAlign: 'right',
@@ -53,7 +51,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   cardTodayTextNumber: {
-    fontSize: 48,
+    fontSize: 32,
     fontWeight: 'bold',
     color: 'black',
     textAlign: 'right',
