@@ -68,7 +68,7 @@ export function verTipoAgendamento(id) {
     const db = SQLite.openDatabaseSync('database.db');
 
     const result = db.getFirstSync('SELECT * from dboTipoAgendamento WHERE id = (?)', [id]);
-    console.log(result);
+    
     return result;
 }
 

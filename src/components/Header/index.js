@@ -5,14 +5,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { AgendamentoScreenContext } from '../../../App';
 
 const Header = () => {
-  
-  const {createOrEditAgendamento} = useContext(AgendamentoScreenContext)
 
   return (
     <View>
       <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
-        <Text style={styles.text}>{createOrEditAgendamento ? '': 'olá'}</Text>
-        {createOrEditAgendamento ? <AntDesign name="menu-unfold" size={24} color="black" /> : null}
+        <Text style={styles.text}>Olá</Text>
+        <AntDesign name="menu-unfold" size={24} color="black" />
       </LinearGradient>
     </View>
   );
