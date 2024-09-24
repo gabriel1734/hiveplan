@@ -32,10 +32,9 @@ const Agendamento = () => {
     });
   };
 
-  return (
-    <ScrollView>
-      <StatusBar style = 'auto' backgroundColor='#F7FF89'/>
+  return (      
     <View style={styles.container}>
+    <StatusBar style = 'auto' backgroundColor='#F7FF89'/>
     <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
       <View style = {{justifyContent: 'center', alignItems:'center'}}>
       <Calendar
@@ -122,11 +121,15 @@ const Agendamento = () => {
       />
 
       {/* Botão Salvar */}
-      <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-        <Text style={styles.saveButtonText}>SALVAR</Text>
-      </TouchableOpacity>
+      
+      
+        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+        <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={{width:'50%', alignItems:'center',height:'100%',borderRadius:15, }}> 
+          <Text style={styles.saveButtonText}>SALVAR</Text>
+          </LinearGradient>
+        </TouchableOpacity>
+      
     </View>
-    </ScrollView>
   );
 };
 
@@ -166,16 +169,21 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   saveButton: {
-    backgroundColor: '#f5d142',
-    padding: 15,
-    alignItems: 'center',
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems:'center',
+    padding: 10,
     borderRadius: 10,
     marginTop: 10,
+    width: '100%',
+    flex:1,
   },
   saveButtonText: {
+    paddingTop: 15,
     color: '#000',
     fontWeight: 'bold',
     fontSize: 16,
+    paddingBottom:0,
   },
   header: {
     padding: 35,
