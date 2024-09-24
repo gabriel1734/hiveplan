@@ -1,9 +1,17 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { AgendamentoScreenContext } from "../../../App";
+import { useContext } from "react";
 
 const BtnAgendamento = () => {
+  const { setCreateOrEditAgendamento } = useContext(AgendamentoScreenContext);
+  
+  const handleCreateOrEditAgendamento = () => {
+    setCreateOrEditAgendamento(true);
+  }
+
   return (
-    <TouchableOpacity style={styles.button}>
+    <TouchableOpacity style={styles.button} onPress={handleCreateOrEditAgendamento()}>
       <Text style={styles.buttonText}>
         <AntDesign style={styles.text} name="plussquare" size={24} color="white" />
       </Text>

@@ -5,6 +5,7 @@ import RNPickerSelect from 'react-native-picker-select';
 import { AntDesign } from '@expo/vector-icons'; // ou outra biblioteca de ícones
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
+import Header from '../../components/Header';
 
 
 const Agendamento = () => {
@@ -36,12 +37,6 @@ const Agendamento = () => {
       <StatusBar style = 'auto' backgroundColor='#F7FF89'/>
     <View style={styles.container}>
     <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
-        <View style = {styles.menu}>
-        <Text style={styles.text}>Olá,!</Text>
-        <AntDesign name="menu-unfold" size={24} color="black" />
-        </View>
-      {/* Calendário */}
-      
       <View style = {{justifyContent: 'center', alignItems:'center'}}>
       <Calendar
         current={new Date().toISOString().split('T')[0]}

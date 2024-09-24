@@ -1,15 +1,20 @@
 import { StyleSheet, Text, View } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { MaterialIcons, AntDesign } from "@expo/vector-icons";
+import { verTipoAgendamento } from "../../database";
 
-export default Agendamento = ({ horario, servico, cliente }) => {
+export default Agendamento = ({ horaAgendamento, nomeCliente, descricao, tipoAgendamento }) => {
+
+  const nomeTipoAgedamento = verTipoAgendamento(tipoAgendamento);
+
+
   return (
     <View style={styles.agendamento}>
-      <Text style={styles.horario}>{horario}</Text>
+      <Text style={styles.horario}>{horaAgendamento}</Text>
       <View style={styles.servicoCliente}>
-        <MaterialIcons name="pets" size={24} color="white" />
         <View style={styles.info}>
-          <Text style={styles.infoText}>{servico}</Text>
-          <Text style={styles.infoText}>{cliente}</Text>
+          <Text style={styles.infoText}><AntDesign name="user" size={14} color="white" /> Nome: {nomeCliente}</Text>
+          <Text style={styles.infoText}><MaterialIcons name="description" size={14} color="white" /> Descrição: {descricao}</Text>
+          <Text style={styles.infoText}><MaterialIcons name="work" size={14} color="white" /> Serviço: {nomeTipoAgedamento.nomeTipo}</Text>
         </View>
       </View>
       <View style={styles.acoes}>
@@ -38,13 +43,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   info: {
-    marginLeft: 10,
+    marginLeft: 5,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
   },
   infoText: {
+    
     color: 'white',
   },
   acoes: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
+    bottom: 30,
   },
 });

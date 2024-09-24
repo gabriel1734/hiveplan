@@ -1,37 +1,48 @@
-import React, { useState } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import Agendamentos from '../Agendamentos';
+import { verAgendamentosPorDia } from '../../database';
+import { DataContext } from '../../pages/HomeScreen';
 
 const CardAgendamentos = () => {
   const [refreshing, setRefreshing] = useState(false);
+
+  const {data} = useContext(DataContext);
   
-  const [agendamentos, setAgendamentos] = useState([
-    { horario: '10h:00s - 10h:30s', servico: 'Tosa e Banho', cliente: 'Juninho do Gás' },
-    { horario: '10h:30s - 12h:30s', servico: 'Corte e Progressiva', cliente: 'Claudinha' },
-  ]);
+  const [agendamentos, setAgendamentos] = useState(verAgendamentosPorDia(data));
+
+  useEffect(() => {
+    onRefresh();
+  }, [data]);
+
 
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
-      setAgendamentos([...agendamentos, { horario: '13h:00s - 15h:30s', servico: 'Clareamento', cliente: 'Cleyton' }]);
+      setAgendamentos([...agendamentos]);
       setRefreshing(false);
-    }, 2000);
+    }, 1000);
   };
 
-  return (
-    <View style={styles.container}>
-      <ScrollView
-        style={styles.scrollview}
-        showsVerticalScrollIndicator={true}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      >
-        {agendamentos.map((agendamento, index) => (
-          <Agendamentos key={index} {...agendamento} />
+  return(
+    agendamentos.length > 0 ? (
+      <View style={styles.container}>
+        <ScrollView
+          style={styles.scrollview}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        >
+          {agendamentos.map((agendamento, index) => (
+          <Agendamentos key={agendamento.id} {...agendamento} />
         ))}
-      </ScrollView>
-    </View>
+          </ScrollView>
+      </View>
+    ) : (
+      <View style={styles.container}>
+        <Text style={styles.text}>Nenhum agendamento encontrado para o dia!</Text>
+      </View>
+    )
   );
 };
 
@@ -42,6 +53,16 @@ const styles = StyleSheet.create({
   },
   scrollview: {
     height: '100%',
+  },
+  text: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginTop: 10,
+    backgroundColor: '#6D6B69',
+    padding: 20,
+    color: '#fff',
+    borderRadius: 10,
   },
 });
 

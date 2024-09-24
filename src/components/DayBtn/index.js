@@ -1,21 +1,27 @@
-import React, {useState} from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
-
+import { DataContext } from '../../pages/HomeScreen';
 
 export default function DayBtn({ dias }) {
+  const { data, setData } = useContext(DataContext);
   const [refreshing, setRefreshing] = useState(false);
+  const [dia, setDia] = useState(dias);
 
-  const [dia, setDia] = useState([
-    ...dias,
-  ]);
+  useEffect(() => {
+    onRefresh();
+  }, [dias]);
 
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
-      setDia([...dia, { dia: '22', mes: 'Nov' }]);
+      setDia([...dias]);
       setRefreshing(false);
-    }, 100);
-  }
+    }, 1000);
+  };
+
+  const handleDayPress = (selectedDay) => {
+    setData(selectedDay);
+  };
 
   return (
     <View style={styles.container}>
@@ -29,7 +35,11 @@ export default function DayBtn({ dias }) {
         }
       >
         {dia.map((item, index) => (
-          <TouchableOpacity key={index} style={styles.btnData}>
+          <TouchableOpacity
+            key={index}
+            style={styles.btnData}
+            onPress={() => handleDayPress(item.date)}
+          >
             <Text style={styles.buttonText}>{item.dia}</Text>
             <Text style={styles.buttonText}>{item.mes}</Text>
           </TouchableOpacity>
@@ -59,4 +69,3 @@ const styles = {
     color: 'white',
   },
 };
-
