@@ -6,7 +6,7 @@ import { AntDesign } from '@expo/vector-icons'; // ou outra biblioteca de ícone
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import Header from '../../components/Header';
-import BtnAddServ from '../../components/BtnAddServ';
+
 
 const Agendamento = () => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -21,6 +21,7 @@ const Agendamento = () => {
   };
 
   const handleSave = () => {
+    adicionarAgendamento(selectedDate, startTime, serviceType, clientName, "tel", observation);
     // Lógica para salvar as informações inseridas
     console.log({
       selectedDate,
@@ -67,9 +68,9 @@ const Agendamento = () => {
       <RNPickerSelect
         onValueChange={(value) => setServiceType(value)}
         items={[
-          { label: 'Serviço 1', value: 'servico1' },
-          { label: 'Serviço 2', value: 'servico2' },
-          { label: 'Serviço 3', value: 'servico3' },
+          { label: 'Serviço 1', value: '1' },
+          { label: 'Serviço 2', value: '2' },
+          { label: 'Serviço 3', value: '3' },
         ]}
         placeholder={{ label: 'Selecione o Tipo de Serviço', value: null }}
         style={pickerSelectStyles}
