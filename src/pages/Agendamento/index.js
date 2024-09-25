@@ -6,15 +6,15 @@ import { AntDesign } from '@expo/vector-icons'; // ou outra biblioteca de ícone
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import Header from '../../components/Header';
-
+import BtnAddServ from '../../components/BtnAddServ';
 
 const Agendamento = () => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [serviceType, setServiceType] = useState('');
   const [clientName, setClientName] = useState('');
-  const [startTime, setStartTime] = useState('10:30');
-  const [endTime, setEndTime] = useState('11:30');
+  const [startTime, setStartTime] = useState('00:00');
   const [observation, setObservation] = useState('');
+  const [telefone,setTelefone] = useState('');
 
   const onDayPress = (day) => {
     setSelectedDate(day.dateString);
@@ -27,13 +27,13 @@ const Agendamento = () => {
       serviceType,
       clientName,
       startTime,
-      endTime,
       observation,
+      telefone
     });
   };
 
   return (      
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
     <StatusBar style = 'auto' backgroundColor='#F7FF89'/>
     <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
       <View style = {{justifyContent: 'center', alignItems:'center'}}>
@@ -61,7 +61,7 @@ const Agendamento = () => {
       />
       </View>
       </LinearGradient>
-
+      <View style={{padding:20}}>
       {/* Tipo de Serviço */}
       <Text style={styles.label}>Tipo de Serviço</Text>
       <RNPickerSelect
@@ -73,24 +73,34 @@ const Agendamento = () => {
         ]}
         placeholder={{ label: 'Selecione o Tipo de Serviço', value: null }}
         style={pickerSelectStyles}
-      />
+        />
+        
 
       {/* Nome do Cliente */}
-      <Text style={styles.label}>Nome do Cliente</Text>
-      <RNPickerSelect
-        onValueChange={(value) => setClientName(value)}
-        items={[
-          { label: 'Cliente 1', value: 'cliente1' },
-          { label: 'Cliente 2', value: 'cliente2' },
-          { label: 'Cliente 3', value: 'cliente3' },
-        ]}
-        placeholder={{ label: 'Selecione o Nome do Cliente', value: null }}
-        style={pickerSelectStyles}
-      />
+      <View>
+        <Text style={styles.label}>Nome do Cliente</Text>
+        <TextInput 
+          style={styles.timeInput}
+          value={clientName}
+          onChangeText={(text) => setClientName(text)}
+          placeholder="Nome do Cliente"
+        />
+      </View>
 
-      {/* Horários de Início e Fim */}
-      <View style={styles.timeContainer}>
-        <View style={styles.timeInputContainer}>
+        {/* Telefone*/}
+        <View >
+          <Text style={styles.label}>Telefone</Text>
+          <TextInput
+            style={styles.timeInput}
+            value={telefone}
+            onChangeText={(text) => setTelefone(text)}
+            placeholder="Telefone"
+          />
+        </View>
+
+
+      {/* Horários do Agendamento*/}
+        <View >
           <Text style={styles.label}>Início</Text>
           <TextInput
             style={styles.timeInput}
@@ -99,16 +109,8 @@ const Agendamento = () => {
             placeholder="Início"
           />
         </View>
-        <View style={styles.timeInputContainer}>
-          <Text style={styles.label}>Fim</Text>
-          <TextInput
-            style={styles.timeInput}
-            value={endTime}
-            onChangeText={(text) => setEndTime(text)}
-            placeholder="Fim"
-          />
-        </View>
-      </View>
+
+     
 
       {/* Observação */}
       <Text style={styles.label}>Observação</Text>
@@ -121,15 +123,16 @@ const Agendamento = () => {
       />
 
       {/* Botão Salvar */}
-      
-      
+        <View style={styles.btnSalvarContainer}>
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
         <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={{width:'50%', alignItems:'center',height:'100%',borderRadius:15, }}> 
           <Text style={styles.saveButtonText}>SALVAR</Text>
           </LinearGradient>
         </TouchableOpacity>
+        </View>
+        </View>
       
-    </View>
+    </ScrollView>
   );
 };
 
@@ -168,15 +171,21 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlignVertical: 'top',
   },
+  btnSalvarContainer:{
+    flexDirection:'row',
+    justifyContent:'center',
+    alignContent:'center',
+  },
   saveButton: {
     backgroundColor: 'transparent',
     justifyContent: 'center',
     alignItems:'center',
+    alignContent:'center',
     padding: 10,
     borderRadius: 10,
-    marginTop: 10,
-    width: '100%',
-    flex:1,
+    width: 700,
+    height: 70,
+    flexDirection:'row',
   },
   saveButtonText: {
     paddingTop: 15,
