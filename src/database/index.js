@@ -11,18 +11,18 @@ export function create(){
     db.execSync(`
         CREATE TABLE IF NOT EXISTS dboAgendamentos (
          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
-         nomeCliente VARCHAR(200),
-         telCliente VARCHAR(50),
-         dataAgendamento TEXT, 
-         horaAgendamento TEXT,
-         tipoAgendamento INTEGER, 
-         descricao VARCHAR(300)
+         nomeCliente TEXT NOT NULL,
+         telCliente TEXT NOT NULL,
+         dataAgendamento TEXT NOT NULL, 
+         horaAgendamento TEXT NOT NULL,
+         tipoAgendamento INTEGER NOT NULL, 
+         descricao TEXT 
          ); 
 
         CREATE TABLE IF NOT EXISTS dboTipoAgendamento(
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
-        nomeTipo VARCHAR(200) NOT NULL,
-        descricao VARCHAR(300)
+        nomeTipo TEXT NOT NULL,
+        descricao TEXT
         );
         `);
 }
@@ -41,11 +41,11 @@ export function adicionarTipoAgendamento(nome, descricao){
      }
 }
 
-export  function  adicionarAgendamento(data, hora, tipo, nome, tel, descricao ){
+export  function  adicionarAgendamento(data, hora, tipo, nomeCliente, telCliente, descricao ){
 
     const db = SQLite.openDatabaseSync('database.db');
 try{
-   const result = db.runSync('INSERT INTO dboAgendamentos (dataAgendamento, horaAgendamento, tipoAgendamento, descricao, nomeCliente, telCliente) VALUES (?, ?, ?, ?, ?, ?)', [data,hora, tipo, descricao, nome, tel]);
+   const result = db.runSync('INSERT INTO dboAgendamentos (dataAgendamento, horaAgendamento, tipoAgendamento, descricao, nomeCliente, telCliente) VALUES (?, ?, ?, ?, ?, ?)', [data,hora, tipo, descricao, nomeCliente, telCliente]);
 
    if(result.changes > 0)
         Alert.alert('sucesso');
