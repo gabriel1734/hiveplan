@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Dimensions } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import RNPickerSelect from 'react-native-picker-select';
@@ -8,8 +8,9 @@ import RNDateTimePicker from '@react-native-community/datetimepicker';
 import { TextInputMask } from 'react-native-masked-text'; // Importação da máscara de texto
 import { adicionarAgendamento, verTipoAgendamentos } from '../../database';
 import BtnAddServ from '../../components/BtnAddServ';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
-const Agendamento = () => {
+const Agendamento = ({navigation}) => {
   const date = new Date().toLocaleTimeString().split(':');
   const localeDate = `${date[0]}:${date[1]}`;
 
@@ -24,6 +25,7 @@ const Agendamento = () => {
   const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
   const [tiposServico, setTiposServico] = useState([]);
   const [refresh, setRefresh] = useState(false);
+  
   
 
   useEffect(() => {
@@ -77,14 +79,48 @@ const Agendamento = () => {
   };
 
   const handleSave = () => {
-    adicionarAgendamento(selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
-  };
+  let hasErrors = false;
+
+  // Validation: Check if each field is filled, if not set an error flag and display alert
+  if (!selectedDate) {
+    Alert.alert('Erro', 'Por favor, selecione uma data.');
+    hasErrors = true;
+  }
+  if (!serviceType) {
+    Alert.alert('Erro', 'Por favor, selecione um tipo de serviço.');
+    hasErrors = true;
+  }
+  if (!clientName) {
+     Alert.alert('Erro', 'Por favor, escreva o nome de um cliente.');
+    hasErrors = true;
+  }
+  if (!telefone) {
+    Alert.alert('Erro', 'Por favor, escreva um telefone.');
+    hasErrors = true;
+  }
+  if (!startTime) {
+    Alert.alert('Erro', 'Por favor, selecione uma hora de início.');
+    hasErrors = true;
+  }
+  if (!endTime) {
+    Alert.alert('Erro', 'Por favor, selecione uma hora de fim.');
+    hasErrors = true;
+  }
+
+  // If any field is not filled, stop the process
+  if (hasErrors) {
+    return;
+  }
+  adicionarAgendamento(selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
+  Alert.alert('Sucesso', 'Agendamento salvo com sucesso!');
+  navigation.navigate('Home');
+}
 
   return (      
     <ScrollView style={styles.container}>
       <StatusBar style='auto' backgroundColor='#F7FF89' />
       <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
-        
+        <AntDesign name="arrowleft" size={24} color="black" onPress={() =>{navigation.navigate('Home')}} />
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <Calendar
             current={new Date().toISOString().split('T')[0]}
@@ -329,23 +365,6 @@ const styles = StyleSheet.create({
   },
 });
 
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
-    height: 40,
-    borderColor: '#000',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
-  inputAndroid: {
-    height: 40,
-    borderColor: '#000',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
-});
+
 
 export default Agendamento;

@@ -2,14 +2,14 @@ import { StyleSheet, Text, View } from "react-native";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { verTipoAgendamento } from "../../database";
 
-export default Agendamento = ({ horaAgendamento, nomeCliente, descricao, tipoAgendamento }) => {
+export default Agendamento = ({ horaInicioAgendamento,horaFimAgendamento, nomeCliente, descricao, tipoAgendamento }) => {
 
   const nomeTipoAgedamento = verTipoAgendamento(tipoAgendamento);
 
 
   return (
     <View style={styles.agendamento}>
-      <Text style={styles.horario}>{horaAgendamento}</Text>
+      <Text style={styles.horario}>{horaInicioAgendamento} - {horaFimAgendamento}</Text>
       <View style={styles.servicoCliente}>
         <View style={styles.info}>
           <Text style={styles.infoText}><AntDesign name="user" size={14} color="white" /> Nome: {nomeCliente}</Text>
@@ -35,7 +35,10 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   horario: {
+    paddingBottom: 5,
+    paddingLeft: 5,
     fontWeight: 'bold',
+    fontSize: 16,
     color: 'white',
   },
   servicoCliente: {

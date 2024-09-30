@@ -6,7 +6,7 @@ import DayBtn from '../DayBtn';
 import { DataContext } from '../../pages/HomeScreen';
 import { getDaysOfWeek, verSemanasComAgendamentos } from '../../database';
 
-const WeekBtn = () => {
+const WeekBtn = ({navigation}) => {
   const { data, setData } = useContext(DataContext);
   const [selectedValue, setSelectedValue] = useState(data);
   const dates = verSemanasComAgendamentos();
@@ -38,7 +38,7 @@ const WeekBtn = () => {
             value={selectedValue}
           />
         </View>
-        <BtnAgendamento />
+        <BtnAgendamento navigation={navigation} />
       </View>
       <View style={{ marginTop: 30 }}>
         <DayBtn dias={dias} />

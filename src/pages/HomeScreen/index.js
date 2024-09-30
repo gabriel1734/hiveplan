@@ -8,7 +8,7 @@ import { adicionarAgendamento, adicionarTipoAgendamento, verAgendamentos } from 
 
 export const DataContext = createContext();
 
-export default function HomeScreen() {
+export default function HomeScreen({navigation}) {
   const date = new Date();
   const [data, setData] = useState(date.toISOString().split('T')[0]);
 
@@ -21,7 +21,7 @@ export default function HomeScreen() {
         }
       }>
         <Header />
-        <WeekBtn />
+        <WeekBtn navigation={navigation} />
         <CardAgendamentosCount />
         <CardAgendamentos />
       </DataContext.Provider>

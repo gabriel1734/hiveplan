@@ -34,6 +34,7 @@ const CardAgendamentos = () => {
           }
         >
           {agendamentos.map((agendamento, index) => (
+            
           <Agendamentos key={agendamento.id} {...agendamento} />
         ))}
           </ScrollView>
@@ -53,6 +54,7 @@ const styles = StyleSheet.create({
   },
   scrollview: {
     height: '100%',
+    marginBottom: 20,
   },
   text: {
     fontSize: 14,

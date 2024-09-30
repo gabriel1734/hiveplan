@@ -48,19 +48,34 @@ export function adicionarTipoAgendamento(nome, descricao){
      }
 }
 
-export  function  adicionarAgendamento(data, hora, tipo, nomeCliente, telCliente, descricao ){
+export function adicionarAgendamento(data, horaInicio, horaFim, tipo, nomeCliente, telCliente, descricao) {
+
+    if (checkAgendamentoExistente(data, horaInicio, horaFim)) {
+        Alert.alert('Já existe um agendamento para esse horário');
+        return;
+    }
 
     const db = SQLite.openDatabaseSync('database.db');
-try{
-   const result = db.runSync('INSERT INTO dboAgendamentos (dataAgendamento, horaAgendamento, tipoAgendamento, descricao, nomeCliente, telCliente) VALUES (?, ?, ?, ?, ?, ?)', [data,hora, tipo, descricao, nomeCliente, telCliente]);
+    try {
+        // Make sure to pass 7 values to match the 7 columns in your table
+        const result = db.runSync(
+            'INSERT INTO dboAgendamentos (dataAgendamento, horaInicioAgendamento, horaFimAgendamento, tipoAgendamento, descricao, nomeCliente, telCliente) VALUES (?, ?, ?, ?, ?, ?, ?)', 
+            [data, horaInicio, horaFim, tipo, descricao, nomeCliente, telCliente]
+        );
 
-   if(result.changes > 0)
-        Alert.alert('sucesso');
-}
-catch{
-    console.log('erro');
+        if (result.changes > 0) {
+            Alert.alert('Sucesso', 'Agendamento adicionado com sucesso!');
+        }
+    } catch (error) {
+        console.log('Erro ao adicionar agendamento: ', error);
+    }
+    
 }
 
+export function checkAgendamentoExistente(data, horaInicio, horaFim) {
+    const db = SQLite.openDatabaseSync('database.db');
+    const result = db.getFirstSync('SELECT COUNT(*) FROM dboAgendamentos WHERE dataAgendamento = (?) AND horaInicioAgendamento = (?) AND horaFimAgendamento = (?)', [data, horaInicio, horaFim]);
+    return result['COUNT(*)'] > 0;
 }
 
 export function verTipoAgendamentos(){
@@ -78,6 +93,16 @@ export function verTipoAgendamento(id) {
     
     return result;
 }
+
+export function editarTipoAgendamento(id, nome, descricao) {
+    const db = SQLite.openDatabaseSync('database.db');
+    const result = db.runSync('UPDATE dboTipoAgendamento SET nomeTipo = (?), descricao = (?) WHERE id = (?)', [nome, descricao, id]);
+    if(result.changes > 0)
+        Alert.alert('sucesso');
+    else 
+        Alert.alert('erro');
+}
+
 
 export function verAgendamentos(){
     const db = SQLite.openDatabaseSync('database.db');
@@ -129,8 +154,19 @@ export function editarAgendamento(id, data, hora, tipo, nome, tel, descricao) {
         Alert.alert('sucesso');
 }
 
+export function checarTipoAgendamento(id) {
+    const db = SQLite.openDatabaseSync('database.db');
+    const result = db.getFirstSync('SELECT COUNT(*) FROM dboAgendamentos WHERE tipoAgendamento = (?)', [id]);
+    return result['COUNT(*)'] > 0;
+}
+
 export function excluirTipoAgendamento(id){
     const db = SQLite.openDatabaseSync('database.db');
+
+    if(checarTipoAgendamento(id)){
+        Alert.alert('Erro esse tipo de agendamento já está sendo utilizado');   
+        return;
+    }
 
     const result = db.runSync('DELETE FROM dboTipoAgendamento WHERE id = (?)', [id]);
     if(result.changes > 0)

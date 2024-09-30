@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, TouchableOpacity, Modal, View, TextInput, FlatList, Alert } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, Modal, View, TextInput, ScrollView, Alert, RefreshControl } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { adicionarTipoAgendamento, verAgendamentos, excluirAgendamento } from "../../database";
+import { adicionarTipoAgendamento, editarTipoAgendamento, excluirAgendamento, excluirTipoAgendamento, verTipoAgendamento, verTipoAgendamentos } from "../../database";
 
 const BtnAddServ = ({ refresh, setRefresh }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [nome, setNome] = useState('');
+  const [id, setId] = useState('');
   const [descricao, setDescricao] = useState('');
-  const [agendamentos, setAgendamentos] = useState([]);
+  const [tiposAgendamentos, setTiposAgendamentos] = useState([]);
+  const [refreshList, setRefreshList] = useState(false);
 
   // Função para carregar todos os agendamentos
   const loadAgendamentos = () => {
-    const agendamentos = verAgendamentos(); // Função que busca todos os agendamentos
-    setAgendamentos(agendamentos);
+    setTiposAgendamentos(verTipoAgendamentos());
   };
 
   // Carregar os agendamentos ao montar o componente
@@ -25,12 +26,26 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
   };
 
   const handleSave = () => {
-    adicionarTipoAgendamento(nome, descricao); // Salva no banco de dados
-    setNome(''); // Limpa o campo de nome
-    setDescricao(''); // Limpa o campo de descrição
+
+    if (id) {
+      editarTipoAgendamento(id, nome, descricao);
+    } else {
+      adicionarTipoAgendamento(nome, descricao);
+    }
+    
+    setNome(''); 
+    setDescricao('');
+    setId('');
     setModalVisible(false);
-    setRefresh(!refresh); // Atualiza a lista após salvar
+    setRefresh(!refresh); 
   };
+
+  const handleEdit = (id) => {
+    const r = verTipoAgendamento(id);
+    setId(r.id);
+    setNome(r.nomeTipo);
+    setDescricao(r.descricao);
+  }
 
   const handleDelete = (id) => {
     Alert.alert(
@@ -39,49 +54,32 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", onPress: () => {
-            excluirAgendamento(id); // Exclui do banco de dados
-            setRefresh(!refresh); // Atualiza a lista após exclusão
+            excluirTipoAgendamento(id); // Exclui do banco de dados
+            console.log('Excluiu');
+            setRefresh(!refresh); 
+            onRefresh();
           }
         }
       ]
     );
   };
 
-  const renderItem = ({ item }) => (
-    <View style={styles.agendamentoItem}>
-      <Text style={styles.agendamentoText}>Nome: {item.nomeCliente}</Text>
-      <Text style={styles.agendamentoText}>Descrição: {item.descricao}</Text>
-      <Text style={styles.agendamentoText}>Data: {item.dataAgendamento}</Text>
-      <View style={styles.actionButtons}>
-        <TouchableOpacity style={styles.editButton}>
-          <Text style={styles.buttonText}>Editar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.deleteButton} onPress={() => handleDelete(item.id)}>
-          <Text style={styles.buttonText}>Excluir</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
+  const onRefresh = () => {
+  setRefreshList(true);
+  setTimeout(() => {
+    loadAgendamentos();
+    setRefreshList(false);
+  }, 1000);
+  };
+
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={agendamentos}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        ListEmptyComponent={<Text>Nenhum agendamento encontrado.</Text>}
-        ListHeaderComponent={
-          <>
-            <TouchableOpacity style={styles.button} onPress={handleCreateOrEditAgendamento}>
-              <Text style={styles.buttonText}>
-                <AntDesign style={styles.text} name="plussquare" size={24} color="white" />
-              </Text>
-            </TouchableOpacity>
-            <Text style={styles.headerText}>Lista de Agendamentos</Text>
-          </>
-        }
-        contentContainerStyle={{ paddingBottom: 100 }} // Espaço extra ao final da lista
-      />
+      <TouchableOpacity style={styles.button} onPress={handleCreateOrEditAgendamento}>
+        <Text style={styles.buttonText}>
+          <AntDesign style={styles.text} name="plussquare" size={24} color="white" />
+        </Text>
+      </TouchableOpacity>
 
       {/* Modal para adicionar o tipo de serviço */}
       <Modal
@@ -94,6 +92,11 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
       >
         <View style={styles.modalView}>
           <Text style={styles.modalText}>Adicionar Tipo de Serviço</Text>
+          <Text
+            placeholder="ID"
+            style={{ display: 'none' }}
+            value={id}
+          />
           <TextInput
             placeholder="Nome do Serviço"
             style={styles.input}
@@ -114,6 +117,28 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
               Salvar
             </Text>
           </View>
+          <View style={styles.actionContainer}>
+            <ScrollView
+              style={{
+                width: '100%',
+                height: '80%',
+              }}
+              refreshControl={
+              <RefreshControl refreshing={refreshList} onRefresh={onRefresh} />
+              }
+            >
+              {tiposAgendamentos.map((agendamento) => (
+                <View key={agendamento.id} style={styles.agendamentoItem}>
+                  <Text style={styles.agendamentoText}>{agendamento.nomeTipo}</Text>
+                  <Text style={styles.agendamentoText}>{agendamento.descricao}</Text>
+                  <View style={styles.actionButtons}>
+                    <Text style={styles.editButton} onPress={() => handleEdit(agendamento.id)}>Editar</Text>
+                    <Text style={styles.deleteButton} onPress={() => handleDelete(agendamento.id)}>Excluir</Text>
+                  </View>
+                </View>
+              ))}
+          </ScrollView>
+        </View>
         </View>
       </Modal>
     </View>
@@ -181,6 +206,11 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
+  actionContainer: {
+    marginTop: 20,
+    width: '100%',
+    marginBottom: 20,
+  },
   modalText: {
     marginBottom: 15,
     textAlign: "center",
@@ -202,14 +232,15 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   agendamentoItem: {
-    backgroundColor: '#e0e0e0',
-    padding: 15,
+    backgroundColor: '#6D6B69',
+    padding: 10,
     marginBottom: 10,
     borderRadius: 10,
   },
   agendamentoText: {
     fontSize: 16,
     marginBottom: 5,
+    color: 'white',
   },
   actionButtons: {
     flexDirection: 'row',
@@ -217,14 +248,17 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   editButton: {
-    backgroundColor: '#4CAF50',
+    backgroundColor: 'white',
     padding: 10,
     borderRadius: 5,
+    color: '#6D6B69',
+
   },
   deleteButton: {
     backgroundColor: '#f44336',
     padding: 10,
     borderRadius: 5,
+    color: 'white',
   },
   buttonText: {
     color: 'white',
