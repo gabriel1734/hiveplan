@@ -1,4 +1,4 @@
-import { create } from './src/database';
+import { create, dropTables } from './src/database';
 import Agendamento from './src/pages/Agendamento';
 import HomeScreen from './src/pages/HomeScreen';
 import { createContext, useState } from 'react';

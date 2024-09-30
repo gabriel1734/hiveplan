@@ -14,7 +14,8 @@ export function create(){
          nomeCliente TEXT NOT NULL,
          telCliente TEXT NOT NULL,
          dataAgendamento TEXT NOT NULL, 
-         horaAgendamento TEXT NOT NULL,
+         horaInicioAgendamento TEXT NOT NULL,
+         horaFimAgendamento TEXT NOT NULL,
          tipoAgendamento INTEGER NOT NULL, 
          descricao TEXT 
          ); 
@@ -25,6 +26,12 @@ export function create(){
         descricao TEXT
         );
         `);
+}
+
+export function dropTables() {
+    const db = SQLite.openDatabaseSync('database.db');
+    db.execSync('DROP TABLE dboAgendamentos');
+    db.execSync('DROP TABLE dboTipoAgendamento');
 }
 
 export function adicionarTipoAgendamento(nome, descricao){
