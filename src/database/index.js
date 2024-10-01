@@ -118,6 +118,12 @@ export function verAgendamentosPorDia(data) {
     return result;
 }
 
+export function getAgendamento(id){
+    const db = SQLite.openDatabaseSync('database.db');
+    const result = db.getFirstSync('SELECT * FROM dboAgendamentos WHERE id = (?)', [id]);
+    return result;
+}
+
 export async function countAgendamentosPorDia(data) {
     const db = SQLite.openDatabaseSync('database.db');
 
@@ -147,11 +153,27 @@ export function excluirAgendamento(id){
             
 }
 
-export function editarAgendamento(id, data, hora, tipo, nome, tel, descricao) {
-    const db = SQLite.openDatabaseSync('database.db');
-    const result = db.runSync('UPDATE dboAgendamentos SET dataAgendamento = (?), horaAgendamento = (?), tipoAgendamento = (?), nomeCliente = (?), telCliente = (?), descricao = (?) WHERE id = (?)', [data, hora, tipo, nome, tel, descricao, id]);
-    if(result.changes > 0)
-        Alert.alert('sucesso');
+export function editarAgendamento(id,data, horaInicio, horaFim, tipo, nomeCliente, telCliente, descricao) {
+    try {
+        const db = SQLite.openDatabaseSync('database.db');
+        
+        const result = db.runSync(`
+            UPDATE dboAgendamentos
+                SET dataAgendamento = (?), 
+                horaInicioAgendamento = (?), 
+                horaFimAgendamento = (?), 
+                tipoAgendamento = (?), 
+                nomeCliente = (?), 
+                telCliente = (?), 
+                descricao = (?)
+            WHERE id = (?)
+            `,[data, horaInicio, horaFim, tipo, nomeCliente, telCliente, descricao, id]);
+        
+        if(result.changes > 0)
+            Alert.alert('sucesso');
+    } catch (error) {
+        console.log('Erro ao editar agendamento: ', error);
+    }
 }
 
 export function checarTipoAgendamento(id) {

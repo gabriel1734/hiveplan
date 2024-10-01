@@ -4,13 +4,14 @@ import WeekBtn from "../../components/WeekBtn";
 import CardAgendamentosCount from "../../components/CardAgendamentosCount";
 import CardAgendamentos from "../../components/CardAgendamentos";
 import { createContext, useState } from "react";
-import { adicionarAgendamento, adicionarTipoAgendamento, verAgendamentos } from "../../database";
+
 
 export const DataContext = createContext();
 
 export default function HomeScreen({navigation}) {
   const date = new Date();
   const [data, setData] = useState(date.toISOString().split('T')[0]);
+  const [refreshing, setRefreshing] = useState(false);
 
   return (
     <View>
@@ -18,12 +19,14 @@ export default function HomeScreen({navigation}) {
         {
           data,
           setData,
+          refreshing,
+          setRefreshing
         }
       }>
         <Header />
         <WeekBtn navigation={navigation} />
         <CardAgendamentosCount />
-        <CardAgendamentos />
+        <CardAgendamentos navigation={navigation} />
       </DataContext.Provider>
     </View>
   );

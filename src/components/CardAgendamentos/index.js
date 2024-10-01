@@ -4,10 +4,10 @@ import Agendamentos from '../Agendamentos';
 import { verAgendamentosPorDia } from '../../database';
 import { DataContext } from '../../pages/HomeScreen';
 
-const CardAgendamentos = () => {
-  const [refreshing, setRefreshing] = useState(false);
+const CardAgendamentos = ({navigation}) => {
+  
 
-  const {data} = useContext(DataContext);
+  const {data, refreshing, setRefreshing} = useContext(DataContext);
   
   const [agendamentos, setAgendamentos] = useState(verAgendamentosPorDia(data));
 
@@ -19,7 +19,7 @@ const CardAgendamentos = () => {
   const onRefresh = () => {
     setRefreshing(true);
     setTimeout(() => {
-      setAgendamentos([...agendamentos]);
+      setAgendamentos(verAgendamentosPorDia(data));
       setRefreshing(false);
     }, 1000);
   };
@@ -35,7 +35,7 @@ const CardAgendamentos = () => {
         >
           {agendamentos.map((agendamento, index) => (
             
-          <Agendamentos key={agendamento.id} {...agendamento} />
+          <Agendamentos key={agendamento.id} {...agendamento} onRefresh={onRefresh} navigation={navigation} />
         ))}
           </ScrollView>
       </View>

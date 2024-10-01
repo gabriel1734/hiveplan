@@ -6,11 +6,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
 import { TextInputMask } from 'react-native-masked-text'; // Importação da máscara de texto
-import { adicionarAgendamento, verTipoAgendamentos } from '../../database';
+import { adicionarAgendamento, editarAgendamento, getAgendamento, verTipoAgendamentos } from '../../database';
 import BtnAddServ from '../../components/BtnAddServ';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
-const Agendamento = ({navigation}) => {
+const Agendamento = ({navigation, route}) => {
   const date = new Date().toLocaleTimeString().split(':');
   const localeDate = `${date[0]}:${date[1]}`;
 
@@ -25,6 +25,25 @@ const Agendamento = ({navigation}) => {
   const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
   const [tiposServico, setTiposServico] = useState([]);
   const [refresh, setRefresh] = useState(false);
+  const [idAgendamento, setIdAgendamento] = useState(null);
+  const [erroTelefone, setErroTelefone] = useState(false);
+
+  useEffect(() => {
+    const { id } = route.params || {};
+    
+    if (id) {
+      const result = getAgendamento(id);
+      console.log(result);
+      setSelectedDate(result.dataAgendamento);
+      setServiceType(result.tipoAgendamento);
+      setClientName(result.nomeCliente);
+      setTelefone(result.telCliente);
+      setStartTime(result.horaInicioAgendamento);
+      setEndTime(result.horaFimAgendamento);
+      setObservation(result.descricao);
+      setIdAgendamento(id);
+    }
+  }, [route.params]);
   
   
 
@@ -106,14 +125,27 @@ const Agendamento = ({navigation}) => {
     Alert.alert('Erro', 'Por favor, selecione uma hora de fim.');
     hasErrors = true;
   }
+    
+    if (telefone.length < 15) {
+      Alert.alert('Erro', 'O telefone deve ter no mínimo 10 dígitos.');
+      setErroTelefone(true);
+      hasErrors = true;
+  }
 
-  // If any field is not filled, stop the process
   if (hasErrors) {
     return;
-  }
-  adicionarAgendamento(selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
-  Alert.alert('Sucesso', 'Agendamento salvo com sucesso!');
-  navigation.navigate('Home');
+    }
+    
+    setErroTelefone(false);
+  
+    if (idAgendamento) {
+    console.log('Editar');
+    editarAgendamento(idAgendamento, selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
+  }else{
+    adicionarAgendamento(selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
+    }
+    
+    navigation.navigate('Home');
 }
 
   return (      
@@ -157,6 +189,7 @@ const Agendamento = ({navigation}) => {
               items={tiposServico}
               placeholder={{ label: 'Selecione o Tipo de Serviço', value: null }}
               style={styles.pickerSelectTelInput}
+              value={serviceType ? serviceType : null}
             />
           </View>
           <BtnAddServ refresh={refresh} setRefresh={setRefresh} />
@@ -182,9 +215,17 @@ const Agendamento = ({navigation}) => {
               withDDD: true,
               dddMask: '(99) '
             }}
-            style={styles.timeInput}
+            style={erroTelefone ? [styles.timeInput, styles.inputError] : styles.timeInput}
             value={telefone}
-            onChangeText={(text) => setTelefone(text)}
+            onChangeText={(text) => {
+              setTelefone(text);
+
+              if (text.length < 10) {
+                setErroTelefone(true);
+              } else {
+                setErroTelefone(false);
+              }
+            }}
             placeholder="Telefone"
             keyboardType="numeric"
           />
@@ -271,6 +312,9 @@ const styles = StyleSheet.create({
   pickerSelectTelInput: {
     width: '80%',
     height: 50,
+  },
+   inputError: {
+    borderColor: 'red',
   },
   label: {
     fontSize: 16,

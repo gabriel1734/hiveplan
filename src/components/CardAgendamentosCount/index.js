@@ -5,7 +5,7 @@ import { DataContext } from "../../pages/HomeScreen";
 import { countAgendamentosPorDia, countAgendamentosPorSemana } from "../../database";
 
 export default function CardAgendamentosCount() {
-  const { data } = useContext(DataContext);
+  const { data, refreshing } = useContext(DataContext);
   const [countDia, setCountDia] = useState(0); 
 
   const [countSemana, setCountSemana] = useState(0);
@@ -25,7 +25,7 @@ export default function CardAgendamentosCount() {
 
       fetchCount();
     });
-  }, [data]);
+  }, [data, refreshing]);
 
   return (
     <View style={styles.container}>

@@ -37,11 +37,11 @@ export default function DayBtn({ dias }) {
         {dia.map((item, index) => (
           <TouchableOpacity
             key={index}
-            style={styles.btnData}
+            style={data === item.date ? styles.btnDataSelected : styles.btnData}
             onPress={() => handleDayPress(item.date)}
           >
-            <Text style={styles.buttonText}>{item.dia}</Text>
-            <Text style={styles.buttonText}>{item.mes}</Text>
+            <Text style={data == item.date ? styles.buttonTextSelected : styles.buttonText}>{item.dia}</Text>
+            <Text style={data == item.date ? styles.buttonTextSelected : styles.buttonText}>{item.mes}</Text>
           </TouchableOpacity>
         ))}
       </ScrollView>
@@ -67,5 +67,18 @@ const styles = {
   },
   buttonText: {
     color: 'white',
+  },
+  btnDataSelected: {
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 10,
+    marginHorizontal: 5,
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  buttonTextSelected: {
+    color: '#6D6B69',
   },
 };
