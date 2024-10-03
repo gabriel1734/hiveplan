@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
 import { TextInputMask } from 'react-native-masked-text'; // Importação da máscara de texto
-import { adicionarAgendamento, editarAgendamento, getAgendamento, verTipoAgendamentos } from '../../database';
+import { addAgendamento, adicionarAgendamento, editarAgendamento, getAgendamento, verTipoAgendamentos } from '../../database';
 import BtnAddServ from '../../components/BtnAddServ';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
@@ -142,7 +142,7 @@ const Agendamento = ({navigation, route}) => {
     console.log('Editar');
     editarAgendamento(idAgendamento, selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
   }else{
-    adicionarAgendamento(selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
+    addAgendamento(selectedDate,startTime,clientName,telefone,observation,0,0);
     }
     
     navigation.navigate('Home');
