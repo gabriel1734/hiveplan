@@ -9,43 +9,41 @@ export function create(){
     const db = SQLite.openDatabaseSync('database.db');
     
     db.execSync(`
-        PRAGMA foreign_keys = ON;
-        
         CREATE TABLE IF NOT EXISTS dboAgendamento (
          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
          nomeCliente TEXT NOT NULL,
          telCliente TEXT NOT NULL,
          dataAgendamento TEXT NOT NULL, 
          horaAgendamento TEXT NOT NULL, 
-         descricao TEXT,
-         ); 
+         descricao TEXT
+         );
 
         CREATE TABLE IF NOT EXISTS dboServico(
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
         nome TEXT NOT NULL,
         descricao TEXT,
-        favorito NUMERIC,
+        favorito NUMERIC
         );
 
         CREATE TABLE IF NOT EXISTS dboColaborador(
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         nome TEXT NOT NULL
-        )
+        );
 
         CREATE TABLE IF NOT EXISTS dboColaboradorServico(
-        codColaborador INTEGER PRIMARY KEY NOT NULL REFERENCES dboColaborador,
-        codServico INTEGER PRIMARY KEY NOT NULL REFERENCES dboServico,
+        codColaborador INTEGER  NOT NULL REFERENCES dboColaborador,
+        codServico INTEGER NOT NULL REFERENCES dboServico,
         favorito NUMERIC,
-        )
+        PRIMARY KEY (codColaborador, codServico)
+        );
 
         CREATE TABLE IF NOT EXISTS dboAgendamentoServico(
-        codAgendamento INTEGER PRIMARY KEY NOT NULL REFERENCES dboAgendamento,
-        codServico INTEGER PRIMARY KEY NOT NULL REFERENCES dboServico,
-        codColaborador INTEGER PRIMARY KEY NOT NULL REFERENCES dboColaborador
-        )
-
-        INSERT INTO dboColaborador VALUES (0, DEFAULT);
-        INSERT INTO dboServico VALUES (0,DEFAULT);
+        codAgendamento INTEGER  NOT NULL REFERENCES dboAgendamento,
+        codServico INTEGER  NOT NULL REFERENCES dboServico,
+        codColaborador INTEGER  NOT NULL REFERENCES dboColaborador,
+        PRIMARY KEY(codAgendamento, codServico, codColaborador)
+        );
+      
         `);
 }
 
@@ -110,11 +108,11 @@ export function addAgendamento(data, horaAgendamento, nomeCliente, telCliente, d
 
 }
 //DEVO ATUALIZAR ESTA FUNÇÃO
-/*export function checkAgendamentoExistente(data, horaAgendamento) {
+export function checkAgendamentoExistente(data, horaAgendamento) {
     const db = SQLite.openDatabaseSync('database.db');
     const result = db.getFirstSync('SELECT COUNT(*) FROM dboAgendamento WHERE dataAgendamento = (?) AND horaAgendamentos = (?)', [data, horaAgendamento]);
     return result['COUNT(*)'] > 0;
-}*/
+}
 
 export function viewServicoAll(){
     const db = SQLite.openDatabaseSync('database.db');
@@ -157,11 +155,11 @@ export function viewAgendamentosPorDia(data) {
 }
 
 //Essa função vai ser usada onde ?
-/*export function getAgendamento(id){
+export function getAgendamento(id){
     const db = SQLite.openDatabaseSync('database.db');
     const result = db.getFirstSync('SELECT * FROM dboAgendamento WHERE id = (?)', [id]);
     return result;
-}*/
+}
 
 export async function countAgendamentosPorDia(data) {
     const db = SQLite.openDatabaseSync('database.db');
@@ -227,7 +225,7 @@ export function editarAgendamento(id,data,hora, nomeCliente, telCliente, descric
 }
 
 // o que essa função faz ?
-/*
+
 export function checarTipoAgendamento(id) {
     const db = SQLite.openDatabaseSync('database.db');
     const result = db.getFirstSync('SELECT COUNT(*) FROM dboAgendamento WHERE tipoAgendamento = (?)', [id]);
@@ -247,7 +245,7 @@ export function excluirTipoAgendamento(id){
     if(result.changes > 0)
         Alert.alert('sucesso');
 }
- */
+ 
 export function deleteServico(id){
     const db = SQLite.openDatabaseSync('database.db');
 
