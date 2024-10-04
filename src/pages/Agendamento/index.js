@@ -6,7 +6,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
 import { TextInputMask } from 'react-native-masked-text'; // Importação da máscara de texto
-import { addAgendamento, adicionarAgendamento, editarAgendamento, getAgendamento, verTipoAgendamentos } from '../../database';
+import { addAgendamento, adicionarAgendamento, editarAgendamento, getAgendamento, verTipoAgendamentos, viewAgendamentoID, viewServicoAll } from '../../database';
 import BtnAddServ from '../../components/BtnAddServ';
 import AntDesign from '@expo/vector-icons/AntDesign';
 
@@ -17,8 +17,7 @@ const Agendamento = ({navigation, route}) => {
   const [selectedDate, setSelectedDate] = useState(null);
   const [serviceType, setServiceType] = useState('');
   const [clientName, setClientName] = useState('');
-  const [startTime, setStartTime] = useState(localeDate);
-  const [endTime, setEndTime] = useState(localeDate);
+  const [time, setTime] = useState(localeDate)
   const [observation, setObservation] = useState('');
   const [telefone, setTelefone] = useState('');
   const [isTimePickerVisible, setTimePickerVisible] = useState(false);
@@ -32,14 +31,13 @@ const Agendamento = ({navigation, route}) => {
     const { id } = route.params || {};
     
     if (id) {
-      const result = getAgendamento(id);
+      const result = viewAgendamentoID(id);
       console.log(result);
       setSelectedDate(result.dataAgendamento);
-      setServiceType(result.tipoAgendamento);
+      setServiceType(result.servico);
+      setTime(result.horaAgendamento);
       setClientName(result.nomeCliente);
       setTelefone(result.telCliente);
-      setStartTime(result.horaInicioAgendamento);
-      setEndTime(result.horaFimAgendamento);
       setObservation(result.descricao);
       setIdAgendamento(id);
     }
@@ -48,10 +46,10 @@ const Agendamento = ({navigation, route}) => {
   
 
   useEffect(() => {
-    const resultTiposServico = verTipoAgendamentos();
+    const resultTiposServico = viewServicoAll();
 
     if (resultTiposServico.length > 0) {
-      setTiposServico(resultTiposServico.map((tipo) => ({label: tipo.nomeTipo, value: tipo.id})));
+      setTiposServico(resultTiposServico.map((tipo) => ({label: tipo.nome, value: tipo.id})));
     } else {
       setTiposServico([{label: 'Nenhum tipo de serviço encontrado', value: 0}]);
     }
@@ -85,18 +83,6 @@ const Agendamento = ({navigation, route}) => {
     }
   };
 
-  const handleEndTimePickerChange = (event, selectedDate) => {
-    setEndTimePickerVisible(false);
-    if (event.type === 'set' && selectedDate) { 
-      const formattedTime = selectedDate.toISOString().split('T')[1].substring(0, 5);
-      if (!compareTimes(startTime, formattedTime)) {
-        Alert.alert('Erro', 'A hora de fim deve ser maior que a hora de início.');
-      } else {
-        setEndTime(formattedTime);
-      }
-    }
-  };
-
   const handleSave = () => {
   let hasErrors = false;
 
@@ -117,16 +103,11 @@ const Agendamento = ({navigation, route}) => {
     Alert.alert('Erro', 'Por favor, escreva um telefone.');
     hasErrors = true;
   }
-  if (!startTime) {
+  if (!time) {
     Alert.alert('Erro', 'Por favor, selecione uma hora de início.');
     hasErrors = true;
-  }
-  if (!endTime) {
-    Alert.alert('Erro', 'Por favor, selecione uma hora de fim.');
-    hasErrors = true;
-  }
-    
-    if (telefone.length < 15) {
+  }    
+  if (telefone.length < 15) {
       Alert.alert('Erro', 'O telefone deve ter no mínimo 10 dígitos.');
       setErroTelefone(true);
       hasErrors = true;
@@ -140,9 +121,9 @@ const Agendamento = ({navigation, route}) => {
   
     if (idAgendamento) {
     console.log('Editar');
-    editarAgendamento(idAgendamento, selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
+   //editarAgendamento(idAgendamento, selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
   }else{
-    addAgendamento(selectedDate,startTime,clientName,telefone,observation,0,0);
+    addAgendamento(selectedDate,time,clientName,telefone,observation,serviceType,"colocar colaborador!!");
     }
     
     navigation.navigate('Home');
@@ -198,6 +179,7 @@ const Agendamento = ({navigation, route}) => {
         <View>
           <Text style={styles.label}>Nome do Cliente</Text>
           <TextInput 
+            
             style={styles.timeInput}
             value={clientName}
             onChangeText={(text) => setClientName(text)}
@@ -233,39 +215,17 @@ const Agendamento = ({navigation, route}) => {
 
         {/* Horário de Início */}
         <View>
-          <Text style={styles.label}>Início</Text>
+          <Text style={styles.label}>Hora</Text>
           <TouchableOpacity
             style={styles.timeButton}
             onPress={() => setTimePickerVisible(true)}
           >
-            <Text style={styles.timeButtonText}>{startTime}</Text>
+            <Text style={styles.timeButtonText}>{time}</Text>
           </TouchableOpacity>
 
           {isTimePickerVisible && (
             <RNDateTimePicker
               onChange={handleStartTimePickerChange}
-              mode="time"
-              is24Hour={true}
-              display="default"
-              value={new Date()}
-              timeZoneOffsetInMinutes={0}
-            />
-          )}
-        </View>
-
-        {/* Horário de Fim */}
-        <View>
-          <Text style={styles.label}>Fim</Text>
-          <TouchableOpacity
-            style={styles.timeButton}
-            onPress={() => setEndTimePickerVisible(true)}
-          >
-            <Text style={styles.timeButtonText}>{endTime}</Text>
-          </TouchableOpacity>
-
-          {isEndTimePickerVisible && (
-            <RNDateTimePicker
-              onChange={handleEndTimePickerChange}
               mode="time"
               is24Hour={true}
               display="default"

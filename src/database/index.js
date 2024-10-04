@@ -43,7 +43,8 @@ export function create(){
         codColaborador INTEGER  NOT NULL REFERENCES dboColaborador,
         PRIMARY KEY(codAgendamento, codServico, codColaborador)
         );
-      
+        
+    
         `);
 }
 
@@ -60,7 +61,7 @@ export function addServico(nome, descricao){
     const db = SQLite.openDatabaseSync('database.db');
     try {
           console.log(nome, descricao);
-        const result = db.runSync('INSERT INTO dboServicos (nome, descricao) VALUES (?, ?)', [nome, descricao]);
+        const result = db.runSync('INSERT INTO dboServico (nome, descricao) VALUES (?, ?)', [nome, descricao]);
 
          if(result.changes > 0)
              return true; 
@@ -68,7 +69,7 @@ export function addServico(nome, descricao){
             return false;
         
     }     
-     catch{
+     catch(error){
          console.log('erro', error);
      }
 
@@ -101,7 +102,7 @@ export function addAgendamento(data, horaAgendamento, nomeCliente, telCliente, d
         return false;
         
 }
-    catch (error) {
+    catch(error) {
         console.log('Erro ao adicionar agendamento: ', error);
         return false;
     }
@@ -122,7 +123,7 @@ export function viewServicoAll(){
     return result;
 }
 
-export function verServicoID(id) {
+export function viewServicoID(id) {
     const db = SQLite.openDatabaseSync('database.db');
 
     const result = db.getFirstSync('SELECT * from dboServico WHERE id = (?)', [id]);
@@ -155,7 +156,7 @@ export function viewAgendamentosPorDia(data) {
 }
 
 //Essa função vai ser usada onde ?
-export function getAgendamento(id){
+export function viewAgendamentoID(id){
     const db = SQLite.openDatabaseSync('database.db');
     const result = db.getFirstSync('SELECT * FROM dboAgendamento WHERE id = (?)', [id]);
     return result;
@@ -183,7 +184,7 @@ export async function countAgendamentosPorSemana(data) {
     return result['COUNT(*)'];
 }
 
-export function excluirAgendamento(id){
+export function deleteAgendamento(id){
     const db = SQLite.openDatabaseSync('database.db');
 
     try{
@@ -195,7 +196,7 @@ export function excluirAgendamento(id){
     return false;
 
     }
-    catch{
+    catch(error){
         console.log('erro:',error);
         return false;
     }              
@@ -257,7 +258,7 @@ export function deleteServico(id){
         else 
         return false;
     }
-    catch{
+    catch(error){
         console.log('erro:',error);
     }
 }
@@ -271,7 +272,7 @@ export function addColaborador(nome){
     else 
         return false;
     }
-    catch{
+    catch(error){
     console.log('erro:', error);
     }
 }

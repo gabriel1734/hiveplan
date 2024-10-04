@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity, Modal, Button, Alert } from "react-native";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
-import { excluirAgendamento, verTipoAgendamento } from "../../database";
+import { deleteAgendamento, viewServicoID,} from "../../database";
 
-export default Agendamento = ({ horaInicioAgendamento, horaFimAgendamento, nomeCliente, descricao, tipoAgendamento, id, onRefresh, navigation }) => {
+export default Agendamento = ({horaAgendamento,colaborador,telCliente, nomeCliente, descricao, servico, id, onRefresh, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const nomeTipoAgedamento = verTipoAgendamento(tipoAgendamento);
+  const nomeTipoAgedamento = viewServicoID(servico);
 
   const handleDelete = (id) => {
     Alert.alert(
@@ -14,7 +14,7 @@ export default Agendamento = ({ horaInicioAgendamento, horaFimAgendamento, nomeC
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", onPress: () => {
-            excluirAgendamento(id);
+            deleteAgendamento(id);
             
             onRefresh();
           }
@@ -30,7 +30,7 @@ export default Agendamento = ({ horaInicioAgendamento, horaFimAgendamento, nomeC
 
   return (
     <View style={styles.agendamento}>
-      <Text style={styles.horario}>{horaInicioAgendamento} - {horaFimAgendamento}</Text>
+      <Text style={styles.horario}>{horaAgendamento}</Text>
       <View style={styles.servicoCliente}>
         <View style={styles.info}>
           <Text style={styles.infoText}>
@@ -40,7 +40,7 @@ export default Agendamento = ({ horaInicioAgendamento, horaFimAgendamento, nomeC
             <MaterialIcons name="description" size={14} color="white" /> Descrição: {descricao}
           </Text>
           <Text style={styles.infoText}>
-            <MaterialIcons name="work" size={14} color="white" /> Serviço: {nomeTipoAgedamento.nomeTipo}
+            <MaterialIcons name="work" size={14} color="white" /> Serviço: 
           </Text>
         </View>
       </View>

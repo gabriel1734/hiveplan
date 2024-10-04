@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, Modal, View, TextInput, ScrollView, Alert, RefreshControl } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { adicionarTipoAgendamento, editarTipoAgendamento, excluirAgendamento, excluirTipoAgendamento, verTipoAgendamento, verTipoAgendamentos } from "../../database";
+import { addServico, adicionarTipoAgendamento, deleteServico, editarTipoAgendamento, deleteAgendamento, excluirTipoAgendamento, updateServico, verTipoAgendamento, verTipoAgendamentos, viewServicoAll, viewServicoID } from "../../database";
 
 const BtnAddServ = ({ refresh, setRefresh }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -13,7 +13,7 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
 
   // Função para carregar todos os agendamentos
   const loadAgendamentos = () => {
-    setTiposAgendamentos(verTipoAgendamentos());
+    setTiposAgendamentos(viewServicoAll());
   };
 
   // Carregar os agendamentos ao montar o componente
@@ -28,9 +28,9 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
   const handleSave = () => {
 
     if (id) {
-      editarTipoAgendamento(id, nome, descricao);
+      updateServico(id,nome,descricao,false);
     } else {
-      adicionarTipoAgendamento(nome, descricao);
+      addServico(nome, descricao);
     }
     
     setNome(''); 
@@ -41,9 +41,9 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
   };
 
   const handleEdit = (id) => {
-    const r = verTipoAgendamento(id);
+    const r = viewServicoID(id)
     setId(r.id);
-    setNome(r.nomeTipo);
+    setNome(r.nome);
     setDescricao(r.descricao);
   }
 
@@ -54,7 +54,7 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", onPress: () => {
-            excluirTipoAgendamento(id); // Exclui do banco de dados
+            deleteServico(id); // Exclui do banco de dados
             console.log('Excluiu');
             setRefresh(!refresh); 
             onRefresh();
@@ -129,7 +129,7 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
             >
               {tiposAgendamentos.map((agendamento) => (
                 <View key={agendamento.id} style={styles.agendamentoItem}>
-                  <Text style={styles.agendamentoText}>{agendamento.nomeTipo}</Text>
+                  <Text style={styles.agendamentoText}>{agendamento.nome}</Text>
                   <Text style={styles.agendamentoText}>{agendamento.descricao}</Text>
                   <View style={styles.actionButtons}>
                     <Text style={styles.editButton} onPress={() => handleEdit(agendamento.id)}>Editar</Text>
