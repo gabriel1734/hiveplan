@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Modal, Button, Alert } from "
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { deleteAgendamento, viewServicoID,} from "../../database";
 
-export default Agendamento = ({horaAgendamento,colaborador,telCliente, nomeCliente, descricao, servico, id, onRefresh, navigation }) => {
+export default Agendamento = ({horaAgendamento,dataAgendamento,colaborador,telCliente, nomeCliente, descricao, servico, id, onRefresh, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const nomeTipoAgedamento = viewServicoID(servico);
 
@@ -36,6 +36,14 @@ export default Agendamento = ({horaAgendamento,colaborador,telCliente, nomeClien
           <Text style={styles.infoText}>
             <AntDesign name="user" size={14} color="white" /> Nome: {nomeCliente}
           </Text>
+          <Text style={styles.infoText}>
+            Telefone: {telCliente}
+           </Text>
+           <Text style={styles.infoText}>Data: {dataAgendamento}</Text>
+          <Text style={styles.infoText}>
+             Colaborador: {colaborador}
+           </Text>
+           
           <Text style={styles.infoText}>
             <MaterialIcons name="description" size={14} color="white" /> Descrição: {descricao}
           </Text>
@@ -81,7 +89,7 @@ const styles = StyleSheet.create({
   agendamento: {
     backgroundColor: '#6D6B69',
     padding: 15,
-    height: 120,
+    height: 160,
     marginBottom: 10,
     borderRadius: 10,
     color: 'white',
@@ -90,7 +98,7 @@ const styles = StyleSheet.create({
     paddingBottom: 5,
     paddingLeft: 5,
     fontWeight: 'bold',
-    fontSize: 16,
+    fontSize: 20,
     color: 'white',
   },
   servicoCliente: {

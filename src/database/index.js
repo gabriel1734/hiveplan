@@ -328,10 +328,12 @@ export function getDaysOfWeek(startDate) {
   const daysOfWeek = [];
   const monthNames = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
 
-    for (let i = 0; i < 7; i++) {
     const date = new Date(startDate);
-    const currentDate = new Date(startDate);
-    currentDate.setDate(currentDate.getDate() + i); // Adiciona i dias a partir da data de início
+    const currentDate = new Date(startDate );
+
+    for (let i = 0; i < 7; i++) {
+    
+    currentDate.setDate(currentDate.getDate() + i ); // Adiciona i dias a partir da data de início
 
     const day = String(currentDate.getDate()).padStart(2, '0'); // Pega o dia com dois dígitos
     const month = monthNames[currentDate.getMonth()]; // Nome do mês abreviado

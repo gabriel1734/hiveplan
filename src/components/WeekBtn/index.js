@@ -13,7 +13,7 @@ const WeekBtn = ({navigation}) => {
   const [dias, setDias] = useState(getDaysOfWeek(data));
 
   useEffect(() => {
-    if (data && data !== selectedValue) {
+    if (data !== selectedValue) {
       setDias(getDaysOfWeek(data));
       setSelectedValue(data);
     }

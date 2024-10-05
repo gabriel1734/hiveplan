@@ -13,6 +13,7 @@ const CardAgendamentos = ({navigation}) => {
 
   useEffect(() => {
     onRefresh();
+    console.log(data);
   }, [data]);
 
 
