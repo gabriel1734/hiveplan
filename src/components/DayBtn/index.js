@@ -20,10 +20,7 @@ export default function DayBtn({ dias }) {
   };
 
   const handleDayPress = (selectedDay) => {
-    //setData(selectedDay);
-    console.log(dia);
-    console.log(selectedDay);
-    console.log("linha 25 em componentes DayBtn - o erro pode estar aqui");
+    setData(selectedDay);
   };
 
   return (
@@ -41,7 +38,7 @@ export default function DayBtn({ dias }) {
           <TouchableOpacity
             key={index}
             style={data == item.date ? styles.btnDataSelected : styles.btnData}
-            onPress={() => handleDayPress(item.date)}
+            onPress={() => handleDayPress(item.date)} 
           >
             <Text style={data == item.date ? styles.buttonTextSelected : styles.buttonText}>{item.dia}</Text>
             <Text style={data == item.date ? styles.buttonTextSelected : styles.buttonText}>{item.mes}</Text>

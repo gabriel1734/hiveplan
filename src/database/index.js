@@ -325,24 +325,29 @@ function getWeekRange(date) {
 }
 
 export function getDaysOfWeek(startDate) {
-  const daysOfWeek = [];
-  const monthNames = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
-
-    const date = new Date(startDate);
-    const currentDate = new Date(startDate );
-
-    for (let i = 0; i < 7; i++) {
+    const daysOfWeek = [];
+    const monthNames = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', 'OUT', 'NOV', 'DEZ'];
     
-    currentDate.setDate(currentDate.getDate() + i ); // Adiciona i dias a partir da data de início
+    let currentDate = new Date(startDate);
+    const dayOfWeek = currentDate.getDay(); // Obtém o dia da semana (0 para domingo, 1 para segunda, etc.)
+    // Calcula o último domingo anterior ou a data atual se for domingo
+    currentDate.setDate(currentDate.getDate() - dayOfWeek);
 
-    const day = String(currentDate.getDate()).padStart(2, '0'); // Pega o dia com dois dígitos
-    const month = monthNames[currentDate.getMonth()]; // Nome do mês abreviado
-      
-    daysOfWeek.push({ dia: day, mes: month, date: currentDate.toISOString().split('T')[0] }); // Formato 'YYYY-MM-DD' 
-  }
-
-  return daysOfWeek;
+    for (let i = 0; i <= 7; i++) { // loop para os 7 dias da semana
+        const newDate = new Date(currentDate); // Cria uma nova instância de currentDate
+        newDate.setDate(currentDate.getDate() + i); // Adiciona i dias a partir do domingo calculado
+        const day = String(newDate.getDate()).padStart(2, '0'); // Pega o dia com dois dígitos
+        const month = monthNames[newDate.getMonth()]; // Nome do mês abreviado
+        
+        newDate.setDate(newDate.getDate() - 1);
+        const date = newDate.toISOString().split('T')[0]; // Formato 'YYYY-MM-DD'
+        
+        daysOfWeek.push({ dia: day, mes: month, date: date}); // Formato 'YYYY-MM-DD'
+    }
+    return daysOfWeek;
 }
+
+
 
 function getFirstDayOfWeek(date) {
     const day = date.getDay();
