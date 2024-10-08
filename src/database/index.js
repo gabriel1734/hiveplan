@@ -60,7 +60,6 @@ export function dropTables() {
 export function addServico(nome, descricao){
     const db = SQLite.openDatabaseSync('database.db');
     try {
-          console.log(nome, descricao);
         const result = db.runSync('INSERT INTO dboServico (nome, descricao) VALUES (?, ?)', [nome, descricao]);
 
          if(result.changes > 0)

@@ -23,6 +23,8 @@ export default function DayBtn({ dias }) {
     setData(selectedDay);
   };
 
+  
+
   return (
     <View style={styles.container}>
       <ScrollView
