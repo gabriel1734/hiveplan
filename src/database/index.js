@@ -262,6 +262,54 @@ export function addColaborador(nome){
     console.log('erro:', error);
     }
 }
+
+export function addServicoColaborador(idColaborador, idServico){
+    const db = SQLite.openDatabaseSync('database.db');
+    try{
+        const result = db.runSync('INSER INTO dboColaboradorServico VALUES (?, ?, ?)',[idColaborador, idServico,0]);
+
+        if (result.changes > 0)
+            return true;
+        else 
+            return false;
+    }
+    catch(error){
+        console.log('erro', error);
+        return false;
+    }
+}
+
+export function addAgendamentoServicoColaborador(idAgendamento, idColaborador, idServico){
+        const db = SQLite.openDatabaseSync('database.db');
+        try{
+            const result = db.runSync('INSER INTO dboAgendamentoServico VALUES (?, ?, ?)',[idAgendamento,idColaborador, idServico]);
+    
+            if (result.changes > 0)
+                return true;
+            else 
+                return false;
+        }
+        catch(error){
+            console.log('erro', error);
+            return false;
+        }
+    
+}
+export function delServicoColaborador(idColaborador, idServico){
+    const db = SQLite.openDatabaseSync('database.db');
+    try{
+        // const result = db.runSync('DELETE dboColaboradorServico VALUES (?, ?, ?)',[idColaborador, idServico,0]);
+
+        // if (result.changes > 0)
+        //     return true;
+        // else 
+        //     return false;
+    }
+    catch(error){
+        console.log('erro', error);
+        return false;
+    }
+}
  // daqui pra baixo nada é meu //
 export function verSemanasComAgendamentos() {
     const db = SQLite.openDatabaseSync('database.db');
