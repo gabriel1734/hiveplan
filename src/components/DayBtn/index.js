@@ -20,6 +20,7 @@ export default function DayBtn({ dias }) {
   };
 
   const handleDayPress = (selectedDay) => {
+    console.log(selectedDay);
     setData(selectedDay);
   };
 
