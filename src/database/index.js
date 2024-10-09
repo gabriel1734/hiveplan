@@ -373,7 +373,7 @@ export function getDaysOfWeek(startDate) {
         const day = String(newDate.getDate()).padStart(2, '0'); // Pega o dia com dois dígitos
         const month = monthNames[newDate.getMonth()]; // Nome do mês abreviado
         
-        newDate.setDate(newDate.getDate() - 1);
+        newDate.setDate(newDate.getDate());
         const date = newDate.toISOString().split('T')[0]; // Formato 'YYYY-MM-DD'
         
         daysOfWeek.push({ dia: day, mes: month, date: date}); // Formato 'YYYY-MM-DD'

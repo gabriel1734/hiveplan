@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './src/pages/HomeScreen';
 import Agendamento from './src/pages/Agendamento';
-import { create } from './src/database';
+import { create, dropTables } from './src/database';
 import { createContext } from 'react';
 
 export const AgendamentoScreenContext = createContext();
@@ -11,6 +11,7 @@ export const AgendamentoScreenContext = createContext();
 const Stack = createNativeStackNavigator();  // Create a stack navigator
 
 export default function App() {
+  
   create();
 
   return (

@@ -15,22 +15,23 @@ const WeekBtn = ({navigation}) => {
   useEffect(() => {
     setDias(getDaysOfWeek(data));
     setSelectedValue(data);
+    
   }, [data]);
-
+  
   return (
     <>
       <View style={styles.container}>
         <View style={styles.pickerContainer}>
           <RNPickerSelect
             onValueChange={(value) => {
-              if (value != data) {
-                setData(value);
-              }
+              //if (value != data) 
+              setData(value); 
             }}
             items={dates}
             placeholder={{
               label: 'Selecione a semana', // Ajusta o placeholder
-              value: null,
+              //erro possivelmente esta aqui
+              value: "dates",
             }}
             style={styles.pickerSelect}
             value={selectedValue}
