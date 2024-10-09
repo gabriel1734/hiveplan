@@ -154,7 +154,7 @@ export function viewAgendamentosPorDia(data) {
     return result;
 }
 
-//Essa função vai ser usada onde ?
+
 export function viewAgendamentoID(id){
     const db = SQLite.openDatabaseSync('database.db');
     const result = db.getFirstSync('SELECT * FROM dboAgendamento WHERE id = (?)', [id]);
@@ -226,25 +226,12 @@ export function editarAgendamento(id,data,hora, nomeCliente, telCliente, descric
 
 // o que essa função faz ?
 
-export function checarTipoAgendamento(id) {
-    const db = SQLite.openDatabaseSync('database.db');
-    const result = db.getFirstSync('SELECT COUNT(*) FROM dboAgendamento WHERE tipoAgendamento = (?)', [id]);
-    return result['COUNT(*)'] > 0;
-}
+// export function checarTipoAgendamento(id) {
+//     const db = SQLite.openDatabaseSync('database.db');
+//     const result = db.getFirstSync('SELECT COUNT(*) FROM dboAgendamento WHERE tipoAgendamento = (?)', [id]);
+//     return result['COUNT(*)'] > 0;
+// }
     
-
-export function excluirTipoAgendamento(id){
-    const db = SQLite.openDatabaseSync('database.db');
-
-    if(checarTipoAgendamento(id)){
-        Alert.alert('Erro esse tipo de agendamento já está sendo utilizado');   
-        return;
-    }
-
-    const result = db.runSync('DELETE FROM dboTipoAgendamento WHERE id = (?)', [id]);
-    if(result.changes > 0)
-        Alert.alert('sucesso');
-}
  
 export function deleteServico(id){
     const db = SQLite.openDatabaseSync('database.db');
