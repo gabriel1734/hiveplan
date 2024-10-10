@@ -5,6 +5,7 @@ import HomeScreen from './src/pages/HomeScreen';
 import Agendamento from './src/pages/Agendamento';
 import { create, dropTables } from './src/database';
 import { createContext } from 'react';
+import { ToastProvider } from 'react-native-toast-notifications';
 
 export const AgendamentoScreenContext = createContext();
 
@@ -15,6 +16,7 @@ export default function App() {
   create();
 
   return (
+    <ToastProvider>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home"
         screenOptions={{
@@ -25,5 +27,6 @@ export default function App() {
         <Stack.Screen name="Agendamento" component={Agendamento} />
       </Stack.Navigator>
     </NavigationContainer>
+    </ToastProvider>
   );
 }

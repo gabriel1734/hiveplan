@@ -1,7 +1,7 @@
 import { SafeAreaView,CheckBox } from "react-native";
 import { View,useState,useEffect } from "react";
 import { TextInput } from "react-native-web";
-import { verTipoAgendamentos } from "../../database";
+import { verTipoAgendamentos, viewAgendamentosAll } from "../../database";
 
 export default function Colaboradores({navigation}){
 
@@ -11,7 +11,7 @@ export default function Colaboradores({navigation}){
 
 
  const loadAgendamentos = () => {
-    setTiposAgendamentos(verTipoAgendamentos());
+    setTiposAgendamentos(viewAgendamentosAll());
   };
 
   useEffect(() => {
