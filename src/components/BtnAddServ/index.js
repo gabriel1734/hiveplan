@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, Modal, View, TextInput, ScrollView, Alert, RefreshControl } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { addServico, adicionarTipoAgendamento, deleteServico, editarTipoAgendamento, deleteAgendamento, excluirTipoAgendamento, updateServico, verTipoAgendamento, verTipoAgendamentos, viewServicoAll, viewServicoID, updateServicoFavorito } from "../../database";
+import Toast from "react-native-root-toast";
 
 const BtnAddServ = ({ refresh, setRefresh }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -38,9 +39,15 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
   const handleSave = () => {
 
     if (id) {
-      updateServico(id,nome,descricao,false);
+      if(updateServico(id,nome,descricao,false))
+        Toast.show("Atualizado!")
+      else
+      Toast.show("Erro!");
     } else {
-      addServico(nome, descricao);
+      if(addServico(nome, descricao))
+        Toast.show("Adicionado!");
+      else 
+      Toast.show("Erro!");
 
     }
     
@@ -65,7 +72,8 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", onPress: () => {
-            deleteServico(id); // Exclui do banco de dados
+           if(deleteServico(id))
+            Toast.show("Exluido com sucesso!") // Exclui do banco de dados
             console.log('Excluiu');
             setRefresh(!refresh); 
             onRefresh();

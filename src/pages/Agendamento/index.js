@@ -8,6 +8,7 @@ import { TextInputMask } from 'react-native-masked-text';
 import { addAgendamento, viewServicoAll, viewAgendamentoID, viewColaboradorAll, editarAgendamento } from '../../database';
 import BtnAddServ from '../../components/BtnAddServ';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import Toast from 'react-native-root-toast';
 
 const Agendamento = ({ navigation, route }) => {
   const date = new Date().toLocaleTimeString().split(':');
@@ -70,6 +71,14 @@ const Agendamento = ({ navigation, route }) => {
       [id]: !prevState[id],
     }));
   }
+  const handleStartTimePickerChange = (event, selectedDate) => {
+    setTimePickerVisible(false);
+    if (event.type === 'set' && selectedDate) { 
+      const formattedTime = selectedDate.toISOString().split('T')[1].substring(0, 5);
+      
+        setStartTime(formattedTime);
+    }
+  };
 
   const handleSave = () => {
     let hasErrors = false;
@@ -138,6 +147,8 @@ const Agendamento = ({ navigation, route }) => {
         </View>
       </LinearGradient>
       <View style={{ padding: 20 }}>
+        {/* Tipo de Serviço */}
+        <Text style={styles.label}>Serviço</Text>
         <View style={styles.tiposServicoContainer}>
           <View>
             <Text style={styles.label}>Serviços Disponíveis</Text>
@@ -167,6 +178,8 @@ const Agendamento = ({ navigation, route }) => {
           ))}
         </ScrollView>
         </View>
+        {/* Nome do Cliente */}
+        <Text style={styles.label}>Colaborador</Text>
         <View style={styles.tiposServicoContainer}>
           <View>
             <Text style={styles.label}>Colaboradores Disponíveis</Text>
