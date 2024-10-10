@@ -5,6 +5,7 @@ import HomeScreen from './src/pages/HomeScreen';
 import Agendamento from './src/pages/Agendamento';
 import { create, dropTables } from './src/database';
 import { createContext } from 'react';
+import Colaboradores from './src/pages/Colaboradores';
 
 export const AgendamentoScreenContext = createContext();
 
@@ -15,14 +16,16 @@ export default function App() {
   create();
 
   return (
+   
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home"
+      <Stack.Navigator initialRouteName="Colaboradores"
         screenOptions={{
           headerShown: false,
         }}
       >
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Agendamento" component={Agendamento} />
+        <Stack.Screen name="Colaboradores" component={Colaboradores} />
       </Stack.Navigator>
     </NavigationContainer>
   );

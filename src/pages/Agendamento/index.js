@@ -176,6 +176,23 @@ const Agendamento = ({navigation, route}) => {
           <BtnAddServ refresh={refresh} setRefresh={setRefresh} />
         </View>
         {/* Nome do Cliente */}
+        <Text style={styles.label}>colaborador</Text>
+        <View style={styles.tiposServicoContainer}>
+          <View style={styles.pickerSelectTelInput}>
+            <RNPickerSelect
+              onValueChange={(value) => setServiceType(value)}
+              items={tiposServico}
+              placeholder={{ label: 'Selecione o Tipo de Serviço', value: null }}
+              style={styles.pickerSelectTelInput}
+              value={serviceType ? serviceType : null}
+            />
+          </View>
+          <TouchableOpacity style={styles.button} onPress={ () => navigation.navigate('Colaboradores')}>
+            <Text style={styles.buttonText}>
+              <AntDesign style={styles.text} name="plussquare" size={24} color="white" />
+            </Text>
+          </TouchableOpacity>
+        </View>
         <View>
           <Text style={styles.label}>Nome do Cliente</Text>
           <TextInput 
@@ -366,6 +383,27 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
+  },
+  colaboradoresContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    height: 50,
+    marginTop: 10,
+  },
+  button: {
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#6D6B69",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 50,
+    height: 50,
+  },
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
   },
 });
 
