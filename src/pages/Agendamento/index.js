@@ -9,6 +9,7 @@ import { addAgendamento, viewServicoAll, viewAgendamentoID, viewColaboradorAll, 
 import BtnAddServ from '../../components/BtnAddServ';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Toast from 'react-native-root-toast';
+import RNDateTimePicker from '@react-native-community/datetimepicker';
 
 const Agendamento = ({ navigation, route }) => {
   const date = new Date().toLocaleTimeString().split(':');
@@ -26,6 +27,7 @@ const Agendamento = ({ navigation, route }) => {
   const [erroTelefone, setErroTelefone] = useState(false);
   const [colaboradores, setColaboradores] = useState([]);
   const [selectedColaboradores, setSelectedColaboradores] = useState({});
+  const [isTimePickerVisible, setTimePickerVisible] = useState(false);	
 
   useEffect(() => {
     const { id } = route.params || {};
@@ -76,7 +78,7 @@ const Agendamento = ({ navigation, route }) => {
     if (event.type === 'set' && selectedDate) { 
       const formattedTime = selectedDate.toISOString().split('T')[1].substring(0, 5);
       
-        setStartTime(formattedTime);
+        setTime(formattedTime);
     }
   };
 
@@ -107,6 +109,7 @@ const Agendamento = ({ navigation, route }) => {
     setTelefone('');
     setObservation('');
     setSelectedServices({});
+    setTime(localeDate);
     setColaboradores([]);
     route.params = {};
   }
@@ -148,7 +151,6 @@ const Agendamento = ({ navigation, route }) => {
       </LinearGradient>
       <View style={{ padding: 20 }}>
         {/* Tipo de Serviço */}
-        <Text style={styles.label}>Serviço</Text>
         <View style={styles.tiposServicoContainer}>
           <View>
             <Text style={styles.label}>Serviços Disponíveis</Text>
@@ -179,7 +181,6 @@ const Agendamento = ({ navigation, route }) => {
         </ScrollView>
         </View>
         {/* Nome do Cliente */}
-        <Text style={styles.label}>Colaborador</Text>
         <View style={styles.tiposServicoContainer}>
           <View>
             <Text style={styles.label}>Colaboradores Disponíveis</Text>
@@ -232,6 +233,27 @@ const Agendamento = ({ navigation, route }) => {
           placeholder="Telefone"
           keyboardType="numeric"
         />
+
+        <View>
+          <Text style={styles.label}>Horário</Text>
+          <TouchableOpacity
+            style={styles.timeButton}
+            onPress={() => setTimePickerVisible(true)}
+          >
+            <Text style={styles.timeButtonText}>{time}</Text>
+          </TouchableOpacity>
+
+          {isTimePickerVisible && (
+            <RNDateTimePicker
+              onChange={handleStartTimePickerChange}
+              mode="time"
+              is24Hour={true}
+              display="default"
+              value={new Date()}
+              timeZoneOffsetInMinutes={0}
+            />
+          )}
+        </View>
 
         <Text style={styles.label}>Observação</Text>
         <TextInput
@@ -368,6 +390,15 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: 'bold',
     textAlign: 'center',
+  },
+   timeButton: {
+    height: 40,
+    borderColor: '#000',
+    borderWidth: 1,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
   },
 });
 
