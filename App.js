@@ -17,7 +17,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Colaboradores"
+      <Stack.Navigator initialRouteName="Agendamento"
         screenOptions={{
           headerShown: false,
         }}
