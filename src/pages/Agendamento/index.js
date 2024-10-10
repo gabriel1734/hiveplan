@@ -123,7 +123,12 @@ const Agendamento = ({navigation, route}) => {
     console.log('Editar');
    //editarAgendamento(idAgendamento, selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
   }else{
-    addAgendamento(selectedDate,time,clientName,telefone,observation,serviceType,"colocar colaborador!!");
+   if( addAgendamento(selectedDate,time,clientName,telefone,observation,serviceType,1)){
+    Alert.alert("Ok","Certo!");
+   }
+   else{
+    Alert.alert("Erro","Erro!");
+   }
     }
     
     navigation.navigate('Home');

@@ -16,7 +16,6 @@ export default function App() {
   create();
 
   return (
-   
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Colaboradores"
         screenOptions={{
