@@ -14,7 +14,8 @@ export function create(){
          nomeCliente TEXT NOT NULL,
          telCliente TEXT NOT NULL,
          dataAgendamento TEXT NOT NULL, 
-         horaAgendamento TEXT NOT NULL, 
+         horaAgendamento TEXT NOT NULL,
+         atendimento NUMERIC,
          descricao TEXT
          );
 
