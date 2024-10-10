@@ -1,11 +1,29 @@
 import React, { useState } from "react";
 import { StyleSheet, Text, View, TouchableOpacity, Modal, Button, Alert } from "react-native";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
-import { deleteAgendamento, viewServicoID,} from "../../database";
+import { deleteAgendamento, viewAgendamentoID, viewColaborador, viewColaboradorAgendamento, viewServicoAgendamento, viewServicoID,} from "../../database";
+import Toast from "react-native-root-toast";
 
 export default Agendamento = ({horaAgendamento,dataAgendamento,colaborador,telCliente, nomeCliente, descricao, servico, id, onRefresh, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const nomeTipoAgedamento = viewServicoID(servico);
+  
+  const codServico = viewServicoAgendamento(id);
+  const detalhesServico = viewServicoID(codServico[0].codServico);
+
+  const codColaborador = viewColaboradorAgendamento(id);
+  const detalhesColaborador = viewColaborador(codColaborador[0].codColaborador);
+
+  const agendamentoG = viewAgendamentoID(id);
+
+  //ATENÇÃO!
+
+  // Eu estava tentando atualizar as informações dos cards de acordo com as novas tabelas mas,
+  // acabei enfrentando o problema de que o agendamento pode ter mais de um colaborador/serviço
+  // e eu não sei como renderizar isso em react-native então vou deixar com vocês essa parte;
+
+  // Obs.: Deem uma olhada nas constantes que eu utilizei pra pegar os dados do agendamento,
+  // eu acho que desse jeito é melhor do que passar todos os dados igual estamos fazendo na linha 7
+
 
   const handleDelete = (id) => {
     Alert.alert(
@@ -14,7 +32,9 @@ export default Agendamento = ({horaAgendamento,dataAgendamento,colaborador,telCl
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", onPress: () => {
-            deleteAgendamento(id);
+            if(deleteAgendamento(id)){
+              Toast.show("Deletado com sucesso!")
+            }
             
             onRefresh();
           }
@@ -29,59 +49,64 @@ export default Agendamento = ({horaAgendamento,dataAgendamento,colaborador,telCl
   }
 
   return (
-    <View style={styles.agendamento}>
-      <Text style={styles.horario}>{horaAgendamento}</Text>
-      <View style={styles.servicoCliente}>
-        <View style={styles.info}>
-          <Text style={styles.infoText}>
-            <AntDesign name="user" size={14} color="white" /> Nome: {nomeCliente}
-          </Text>
-          <Text style={styles.infoText}>
-            Telefone: {telCliente}
-           </Text>
-           <Text style={styles.infoText}>Data: {dataAgendamento}</Text>
-          <Text style={styles.infoText}>
-             Colaborador: {colaborador}
-           </Text>
+    <>
+    <Text>{agendamentoG.nomeCliente}</Text>
+    <Text>C:{detalhesColaborador[0].nome}</Text>
+    <Text>S:{detalhesServico.nome}</Text> 
+    </>
+    // <View style={styles.agendamento}>
+    //   <Text style={styles.horario}>{horaAgendamento}</Text>
+    //   <View style={styles.servicoCliente}>
+    //     <View style={styles.info}>
+    //       <Text style={styles.infoText}>
+    //         <AntDesign name="user" size={14} color="white" /> Nome: {nomeCliente}
+    //       </Text>
+    //       <Text style={styles.infoText}>
+    //         Telefone: {telCliente}
+    //        </Text>
+    //        <Text style={styles.infoText}>Data: {dataAgendamento}</Text>
+    //       <Text style={styles.infoText}>
+    //          Colaborador: {colaborador}
+    //        </Text>
            
-          <Text style={styles.infoText}>
-            <MaterialIcons name="description" size={14} color="white" /> Descrição: {descricao}
-          </Text>
-          <Text style={styles.infoText}>
-            <MaterialIcons name="work" size={14} color="white" /> Serviço: 
-          </Text>
-        </View>
-      </View>
-      <View style={styles.acoes}>
-        <MaterialIcons name="notifications" size={24} color="yellow" />
+    //       <Text style={styles.infoText}>
+    //         <MaterialIcons name="description" size={14} color="white" /> Descrição: {descricao}
+    //       </Text>
+    //       <Text style={styles.infoText}>
+    //         <MaterialIcons name="work" size={14} color="white" /> Serviço: 
+    //       </Text>
+    //     </View>
+    //   </View>
+    //   <View style={styles.acoes}>
+    //     <MaterialIcons name="notifications" size={24} color="yellow" />
 
-        {/* Ícone de três pontos com ação */}
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <MaterialIcons name="more-vert" size={24} color="white" />
-        </TouchableOpacity>
+    //     {/* Ícone de três pontos com ação */}
+    //     <TouchableOpacity onPress={() => setModalVisible(true)}>
+    //       <MaterialIcons name="more-vert" size={24} color="white" />
+    //     </TouchableOpacity>
 
-        {/* Modal para mostrar as ações */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Ações</Text>
-            <Text style={styles.btnAction} onPress={() =>  handleEdit(id)}>
-              Editar
-            </Text>
-            <Text style={styles.btnActionDelete} onPress={() => handleDelete(id)}>
-              Deletar
-            </Text>
-            <Text style={styles.btnActionCancel} onPress={() => setModalVisible(false)}>
-              Fechar
-            </Text>
-          </View>
-        </Modal>
-      </View>
-    </View>
+    //     {/* Modal para mostrar as ações */}
+    //     <Modal
+    //       animationType="slide"
+    //       transparent={true}
+    //       visible={modalVisible}
+    //       onRequestClose={() => setModalVisible(false)}
+    //     >
+    //       <View style={styles.modalView}>
+    //         <Text style={styles.modalText}>Ações</Text>
+    //         <Text style={styles.btnAction} onPress={() =>  handleEdit(id)}>
+    //           Editar
+    //         </Text>
+    //         <Text style={styles.btnActionDelete} onPress={() => handleDelete(id)}>
+    //           Deletar
+    //         </Text>
+    //         <Text style={styles.btnActionCancel} onPress={() => setModalVisible(false)}>
+    //           Fechar
+    //         </Text>
+    //       </View>
+    //     </Modal>
+    //   </View>
+    // </View>
   );
 };
 

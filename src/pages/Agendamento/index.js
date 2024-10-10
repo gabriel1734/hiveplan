@@ -9,6 +9,7 @@ import { TextInputMask } from 'react-native-masked-text'; // Importação da má
 import { addAgendamento, adicionarAgendamento, editarAgendamento, getAgendamento, verTipoAgendamentos, viewAgendamentoID, viewServicoAll } from '../../database';
 import BtnAddServ from '../../components/BtnAddServ';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import Toast from 'react-native-root-toast';
 
 const Agendamento = ({navigation, route}) => {
   const date = new Date().toLocaleTimeString().split(':');
@@ -75,11 +76,8 @@ const Agendamento = ({navigation, route}) => {
     setTimePickerVisible(false);
     if (event.type === 'set' && selectedDate) { 
       const formattedTime = selectedDate.toISOString().split('T')[1].substring(0, 5);
-      if (!compareTimes(formattedTime, endTime)) {
-        Alert.alert('Erro', 'A hora de início não pode ser maior ou igual à hora de fim.');
-      } else {
+      
         setStartTime(formattedTime);
-      }
     }
   };
 
@@ -124,10 +122,10 @@ const Agendamento = ({navigation, route}) => {
    //editarAgendamento(idAgendamento, selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
   }else{
    if( addAgendamento(selectedDate,time,clientName,telefone,observation,serviceType,1)){
-    Alert.alert("Ok","Certo!");
+   Toast.show("Adicionado com sucesso!");
    }
    else{
-    Alert.alert("Erro","Erro!");
+    Toast.show("Erro ao adicionar!");
    }
     }
     
@@ -167,7 +165,7 @@ const Agendamento = ({navigation, route}) => {
       
       <View style={{ padding: 20 }}>
         {/* Tipo de Serviço */}
-        <Text style={styles.label}>Tipo de Serviço</Text>
+        <Text style={styles.label}>Serviço</Text>
         <View style={styles.tiposServicoContainer}>
           <View style={styles.pickerSelectTelInput}>
             <RNPickerSelect
@@ -181,7 +179,7 @@ const Agendamento = ({navigation, route}) => {
           <BtnAddServ refresh={refresh} setRefresh={setRefresh} />
         </View>
         {/* Nome do Cliente */}
-        <Text style={styles.label}>colaborador</Text>
+        <Text style={styles.label}>Colaborador</Text>
         <View style={styles.tiposServicoContainer}>
           <View style={styles.pickerSelectTelInput}>
             <RNPickerSelect
@@ -199,7 +197,7 @@ const Agendamento = ({navigation, route}) => {
           </TouchableOpacity>
         </View>
         <View>
-          <Text style={styles.label}>Nome do Cliente</Text>
+          <Text style={styles.label}>Nome do Cliente:</Text>
           <TextInput 
             
             style={styles.timeInput}

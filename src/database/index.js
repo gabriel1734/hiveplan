@@ -114,7 +114,7 @@ export function addAgendamento(
 ) {
   const db = SQLite.openDatabaseSync("database.db");
 
-  if (CheckAgendamentoExistente(data, horaAgendamento)) {
+  if (checkAgendamentoExistente(data, horaAgendamento)) {
     Alert.alert(
       "Atenção!",
       "Já existe um agendamento cadastrado neste horário!"
@@ -157,7 +157,7 @@ export function addAgendamento(
 export function checkAgendamentoExistente(data, horaAgendamento) {
   const db = SQLite.openDatabaseSync("database.db");
   const result = db.getFirstSync(
-    "SELECT COUNT(*) FROM dboAgendamento WHERE dataAgendamento = (?) AND horaAgendamentos = (?)",
+    "SELECT COUNT(*) FROM dboAgendamento WHERE dataAgendamento = (?) AND horaAgendamento = (?)",
     [data, horaAgendamento]
   );
   return result["COUNT(*)"] > 0;
@@ -177,10 +177,8 @@ export function viewServicoAll() {
   let vetorNFav = resultSemFavoritos.sort((a, b) =>
     a.nome.localeCompare(b.nome)
   );
-  console.log("nfav", vetorNFav);
 
   let vetorFinal = [...vetorFav, ...vetorNFav];
-  console.log("vetor", vetorFinal);
   return vetorFinal;
 }
 //Função que retorna um serviço referente ao ID
