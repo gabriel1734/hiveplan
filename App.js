@@ -19,7 +19,7 @@ export default function App() {
   return (
     <RootSiblingParent>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Homer"
+      <Stack.Navigator initialRouteName="Home"
         screenOptions={{
           headerShown: false,
         }}
