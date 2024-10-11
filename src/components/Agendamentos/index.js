@@ -4,16 +4,25 @@ import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { deleteAgendamento, viewAgendamentoID, viewColaborador, viewColaboradorAgendamento, viewServicoAgendamento, viewServicoID,} from "../../database";
 import Toast from "react-native-root-toast";
 
-export default Agendamento = ({horaAgendamento,dataAgendamento,colaborador,telCliente, nomeCliente, descricao, servico, id, onRefresh, navigation }) => {
+export default Agendamento = ({horaAgendamento,dataAgendamento,telCliente, nomeCliente, descricao, atendimento, id, onRefresh, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [servicos, setServicos] = useState([]);
   
-  const codServico = viewServicoAgendamento(id);
-  const detalhesServico = viewServicoID(codServico[0].codServico);
+  const codColaboradores = viewColaboradorAgendamento(id);
 
-  const codColaborador = viewColaboradorAgendamento(id);
-  const detalhesColaborador = viewColaborador(codColaborador[0].codColaborador);
+  const [colaboradores, setColaboradores] = useState([]);
 
-  const agendamentoG = viewAgendamentoID(id);
+  codColaboradores.forEach((cod) => {
+    setColaboradores([...colaboradores, viewColaborador(cod)]);
+  })
+
+  const codServicos = viewServicoAgendamento(id);
+
+  codServicos.forEach((cod) => { 
+    setServicos([...servicos, viewServicoID(cod)]);
+  });
+
+  console.log(colaboradores);
 
   //ATENÇÃO!
 
@@ -49,64 +58,65 @@ export default Agendamento = ({horaAgendamento,dataAgendamento,colaborador,telCl
   }
 
   return (
-    <>
-    <Text>{agendamentoG.nomeCliente}</Text>
-    <Text>C:{detalhesColaborador[0].nome}</Text>
-    <Text>S:{detalhesServico.nome}</Text> 
-    </>
-    // <View style={styles.agendamento}>
-    //   <Text style={styles.horario}>{horaAgendamento}</Text>
-    //   <View style={styles.servicoCliente}>
-    //     <View style={styles.info}>
-    //       <Text style={styles.infoText}>
-    //         <AntDesign name="user" size={14} color="white" /> Nome: {nomeCliente}
-    //       </Text>
-    //       <Text style={styles.infoText}>
-    //         Telefone: {telCliente}
-    //        </Text>
-    //        <Text style={styles.infoText}>Data: {dataAgendamento}</Text>
-    //       <Text style={styles.infoText}>
-    //          Colaborador: {colaborador}
-    //        </Text>
+    <View style={styles.agendamento}>
+      <Text style={styles.horario}>{horaAgendamento}</Text>
+      <View style={styles.servicoCliente}>
+        <View style={styles.info}>
+          <Text style={styles.infoText}>
+            <AntDesign name="user" size={14} color="white" /> Nome: {nomeCliente}
+          </Text>
+          <Text style={styles.infoText}>
+            Telefone: {telCliente}
+           </Text>
+           <Text style={styles.infoText}>Data: {dataAgendamento}</Text>
+          <Text style={styles.infoText}>
+            {colaboradores.map((colaborador, index) => (
+              <Text key={index}>
+                <MaterialIcons name="person" size={14} color="white" /> Colaborador: {colaborador.nome}
+              </Text>
+            ))}
+           </Text>
            
-    //       <Text style={styles.infoText}>
-    //         <MaterialIcons name="description" size={14} color="white" /> Descrição: {descricao}
-    //       </Text>
-    //       <Text style={styles.infoText}>
-    //         <MaterialIcons name="work" size={14} color="white" /> Serviço: 
-    //       </Text>
-    //     </View>
-    //   </View>
-    //   <View style={styles.acoes}>
-    //     <MaterialIcons name="notifications" size={24} color="yellow" />
+          <Text style={styles.infoText}>
+            <MaterialIcons name="description" size={14} color="white" /> Descrição: {descricao}
+          </Text>
+          <Text style={styles.infoText}>
+            <MaterialIcons name="work" size={14} color="white" /> Serviço: {servicos.map((servico, index) => (
+              <Text key={index}>{servico.nome}</Text>
+            ))}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.acoes}>
+        <MaterialIcons name="notifications" size={24} color="yellow" />
 
-    //     {/* Ícone de três pontos com ação */}
-    //     <TouchableOpacity onPress={() => setModalVisible(true)}>
-    //       <MaterialIcons name="more-vert" size={24} color="white" />
-    //     </TouchableOpacity>
+        {/* Ícone de três pontos com ação */}
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
+          <MaterialIcons name="more-vert" size={24} color="white" />
+        </TouchableOpacity>
 
-    //     {/* Modal para mostrar as ações */}
-    //     <Modal
-    //       animationType="slide"
-    //       transparent={true}
-    //       visible={modalVisible}
-    //       onRequestClose={() => setModalVisible(false)}
-    //     >
-    //       <View style={styles.modalView}>
-    //         <Text style={styles.modalText}>Ações</Text>
-    //         <Text style={styles.btnAction} onPress={() =>  handleEdit(id)}>
-    //           Editar
-    //         </Text>
-    //         <Text style={styles.btnActionDelete} onPress={() => handleDelete(id)}>
-    //           Deletar
-    //         </Text>
-    //         <Text style={styles.btnActionCancel} onPress={() => setModalVisible(false)}>
-    //           Fechar
-    //         </Text>
-    //       </View>
-    //     </Modal>
-    //   </View>
-    // </View>
+        {/* Modal para mostrar as ações */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Ações</Text>
+            <Text style={styles.btnAction} onPress={() =>  handleEdit(id)}>
+              Editar
+            </Text>
+            <Text style={styles.btnActionDelete} onPress={() => handleDelete(id)}>
+              Deletar
+            </Text>
+            <Text style={styles.btnActionCancel} onPress={() => setModalVisible(false)}>
+              Fechar
+            </Text>
+          </View>
+        </Modal>
+      </View>
+    </View>
   );
 };
 
