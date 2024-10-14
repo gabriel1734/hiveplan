@@ -84,7 +84,7 @@ const Agendamento = ({ navigation, route }) => {
 
   const handleSave = () => {
     let hasErrors = false;
-    if (!selectedDate || !clientName || !telefone || telefone.length < 15) {
+    if (!selectedDate || !clientName || !telefone || telefone.length < 15 || Object.keys(selectedServices).length === 0 || Object.keys(selectedColaboradores).length === 0) {
       Alert.alert('Erro', 'Preencha todos os campos obrigatórios corretamente.');
       hasErrors = true;
     }
@@ -93,14 +93,17 @@ const Agendamento = ({ navigation, route }) => {
     if (idAgendamento) {
       console.log('Editar agendamento');
     } else {
-      if (addAgendamento(selectedDate, time, clientName, telefone, observation, selectedServices, 1)) {
+      const selectedServicesArray = Object.keys(selectedServices).filter((key) => selectedServices[key]);
+      const selectedColaboradoresArray = Object.keys(selectedColaboradores).filter((key) => selectedColaboradores[key]);
+
+      if (addAgendamento(selectedDate, time, clientName, telefone, observation, selectedServicesArray, selectedColaboradoresArray)) {
         Alert.alert('Sucesso', 'Agendamento realizado com sucesso!');
       } else {
         Alert.alert('Erro', 'Erro ao realizar o agendamento.');
       }
     }
 
-    navigation.navigate('Home');
+    //navigation.navigate('Home');
   };
 
   const handleClear = () => {
