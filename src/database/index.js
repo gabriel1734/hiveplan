@@ -185,19 +185,10 @@ export function viewServicoAll() {
   const db = SQLite.openDatabaseSync("database.db");
 
   const resultFavoritos = db.getAllSync(
-    "SELECT * FROM dboServico WHERE favorito = 1"
-  );
-  const resultSemFavoritos = db.getAllSync(
-    "SELECT * FROM dboServico WHERE favorito is null"
+    "SELECT * FROM dboServico ORDER BY favorito"
   );
 
-  let vetorFav = resultFavoritos.sort((a, b) => a.nome.localeCompare(b.nome));
-  let vetorNFav = resultSemFavoritos.sort((a, b) =>
-    a.nome.localeCompare(b.nome)
-  );
-
-  let vetorFinal = [...vetorFav, ...vetorNFav];
-  return vetorFinal;
+  return resultFavoritos;
 }
 //Função que retorna um serviço referente ao ID
 export function viewServicoID(id) {
