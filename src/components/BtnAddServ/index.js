@@ -19,12 +19,18 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
       ...prevState,
       [id]: !prevState[id],
     }));
-    updateServicoFavorito(id, favoritos[id] ? false : true);
+    updateServicoFavorito(id, tiposAgendamentos.find(servico => servico.id === id).favorito == 1 ? 0 : 1);
+    onRefresh();
   };
 
   // Função para carregar todos os agendamentos
   const loadAgendamentos = () => {
     setTiposAgendamentos(viewServicoAll());
+    const favoritosTemp = {};
+    tiposAgendamentos.forEach((servico) => {
+      favoritosTemp[servico.id] = servico.favorito == 1 ? true : false;
+    });
+    setFavoritos(favoritosTemp);
   };
 
   // Carregar os agendamentos ao montar o componente
@@ -88,7 +94,7 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
   setTimeout(() => {
     loadAgendamentos();
     setRefreshList(false);
-  }, 1000);
+  }, 500);
   };
 
 
@@ -110,6 +116,9 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
         }}
       >
         <View style={styles.modalView}>
+          <View style={styles.buttonContainer}>
+            <AntDesign name="close" size={32} color="black" onPress={() => setModalVisible(false)}/>
+          </View>
           <Text style={styles.modalText}>Adicionar Tipo de Serviço</Text>
           <Text
             placeholder="ID"
@@ -152,9 +161,9 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
                     <Text style={styles.agendamentoText}>{servico.nome}</Text>
                     <TouchableOpacity onPress={() => handleToggleFavorito(servico.id)}>
                       <AntDesign
-                        name={favoritos[servico.id] ? 'star' : 'staro'}
+                        name={servico.favorito == 1 ? 'staro' : 'star'}
                         size={24}
-                        color={favoritos[servico.id] ? 'gold' : 'gray'}
+                        color='gold'
                       />
                     </TouchableOpacity>
                   </View>

@@ -91,8 +91,8 @@ export function addServico(nome, descricao) {
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.runSync(
-      "INSERT INTO dboServico (nome, descricao) VALUES (?, ?)",
-      [nome, descricao]
+      "INSERT INTO dboServico (nome, descricao, favorito) VALUES (?, ?, ?)",
+      [nome, descricao, 0]
     );
 
     if (result.changes > 0) return true;

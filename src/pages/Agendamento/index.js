@@ -46,7 +46,12 @@ const Agendamento = ({ navigation, route }) => {
     if (resultTiposServico.length > 0) {
       setTiposServico(resultTiposServico);
     } else {
-      setTiposServico([]);
+      setTiposServico([
+        {
+          id: null,
+          nome: "Sem serviço cadastrado"
+        }
+      ]);
     }
 
     const resultColaboradores = viewColaboradorAll();
