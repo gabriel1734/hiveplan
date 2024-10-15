@@ -1,45 +1,25 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
-import RNPickerSelect from 'react-native-picker-select';
+import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import BtnAgendamento from '../BtnAgendamento';
 import DayBtn from '../DayBtn';
 import { DataContext } from '../../pages/HomeScreen';
-import { getDaysOfWeek, verSemanasComAgendamentos } from '../../database';
+import { getDaysOfWeek } from '../../database';
 
 const WeekBtn = ({navigation}) => {
-  const { data, setData } = useContext(DataContext);
-  const [selectedValue, setSelectedValue] = useState(data);
-  const dates = verSemanasComAgendamentos();
+  const { data } = useContext(DataContext);
   const [dias, setDias] = useState(getDaysOfWeek(data));
 
   useEffect(() => {
     setDias(getDaysOfWeek(data));
-    setSelectedValue(data);
-    
   }, [data]);
   
   return (
     <>
       <View style={styles.container}>
-        <View style={styles.pickerContainer}>
-          <RNPickerSelect
-            onValueChange={(value) => {
-              //if (value != data) 
-              setData(value); 
-            }}
-            items={dates}
-            placeholder={{
-              label: 'Selecione a semana', // Ajusta o placeholder
-              //erro possivelmente esta aqui
-              value: "dates",
-            }}
-            style={styles.pickerSelect}
-            value={selectedValue}
-          />
-        </View>
+        <Text style={styles.TextSemana}>Semana</Text>
         <BtnAgendamento navigation={navigation} />
       </View>
-      <View style={{ marginTop: 30 }}>
+      <View style={{ marginTop: 10 }}>
         <DayBtn dias={dias} />
       </View>
     </>
@@ -48,34 +28,19 @@ const WeekBtn = ({navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 20,
+    height: 50,
     padding: 10,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderRadius: 10,
-    marginTop: 30,
-    width: Dimensions.get('window').width,
+    marginTop: 10,
+    width: '100%',
   },
-  scrollView: {
-    flexDirection: 'row',
-  },
-  pickerContainer: {
-    width: Dimensions.get('window').width / 1.5,
-    height: 50,
+  TextSemana: {
+    fontSize: 24,
     color: '#6D6B69',
-  },
-  pickerSelect: {
-    inputAndroid: {
-      fontSize: 16,
-      paddingHorizontal: 10,
-      borderWidth: 1,
-      borderColor: '#ccc',
-      borderRadius: 50,
-    },
-    iconContainer: {
-      right: 10,
-    },
+    fontWeight: 'bold',
   },
 });
 
