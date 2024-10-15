@@ -109,8 +109,8 @@ export function addAgendamento(
   nomeCliente,
   telCliente,
   descricao,
-  servico,
-  colaborador
+  vetorServico,
+  vetorColaborador
 ) {
   const db = SQLite.openDatabaseSync("database.db");
 
@@ -129,18 +129,18 @@ export function addAgendamento(
 
     if (result.changes > 0) {
       //essa parte insere os dados nas tabelas de relacionamento do Agendamento
-      const insertAgendamentoServico = db.runSync(
-        "INSERT INTO dboAgendamentoServico (codAgendamento, codServico) VALUES(?, ?)",
-        [result.lastInsertRowId, servico]
+      const insertAgendamentoServico = addAgendamentoServico(
+        result.lastInsertRowId,
+        vetorColaborador
       );
-      const insertAgendamentoColaborador = db.runSync(
-        "INSERT INTO dboAgendamentoColaborador (codAgendamento, codColaborador) VALUES(?, ?)",
-        [result.lastInsertRowId, colaborador]
+      const insertAgendamentoColaborador = addAgendamentoColaborador(
+        result.lastInsertRowId,
+        vetorServico
       );
 
       if (
-        insertAgendamentoServico.changes > 0 &&
-        insertAgendamentoColaborador.changes > 0
+        insertAgendamentoServico == true &&
+        insertAgendamentoColaborador == true
       ) {
         return true;
       } else {
@@ -375,15 +375,21 @@ export function addServicoColaborador(idColaborador, idServico, favorito) {
   }
 }
 //Função para adicionar um serviço novo no agendamento
-export function addAgendamentoServico(idAgendamento, idServico) {
+export function addAgendamentoServico(idAgendamento, vetorServico) {
   const db = SQLite.openDatabaseSync("database.db");
   try {
-    const result = db.runSync(
-      "INSER INTO dboAgendamentoServico VALUES (?, ?)",
-      [idAgendamento, idServico]
-    );
+    const result = "";
+    let count = 0;
+    vetorServico.forEach((idServico) => {
+      result = db.runSync("INSER INTO dboAgendamentoServico VALUES (?, ?)", [
+        idAgendamento,
+        idServico,
+      ]);
 
-    if (result.changes > 0) return true;
+      if (result.changes > 0) count++;
+    });
+
+    if (count >= vetorServico.length()) return true;
     else return false;
   } catch (error) {
     console.log("erro", error);
@@ -391,15 +397,20 @@ export function addAgendamentoServico(idAgendamento, idServico) {
   }
 }
 //Função para adicionar um novo colaborador ao agendamento
-export function addAgendamentoColaborador(idAgendamento, idColaborador) {
+export function addAgendamentoColaborador(idAgendamento, vetorColaborador) {
   const db = SQLite.openDatabaseSync("database.db");
   try {
-    const result = db.runSync(
-      "INSER INTO dboAgendamentoColaborador VALUES (?, ?)",
-      [idAgendamento, idColaborador]
-    );
+    let count;
+    const result = "";
+    vetorColaborador.forEach((idColaborador) => {
+      result = db.runSync(
+        "INSER INTO dboAgendamentoColaborador VALUES (?, ?)",
+        [idAgendamento, idColaborador]
+      );
+      if (result.changes > 0) count++;
+    });
 
-    if (result.changes > 0) return true;
+    if (count >= vetorColaborador.length()) return true;
     else return false;
   } catch (error) {
     console.log("erro", error);
@@ -585,18 +596,29 @@ function getWeekRange(date) {
 export function getDaysOfWeek(startDate) {
   const daysOfWeek = [];
   const monthNames = [
-    "JAN", "FEV", "MAR", "ABR", "MAI", "JUN", 
-    "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"
+    "JAN",
+    "FEV",
+    "MAR",
+    "ABR",
+    "MAI",
+    "JUN",
+    "JUL",
+    "AGO",
+    "SET",
+    "OUT",
+    "NOV",
+    "DEZ",
   ];
 
   // Garantir que a data de início seja um objeto Date
   let currentDate = new Date(startDate);
   const dayOfWeek = currentDate.getDay(); // Obtém o dia da semana (0 para domingo, 1 para segunda, etc.)
-  
+
   // Ajustar para o último domingo
   currentDate.setDate(currentDate.getDate() - dayOfWeek);
 
-  for (let i = 0; i <= 7; i++) { // Loop para os 7 dias da semana (de domingo a sábado)
+  for (let i = 0; i <= 7; i++) {
+    // Loop para os 7 dias da semana (de domingo a sábado)
     const newDate = new Date(currentDate); // Cria uma nova instância de currentDate
     newDate.setDate(currentDate.getDate() + i); // Adiciona i dias a partir do domingo calculado
 
@@ -607,10 +629,9 @@ export function getDaysOfWeek(startDate) {
     //console.log(`date: ${date}, i: ${i}, day: ${day}, month: ${month}`);
     daysOfWeek.push({ dia: day, mes: month, date: date });
   }
-  
+
   return daysOfWeek;
 }
-
 
 function getFirstDayOfWeek(date) {
   const day = date.getDay();
