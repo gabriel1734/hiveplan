@@ -144,7 +144,6 @@ export function addAgendamento(
       ) {
         return true;
       } else {
-        console.log(error);
         return false;
       }
     } else return false;
@@ -354,7 +353,7 @@ export function addServicoColaborador(idColaborador, idServico, favorito) {
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.runSync(
-      "INSER INTO dboColaboradorServico VALUES (?, ?, ?)",
+      "INSERT INTO dboColaboradorServico VALUES (?, ?, ?)",
       [idColaborador, idServico, favorito]
     );
 
@@ -372,7 +371,7 @@ export function addAgendamentoServico(idAgendamento, vetorServico) {
     const result = "";
     let count = 0;
     vetorServico.forEach((idServico) => {
-      result = db.runSync("INSER INTO dboAgendamentoServico VALUES (?, ?)", [
+      result = db.runSync("INSERT INTO dboAgendamentoServico VALUES (?, ?)", [
         idAgendamento,
         idServico,
       ]);
@@ -383,7 +382,7 @@ export function addAgendamentoServico(idAgendamento, vetorServico) {
     if (count >= vetorServico.length()) return true;
     else return false;
   } catch (error) {
-    console.log("erro", error);
+    console.log("erro servicoAgendamento", error);
     return false;
   }
 }
@@ -395,7 +394,7 @@ export function addAgendamentoColaborador(idAgendamento, vetorColaborador) {
     const result = "";
     vetorColaborador.forEach((idColaborador) => {
       result = db.runSync(
-        "INSER INTO dboAgendamentoColaborador VALUES (?, ?)",
+        "INSERT INTO dboAgendamentoColaborador VALUES (?, ?)",
         [idAgendamento, idColaborador]
       );
       if (result.changes > 0) count++;
@@ -404,7 +403,20 @@ export function addAgendamentoColaborador(idAgendamento, vetorColaborador) {
     if (count >= vetorColaborador.length()) return true;
     else return false;
   } catch (error) {
-    console.log("erro", error);
+    console.log("erro colaboradorAgendamento", error);
+    return false;
+  }
+}
+//Função para deletar um colaborador 
+export function delColaborador(idColaborador){
+  const db = SQLite.openDatabaseSync("database.db");
+
+  try{
+    const result = db.runSync("DELETE FROM dboColaborador WHERE id = (?)",[idColaborador]);
+    if(result.changes > 0 )
+      return true;
+  }catch(error){
+    console.log("erro ao deletar colaborador: ", error);
     return false;
   }
 }
