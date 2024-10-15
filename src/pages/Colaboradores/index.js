@@ -3,21 +3,28 @@ import { useState, useEffect } from "react";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Checkbox } from 'react-native-paper'; // Importação do Checkbox do react-native-paper
-import { viewServicoAll } from "../../database";
+import { viewServicoAll, viewColaboradorAll } from "../../database";
 
 export default function Colaboradores({ navigation }) {
 
   const [tiposAgendamentos, setTiposAgendamentos] = useState([]);
   const [selectedAgendamentos, setSelectedAgendamentos] = useState({});
   const [favoriteAgendamentos, setFavoriteAgendamentos] = useState({});
+  const [colaboradores, setColaboradores] = useState([]);
 
   const loadAgendamentos = () => {
     setTiposAgendamentos(viewServicoAll());
   };
 
+  const loadColaboradores = () => {
+    setColaboradores(viewColaboradorAll());
+  }
+
   useEffect(() => {
     loadAgendamentos();
+    loadColaboradores();
   }, []);
+
 
   const handleCheckboxChange = (id) => {
     setSelectedAgendamentos(prevState => ({
@@ -47,7 +54,7 @@ export default function Colaboradores({ navigation }) {
           placeholderTextColor="#888"
         />
       </View>
-      <Text style={styles.label}>Serviços:</Text>
+      <Text style={styles.label}>Serviços do Colaborador:</Text>
       <ScrollView style={styles.scrollArea}>
         {tiposAgendamentos.map((agendamento) => (
           <View key={agendamento.id} style={styles.agendamentoItem}>
@@ -63,6 +70,26 @@ export default function Colaboradores({ navigation }) {
                 color={favoriteAgendamentos[agendamento.id] ? 'yellow' : 'black'}
               />
             </TouchableOpacity>
+          </View>
+        ))}
+      </ScrollView>
+      <View style={styles.buttonContainer}>
+            <Text style={styles.btnActionCancel} onPress={() => setModalVisible(false)}>
+              Cancelar
+            </Text>
+            <Text style={styles.btnActionSave} /*onPress={handleSave}*/>
+              Salvar
+            </Text>
+      </View>
+      <Text style={styles.label}>Colaboradores cadastrados:</Text>      
+      <ScrollView style={styles.scrollArea}>
+        {colaboradores.map((colaborador) => (
+          <View key={colaborador.id} style={styles.agendamentoItem}>
+            <Text style={styles.agendamentoText}>{colaborador.nome}</Text>
+            <View style={styles.actionButtons}>
+              <Text style={styles.editButton} onPress={() => handleEdit(colaborador.id)}>Editar</Text>
+              <Text style={styles.deleteButton} onPress={() => handleDelete(colaborador.id)}>Excluir</Text>
+            </View>
           </View>
         ))}
       </ScrollView>
@@ -96,15 +123,14 @@ const styles = StyleSheet.create({
   },
   scrollArea: {
     marginTop: 10,
-    maxHeight:10,
-    backgroundColor: 'red',
-    height:50,
+    backgroundColor: '#f5f5f5',
+    maxHeight: 200,
   },
   agendamentoItem: {
     flexDirection: 'row', // Para alinhar o checkbox e texto em linha
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: 'gray',
     padding: 15,
     borderRadius: 5,
     marginBottom: 10,
@@ -118,7 +144,7 @@ const styles = StyleSheet.create({
   },
   agendamentoText: {
     fontSize: 14,
-    color: '#333',
+    color: '#fff',
     marginLeft: 10, 
   },
   header: {
@@ -129,5 +155,42 @@ const styles = StyleSheet.create({
   },
   star: {
     padding: 10,
-  }
+  },
+  editButton: {
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 5,
+    color: '#6D6B69',
+  },
+  deleteButton: {
+    backgroundColor: '#f44336',
+    padding: 10,
+    borderRadius: 5,
+    color: 'white',
+  },
+  btnActionSave: {
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#6D6B69",
+    textAlign: 'center',
+    width: '45%',
+    color: 'white',
+  },
+  btnActionCancel: {
+    color: '#6D6B69',
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "white",
+    textAlign: 'center',
+    width: '45%',
+    borderColor: '#6D6B69',
+    borderWidth: 2,
+    fontWeight: 'bold',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingBottom: 20,
+  },
 });
