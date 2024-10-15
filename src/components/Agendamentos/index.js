@@ -1,38 +1,31 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Modal, Button, Alert } from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, Text, View, TouchableOpacity, Modal, Alert } from "react-native";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
-import { deleteAgendamento, viewAgendamentoID, viewColaborador, viewColaboradorAgendamento, viewServicoAgendamento, viewServicoID,} from "../../database";
+import { deleteAgendamento, setAtendimento, viewColaborador, viewColaboradorAgendamento, viewServicoAgendamento, viewServicoID } from "../../database";
 import Toast from "react-native-root-toast";
 
-export default Agendamento = ({horaAgendamento,dataAgendamento,telCliente, nomeCliente, descricao, atendimento, id, onRefresh, navigation }) => {
+export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, nomeCliente, descricao, id, atendimento, onRefresh, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [servicos, setServicos] = useState([]);
-  
-  const codColaboradores = viewColaboradorAgendamento(id);
-
   const [colaboradores, setColaboradores] = useState([]);
 
-  codColaboradores.forEach((cod) => {
-    setColaboradores([...colaboradores, viewColaborador(cod)]);
-  })
+  // Use useEffect para carregar colaboradores e serviços uma vez quando o ID estiver disponível
+  useEffect(() => {
+    const fetchColaboradores = async () => {
+      const codColaboradores = await viewColaboradorAgendamento(id);
+      const colaboradoresList = await Promise.all(codColaboradores.map(cod => viewColaborador(cod)));
+      setColaboradores(colaboradoresList);
+    };
 
-  const codServicos = viewServicoAgendamento(id);
+    const fetchServicos = async () => {
+      const codServicos = await viewServicoAgendamento(id);
+      const servicosList = await Promise.all(codServicos.map(cod => viewServicoID(cod)));
+      setServicos(servicosList);
+    };
 
-  codServicos.forEach((cod) => { 
-    setServicos([...servicos, viewServicoID(cod)]);
-  });
-
-  console.log(colaboradores);
-
-  //ATENÇÃO!
-
-  // Eu estava tentando atualizar as informações dos cards de acordo com as novas tabelas mas,
-  // acabei enfrentando o problema de que o agendamento pode ter mais de um colaborador/serviço
-  // e eu não sei como renderizar isso em react-native então vou deixar com vocês essa parte;
-
-  // Obs.: Deem uma olhada nas constantes que eu utilizei pra pegar os dados do agendamento,
-  // eu acho que desse jeito é melhor do que passar todos os dados igual estamos fazendo na linha 7
-
+    fetchColaboradores();
+    fetchServicos();
+  }, [id]);  // Executar este efeito sempre que o `id` mudar
 
   const handleDelete = (id) => {
     Alert.alert(
@@ -40,12 +33,13 @@ export default Agendamento = ({horaAgendamento,dataAgendamento,telCliente, nomeC
       "Você tem certeza que deseja excluir este agendamento?",
       [
         { text: "Cancelar", style: "cancel" },
-        { text: "Excluir", onPress: () => {
-            if(deleteAgendamento(id)){
-              Toast.show("Deletado com sucesso!")
+        {
+          text: "Excluir",
+          onPress: () => {
+            if (deleteAgendamento(id)) {
+              Toast.show("Deletado com sucesso!");
+              onRefresh();
             }
-            
-            onRefresh();
           }
         }
       ]
@@ -54,11 +48,25 @@ export default Agendamento = ({horaAgendamento,dataAgendamento,telCliente, nomeC
 
   const handleEdit = (id) => {
     setModalVisible(false);
-    navigation.navigate('Agendamento', { id });
+    navigation.navigate("Agendamento", { id });
+  };
+
+  const handleAtendimento = (id, atendimento) => {
+    if (setAtendimento(id, atendimento)) {
+      Toast.show("Atendimento concluído!");
+      onRefresh();
+    }
+    setModalVisible(false);
+  }
+
+  let style = atendimento ? styles.agendamentoConcluido : styles.agendamento;
+
+  if (horaAgendamento < new Date().toLocaleTimeString() && !atendimento) {
+    style = styles.agendamentoAtrasado;
   }
 
   return (
-    <View style={styles.agendamento}>
+    <View style={style}>
       <Text style={styles.horario}>{horaAgendamento}</Text>
       <View style={styles.servicoCliente}>
         <View style={styles.info}>
@@ -66,24 +74,29 @@ export default Agendamento = ({horaAgendamento,dataAgendamento,telCliente, nomeC
             <AntDesign name="user" size={14} color="white" /> Nome: {nomeCliente}
           </Text>
           <Text style={styles.infoText}>
-            Telefone: {telCliente}
-           </Text>
-           <Text style={styles.infoText}>Data: {dataAgendamento}</Text>
+            <MaterialIcons name="phone" size={14} color="white" /> Telefone: {telCliente}
+          </Text>
+          <Text style={styles.infoText}>
+            <MaterialIcons name="date-range" size={14} color="white" /> Data: {dataAgendamento}
+          </Text>
+          <Text style={styles.infoText}>
+            {servicos.map((servico, index) => (
+              <Text key={index}>
+                <MaterialIcons name="work" size={14} color="white" /> Serviço: {servico?.nome}
+              </Text>
+            ))}
+          </Text>
+
           <Text style={styles.infoText}>
             {colaboradores.map((colaborador, index) => (
               <Text key={index}>
-                <MaterialIcons name="person" size={14} color="white" /> Colaborador: {colaborador.nome}
+                <MaterialIcons name="person" size={14} color="white" /> Colaborador: {colaborador?.nome}
               </Text>
             ))}
-           </Text>
-           
+          </Text>
+
           <Text style={styles.infoText}>
             <MaterialIcons name="description" size={14} color="white" /> Descrição: {descricao}
-          </Text>
-          <Text style={styles.infoText}>
-            <MaterialIcons name="work" size={14} color="white" /> Serviço: {servicos.map((servico, index) => (
-              <Text key={index}>{servico.nome}</Text>
-            ))}
           </Text>
         </View>
       </View>
@@ -104,7 +117,16 @@ export default Agendamento = ({horaAgendamento,dataAgendamento,telCliente, nomeC
         >
           <View style={styles.modalView}>
             <Text style={styles.modalText}>Ações</Text>
-            <Text style={styles.btnAction} onPress={() =>  handleEdit(id)}>
+            {!atendimento ? (
+              <Text style={styles.btnConcluir} onPress={() => handleAtendimento(id, 1)}>
+                Concluir
+              </Text>
+            ) : (
+              <Text style={styles.btnDesfazer} onPress={() => handleAtendimento(id, 0)}>
+                Desfazer
+              </Text>
+            )}
+            <Text style={styles.btnAction} onPress={() => handleEdit(id)}>
               Editar
             </Text>
             <Text style={styles.btnActionDelete} onPress={() => handleDelete(id)}>
@@ -124,7 +146,23 @@ const styles = StyleSheet.create({
   agendamento: {
     backgroundColor: '#6D6B69',
     padding: 15,
-    height: 160,
+    height: 180,
+    marginBottom: 10,
+    borderRadius: 10,
+    color: 'white',
+  },
+  agendamentoConcluido: {
+    backgroundColor: '#228B22',
+    padding: 15,
+    height: 180,
+    marginBottom: 10,
+    borderRadius: 10,
+    color: 'white',
+  },
+  agendamentoAtrasado: {
+    backgroundColor: '#ED213A',
+    padding: 15,
+    height: 180,
     marginBottom: 10,
     borderRadius: 10,
     color: 'white',
@@ -206,6 +244,24 @@ const styles = StyleSheet.create({
     color: '#6D6B69',
     borderColor: '#6D6B69',
     borderWidth: 1,
+    fontSize: 24,
+  },
+  btnConcluir: {
+    padding: 20,
+    borderRadius: 10,
+    backgroundColor: "#228B22",
+    textAlign: 'center',
+    width: '45%',
+    color: 'white',
+    fontSize: 24,
+  },
+  btnDesfazer: {
+    padding: 20,
+    borderRadius: 10,
+    backgroundColor: "#FFD700",
+    textAlign: 'center',
+    width: '45%',
+    color: 'white',
     fontSize: 24,
   }
 });

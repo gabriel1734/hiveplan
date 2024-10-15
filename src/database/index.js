@@ -153,6 +153,24 @@ export function addAgendamento(
     return false;
   }
 }
+
+//Função para adicionar um colaborador
+export function setAtendimento(id, atendimento) {
+  const db = SQLite.openDatabaseSync("database.db");
+
+  try {
+    const result = db.runSync(
+      "UPDATE dboAgendamento SET atendimento = (?) WHERE id = (?)",
+      [atendimento, id]
+    );
+
+    if (result.changes > 0) return true;
+    else return false;
+  } catch (error) {
+    console.log("erro", error);
+  }
+}
+
 //Função para verificar se existe um agendamento em um horario
 export function checkAgendamentoExistente(data, horaAgendamento) {
   const db = SQLite.openDatabaseSync("database.db");

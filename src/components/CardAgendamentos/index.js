@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import Agendamentos from '../Agendamentos';
-import { verAgendamentosPorDia, viewAgendamentosPorDia } from '../../database';
+import { viewAgendamentosPorDia } from '../../database';
 import { DataContext } from '../../pages/HomeScreen';
 
 const CardAgendamentos = ({navigation}) => {
@@ -9,11 +9,10 @@ const CardAgendamentos = ({navigation}) => {
 
   const {data, refreshing, setRefreshing} = useContext(DataContext);
   
-  const [agendamentos, setAgendamentos] = useState(viewAgendamentosPorDia(data));
+  const [agendamentos, setAgendamentos] = useState([]);
 
   useEffect(() => {
-    onRefresh();
-    
+    setAgendamentos(viewAgendamentosPorDia(data));
   }, [data]);
 
 
