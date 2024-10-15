@@ -343,14 +343,14 @@ export function addColaborador(nome) {
       nome,
     ]);
 
-    if (result.changes > 0) return true;
+    if (result.changes > 0) return result.lastInsertRowId;
     else return false;
   } catch (error) {
     console.log("erro:", error);
   }
 }
 //Função para cadastrar um serviço para um colaborador, ela já adiciona ele como favorito se o valor passado for 1
-export function addServicoColaborador(idColaborador, idServico, favorito) {
+export function   addServicoColaborador(idColaborador, idServico, favorito) {
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.runSync(

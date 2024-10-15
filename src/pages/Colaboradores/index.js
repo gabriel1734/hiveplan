@@ -3,14 +3,14 @@ import { useState, useEffect } from "react";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Checkbox } from 'react-native-paper'; // Importação do Checkbox do react-native-paper
-import { viewServicoAll, viewColaboradorAll, updateColaborador, addColaborador, viewColaborador } from "../../database";
+import { viewServicoAll, viewColaboradorAll, updateColaborador, addColaborador, viewColaborador, addServicoColaborador, viewServicoColaborador } from "../../database";
 import Toast from "react-native-root-toast";
 
 export default function Colaboradores({ navigation }) {
 
   const [tiposAgendamentos, setTiposAgendamentos] = useState([]);
-  const [selectedAgendamentos, setSelectedAgendamentos] = useState({});
-  const [favoriteAgendamentos, setFavoriteAgendamentos] = useState({});
+  const [selectedServicos, setSelectedServicos] = useState({});
+  const [favoriteSevicosColaborador, setFavoriteSevicosColaborador] = useState({});
   const [colaboradores, setColaboradores] = useState([]);
   const [nome, setNome] = useState('');
   const [id, setId] = useState('');
@@ -32,32 +32,47 @@ export default function Colaboradores({ navigation }) {
 
 
   const handleCheckboxChange = (id) => {
-    setSelectedAgendamentos(prevState => ({
+    setSelectedServicos(prevState => ({
       ...prevState,
       [id]: !prevState[id],
     }));
+    console.log('selectedServicos', selectedServicos);
   };
 
   const handleStarPress = (id) => {
-    setFavoriteAgendamentos(prevState => ({
+    setFavoriteSevicosColaborador(prevState => ({
       ...prevState,
       [id]: !prevState[id],
     }));
+    console.log('favoriteSevicosColaborador', favoriteSevicosColaborador);
   };
 
   const handleSave = () => {
 
     if (id) {
-      if(updateColaborador(id,nome))
-        Toast.show("Atualizado!")
+      if (updateColaborador(id, nome)) {
+        Object.keys(selectedServicos).forEach((idServico) => {
+          if (selectedServicos[idServico]) {
+            addServicoColaborador(id, idServico, favoriteSevicosColaborador[idServico] ? 1 : 0);
+          }
+        });
+        Toast.show("Atualizado com sucesso!");
+      }
       else
       Toast.show("Erro!");
     } else {
-      if(addColaborador(nome))
-        Toast.show("Adicionado!");
-      else 
-      Toast.show("Erro!");
-
+      const idColaborador = addColaborador(nome);
+      if (idColaborador) {
+        Object.keys(selectedServicos).forEach((idServico) => {
+          if (selectedServicos[idServico]) {
+            addServicoColaborador(idColaborador, idServico, favoriteSevicosColaborador[idServico] ? 1 : 0);
+          }
+        });
+        Toast.show("Adicionado com sucesso!");
+      }
+      else {
+       Alert.alert('Erro', 'Erro ao adicionar colaborador'); 
+      }
     }
     
     setNome(''); 
@@ -69,6 +84,10 @@ export default function Colaboradores({ navigation }) {
     const r = viewColaborador(id)
     setId(r.id);
     setNome(r.nome);
+    const rServicos = viewServicoColaborador(id);
+    const selectedServicosTemp = {};
+    const favoriteSevicosColaboradorTemp = {};
+    console.log('rServicos', rServicos);
   }
 
   const handleDelete = (id) => {
@@ -78,7 +97,7 @@ export default function Colaboradores({ navigation }) {
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", onPress: () => {
-           if(deleteServico(id))
+           if(deleteServico(id)) // Função que exclui o colaborador'
             Toast.show("Exluido com sucesso!") // Exclui do banco de dados
             console.log('Excluiu');
             setRefresh(!refresh); 
@@ -122,7 +141,7 @@ export default function Colaboradores({ navigation }) {
         {tiposAgendamentos.map((agendamento) => (
           <View key={agendamento.id} style={styles.agendamentoItem}>
             <Checkbox
-              status={!!selectedAgendamentos[agendamento.id] ? 'checked' : 'unchecked'}
+              status={!!selectedServicos[agendamento.id] ? 'checked' : 'unchecked'}
               onPress={() => handleCheckboxChange(agendamento.id)}
             />
             <Text style={styles.agendamentoText}>{agendamento.nome}</Text>
@@ -130,7 +149,7 @@ export default function Colaboradores({ navigation }) {
               <AntDesign
                 name="star"
                 size={24}
-                color={favoriteAgendamentos[agendamento.id] ? 'yellow' : 'black'}
+                color={favoriteSevicosColaborador[agendamento.id] ? 'yellow' : 'black'}
               />
             </TouchableOpacity>
           </View>
