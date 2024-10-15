@@ -39,7 +39,7 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
   const handleSave = () => {
 
     if (id) {
-      if(updateServico(id,nome,descricao,false))
+      if(updateServico(id,nome,descricao))
         Toast.show("Atualizado!")
       else
       Toast.show("Erro!");

@@ -192,11 +192,11 @@ export function viewServicoID(id) {
   return result;
 }
 //Função para atualizar o serviço
-export function updateServico(id, nome, descricao, favorito) {
+export function updateServico(id, nome, descricao) {
   const db = SQLite.openDatabaseSync("database.db");
   const result = db.runSync(
-    "UPDATE dboServico SET nome = (?), descricao = (?), favorito = (?) WHERE id = (?)",
-    [nome, descricao, favorito, id]
+    "UPDATE dboServico SET nome = (?), descricao = (?) WHERE id = (?)",
+    [nome, descricao, id]
   );
   if (result.changes > 0) return true;
   else return false;
@@ -567,39 +567,32 @@ function getWeekRange(date) {
 export function getDaysOfWeek(startDate) {
   const daysOfWeek = [];
   const monthNames = [
-    "JAN",
-    "FEV",
-    "MAR",
-    "ABR",
-    "MAI",
-    "JUN",
-    "JUL",
-    "AGO",
-    "SET",
-    "OUT",
-    "NOV",
-    "DEZ",
+    "JAN", "FEV", "MAR", "ABR", "MAI", "JUN", 
+    "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"
   ];
 
+  // Garantir que a data de início seja um objeto Date
   let currentDate = new Date(startDate);
   const dayOfWeek = currentDate.getDay(); // Obtém o dia da semana (0 para domingo, 1 para segunda, etc.)
-  // Calcula o último domingo anterior ou a data atual se for domingo
+  
+  // Ajustar para o último domingo
   currentDate.setDate(currentDate.getDate() - dayOfWeek);
 
-  for (let i = 0; i <= 7; i++) {
-    // loop para os 7 dias da semana
+  for (let i = 0; i <= 7; i++) { // Loop para os 7 dias da semana (de domingo a sábado)
     const newDate = new Date(currentDate); // Cria uma nova instância de currentDate
     newDate.setDate(currentDate.getDate() + i); // Adiciona i dias a partir do domingo calculado
+
     const day = String(newDate.getDate()).padStart(2, "0"); // Pega o dia com dois dígitos
     const month = monthNames[newDate.getMonth()]; // Nome do mês abreviado
 
-    newDate.setDate(newDate.getDate());
     const date = newDate.toISOString().split("T")[0]; // Formato 'YYYY-MM-DD'
-
-    daysOfWeek.push({ dia: day, mes: month, date: date }); // Formato 'YYYY-MM-DD'
+    //console.log(`date: ${date}, i: ${i}, day: ${day}, month: ${month}`);
+    daysOfWeek.push({ dia: day, mes: month, date: date });
   }
+  
   return daysOfWeek;
 }
+
 
 function getFirstDayOfWeek(date) {
   const day = date.getDay();
