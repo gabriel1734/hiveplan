@@ -183,7 +183,7 @@ const Agendamento = ({ navigation, route }) => {
           ))}
         </ScrollView>
         </View>
-        {/* Nome do Cliente */}
+       
         <View style={styles.tiposServicoContainer}>
           <View>
             <Text style={styles.label}>Colaboradores Disponíveis</Text>

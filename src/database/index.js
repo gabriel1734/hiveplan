@@ -521,7 +521,7 @@ export function viewColaboradoresServico(codServico) {
 //Função que retorna um unico colaborador
 export function viewColaborador(id) {
   const db = SQLite.openDatabaseSync("database.db");
-  return db.getAllSync("SELECT * FROM dboColaborador WHERE id = (?)", [id]);
+  return db.getFirstSync("SELECT * FROM dboColaborador WHERE id = (?)", [id]);
 }
 //Função que edita o colaborador
 export function updateColaborador(id, nome) {

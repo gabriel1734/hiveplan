@@ -67,8 +67,8 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
 
   const handleDelete = (id) => {
     Alert.alert(
-      "Excluir Agendamento",
-      "Você tem certeza que deseja excluir este agendamento?",
+      "Excluir Serviço",
+      "Você tem certeza que deseja excluir este serviço?",
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", onPress: () => {

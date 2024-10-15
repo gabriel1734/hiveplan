@@ -1,9 +1,10 @@
-import { SafeAreaView, View, TextInput, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import { SafeAreaView, View, TextInput, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, RefreshControl } from "react-native";
 import { useState, useEffect } from "react";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Checkbox } from 'react-native-paper'; // Importação do Checkbox do react-native-paper
-import { viewServicoAll, viewColaboradorAll } from "../../database";
+import { viewServicoAll, viewColaboradorAll, updateColaborador, addColaborador, viewColaborador } from "../../database";
+import Toast from "react-native-root-toast";
 
 export default function Colaboradores({ navigation }) {
 
@@ -11,6 +12,10 @@ export default function Colaboradores({ navigation }) {
   const [selectedAgendamentos, setSelectedAgendamentos] = useState({});
   const [favoriteAgendamentos, setFavoriteAgendamentos] = useState({});
   const [colaboradores, setColaboradores] = useState([]);
+  const [nome, setNome] = useState('');
+  const [id, setId] = useState('');
+  const [refresh, setRefresh] = useState(false);
+  const [refreshList, setRefreshList] = useState(false);
 
   const loadAgendamentos = () => {
     setTiposAgendamentos(viewServicoAll());
@@ -23,7 +28,7 @@ export default function Colaboradores({ navigation }) {
   useEffect(() => {
     loadAgendamentos();
     loadColaboradores();
-  }, []);
+  }, [refresh]);
 
 
   const handleCheckboxChange = (id) => {
@@ -40,18 +45,76 @@ export default function Colaboradores({ navigation }) {
     }));
   };
 
+  const handleSave = () => {
+
+    if (id) {
+      if(updateColaborador(id,nome))
+        Toast.show("Atualizado!")
+      else
+      Toast.show("Erro!");
+    } else {
+      if(addColaborador(nome))
+        Toast.show("Adicionado!");
+      else 
+      Toast.show("Erro!");
+
+    }
+    
+    setNome(''); 
+    setId('');
+    setRefresh(!refresh); 
+  };
+
+  const handleEdit = (id) => {
+    const r = viewColaborador(id)
+    setId(r.id);
+    setNome(r.nome);
+  }
+
+  const handleDelete = (id) => {
+    Alert.alert(
+      "Excluir Serviço",
+      "Você tem certeza que deseja excluir este serviço?",
+      [
+        { text: "Cancelar", style: "cancel" },
+        { text: "Excluir", onPress: () => {
+           if(deleteServico(id))
+            Toast.show("Exluido com sucesso!") // Exclui do banco de dados
+            console.log('Excluiu');
+            setRefresh(!refresh); 
+            onRefresh();
+          }
+        }
+      ]
+    );
+  };
+
+  const onRefresh = () => {
+    setRefreshList(true);
+    setTimeout(() => {
+      loadAgendamentos();
+      loadColaboradores();
+      setRefreshList(false);
+    }, 1000);
+    };
+
+
   return (
     <>
     <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
       <AntDesign name="arrowleft" size={24} color="black" onPress={() =>{navigation.navigate('Agendamento')}} />
     </LinearGradient>
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} refreshControl={
+              <RefreshControl refreshing={refreshList} onRefresh={onRefresh} />
+              }>
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Nome do colaborador:</Text>
         <TextInput 
           style={styles.input} 
           placeholder="Nome do colaborador" 
           placeholderTextColor="#888"
+          value = {nome}
+          onChangeText={setNome}
         />
       </View>
       <Text style={styles.label}>Serviços do Colaborador:</Text>
@@ -74,10 +137,10 @@ export default function Colaboradores({ navigation }) {
         ))}
       </ScrollView>
       <View style={styles.buttonContainer}>
-            <Text style={styles.btnActionCancel} onPress={() => setModalVisible(false)}>
+            <Text style={styles.btnActionCancel} onPress={() =>{navigation.navigate('Agendamento')}}>
               Cancelar
             </Text>
-            <Text style={styles.btnActionSave} /*onPress={handleSave}*/>
+            <Text style={styles.btnActionSave} onPress={handleSave}>
               Salvar
             </Text>
       </View>
