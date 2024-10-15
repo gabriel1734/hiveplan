@@ -342,7 +342,7 @@ export function addColaborador(nome) {
       nome,
     ]);
 
-    if (result.changes > 0) return true;
+    if (result.changes > 0) return result.lastInsertRowId;
     else return false;
   } catch (error) {
     console.log("erro:", error);
@@ -468,10 +468,11 @@ export function deleteAgendamentoColaborador(idAgendamento, idColaborador) {
 }
 //Função para saber quais serviços um colaborador realiza
 export function viewServicoColaborador(codColaborador) {
+  console.log("codColaborador", codColaborador);
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.getAllSync(
-      "SELECT * FROM dboColaboradorServico WHERE codColaborador = (?)"[
+      "SELECT * FROM dboColaboradorServico WHERE codColaborador = (?)", [
         codColaborador
       ]
     );
