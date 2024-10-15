@@ -9,9 +9,11 @@ import { createContext, useState } from "react";
 export const DataContext = createContext();
 
 export default function HomeScreen({navigation}) {
-  const date = new Date();
-  const [data, setData] = useState(date.toISOString().split('T')[0]);
+  const date = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
+  const [data, setData] = useState(date.split('/').reverse().join('-'));
   const [refreshing, setRefreshing] = useState(false);
+
+  
 
   return (
     <View>

@@ -617,14 +617,14 @@ export function getDaysOfWeek(startDate) {
   // Ajustar para o último domingo
   currentDate.setDate(currentDate.getDate() - dayOfWeek);
 
-  for (let i = 0; i <= 7; i++) {
+  for (let i = 0; i <= 8; i++) {
     // Loop para os 7 dias da semana (de domingo a sábado)
     const newDate = new Date(currentDate); // Cria uma nova instância de currentDate
     newDate.setDate(currentDate.getDate() + i); // Adiciona i dias a partir do domingo calculado
 
     const day = String(newDate.getDate()).padStart(2, "0"); // Pega o dia com dois dígitos
     const month = monthNames[newDate.getMonth()]; // Nome do mês abreviado
-
+    newDate.setDate(newDate.getDate() - 1);
     const date = newDate.toISOString().split("T")[0]; // Formato 'YYYY-MM-DD'
     //console.log(`date: ${date}, i: ${i}, day: ${day}, month: ${month}`);
     daysOfWeek.push({ dia: day, mes: month, date: date });
