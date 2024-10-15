@@ -129,20 +129,22 @@ export function addAgendamento(
 
     if (result.changes > 0) {
       //essa parte insere os dados nas tabelas de relacionamento do Agendamento
-      const insertAgendamentoServico = addAgendamentoServico(
+      let insertAgendamentoServico = addAgendamentoServico(
         result.lastInsertRowId,
         vetorColaborador
       );
-      const insertAgendamentoColaborador = addAgendamentoColaborador(
+      let insertAgendamentoColaborador = addAgendamentoColaborador(
         result.lastInsertRowId,
         vetorServico
       );
-
+      console.log("1",insertAgendamentoColaborador,"2",insertAgendamentoServico);
       if (
         insertAgendamentoServico == true &&
         insertAgendamentoColaborador == true
       ) {
+        Alert.alert("true");
         return true;
+        
       } else {
         return false;
       }
@@ -152,7 +154,51 @@ export function addAgendamento(
     return false;
   }
 }
+//Função para adicionar um serviço novo no agendamento
+export function addAgendamentoServico(idAgendamento, vetorServico) {
+  const db = SQLite.openDatabaseSync("database.db");
+  try {
+    let result = "";
+    let count = 0;
+    vetorServico.forEach((idServico) => {
+      result = db.runSync("INSERT INTO dboAgendamentoServico VALUES (?, ?)", [
+        idAgendamento,
+        idServico,
+      ]);
 
+      if (result.changes > 0) count++;
+    });
+
+    if (count >= vetorServico.length) return true;
+    else return false;
+  } catch (error) {
+    console.log("erro servicoAgendamento", error);
+    return false;
+  }
+}
+//Função para adicionar um novo colaborador ao agendamento
+export function addAgendamentoColaborador(idAgendamento, vetorColaborador) {
+  const db = SQLite.openDatabaseSync("database.db");
+  try {
+    let count = 0;
+    let result = "";
+    vetorColaborador.forEach((idColaborador) => {
+      result = db.runSync(
+        "INSERT INTO dboAgendamentoColaborador VALUES (?, ?)",
+        [idAgendamento, idColaborador]
+      );
+      if (result.changes > 0) count++;
+    });
+
+    if (count >= vetorColaborador.length) 
+      return true;
+    else 
+    return false;
+  } catch (error) {
+    console.log("erro colaboradorAgendamento", error);
+    return false;
+  }
+}
 //Função para adicionar um colaborador
 export function setAtendimento(id, atendimento) {
   const db = SQLite.openDatabaseSync("database.db");
@@ -364,49 +410,7 @@ export function addServicoColaborador(idColaborador, idServico, favorito) {
     return false;
   }
 }
-//Função para adicionar um serviço novo no agendamento
-export function addAgendamentoServico(idAgendamento, vetorServico) {
-  const db = SQLite.openDatabaseSync("database.db");
-  try {
-    const result = "";
-    let count = 0;
-    vetorServico.forEach((idServico) => {
-      result = db.runSync("INSERT INTO dboAgendamentoServico VALUES (?, ?)", [
-        idAgendamento,
-        idServico,
-      ]);
 
-      if (result.changes > 0) count++;
-    });
-
-    if (count >= vetorServico.length()) return true;
-    else return false;
-  } catch (error) {
-    console.log("erro servicoAgendamento", error);
-    return false;
-  }
-}
-//Função para adicionar um novo colaborador ao agendamento
-export function addAgendamentoColaborador(idAgendamento, vetorColaborador) {
-  const db = SQLite.openDatabaseSync("database.db");
-  try {
-    let count;
-    const result = "";
-    vetorColaborador.forEach((idColaborador) => {
-      result = db.runSync(
-        "INSERT INTO dboAgendamentoColaborador VALUES (?, ?)",
-        [idAgendamento, idColaborador]
-      );
-      if (result.changes > 0) count++;
-    });
-
-    if (count >= vetorColaborador.length()) return true;
-    else return false;
-  } catch (error) {
-    console.log("erro colaboradorAgendamento", error);
-    return false;
-  }
-}
 //Função para deletar um colaborador 
 export function delColaborador(idColaborador){
   const db = SQLite.openDatabaseSync("database.db");
