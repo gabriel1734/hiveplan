@@ -103,12 +103,13 @@ const Agendamento = ({ navigation, route }) => {
 
       if (addAgendamento(selectedDate, time, clientName, telefone, observation, selectedServicesArray, selectedColaboradoresArray)) {
         Alert.alert('Sucesso', 'Agendamento realizado com sucesso!');
+        navigation.navigate('Home');
       } else {
         Alert.alert('Erro', 'Erro ao realizar o agendamento.');
       }
     }
 
-    //navigation.navigate('Home');
+    
   };
 
   const handleClear = () => {
