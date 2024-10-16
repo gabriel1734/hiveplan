@@ -96,7 +96,7 @@ export default function Colaboradores({ navigation }) {
       }));
       setFavoriteSevicosColaborador(prevState => ({
         ...prevState,
-        [servico.id]: servico.favorito == 1 ? true : false,
+        [servico.codServico]: servico.favorito == 1 ? true : false,
       }));
     });
     setId(r.id);
