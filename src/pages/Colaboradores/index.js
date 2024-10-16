@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Checkbox } from 'react-native-paper'; // Importação do Checkbox do react-native-paper
-import { viewServicoAll, viewColaboradorAll, updateColaborador, addColaborador, viewColaborador } from "../../database";
+import { viewServicoAll, viewColaboradorAll, updateColaborador, addColaborador, viewColaborador, addAgendamentoColaborador, addServicoColaborador, viewServicoColaborador } from "../../database";
 import Toast from "react-native-root-toast";
 
 export default function Colaboradores({ navigation }) {
@@ -36,6 +36,7 @@ export default function Colaboradores({ navigation }) {
       ...prevState,
       [id]: !prevState[id],
     }));
+    
   };
 
   const handleStarPress = (id) => {
@@ -47,28 +48,62 @@ export default function Colaboradores({ navigation }) {
 
   const handleSave = () => {
 
+    if (!nome) {
+      Alert.alert('Nome do colaborador é obrigatório!');
+      return;
+    }
+
+    if (Object.keys(selectedAgendamentos).length == 0) {
+      Alert.alert('Selecione pelo menos um serviço!');
+      return;
+    }
+
     if (id) {
-      if(updateColaborador(id,nome))
+      if(updateColaborador(id,nome)){
         Toast.show("Atualizado!")
+      }
       else
       Toast.show("Erro!");
     } else {
-      if(addColaborador(nome))
+      
+      const idColaborador = addColaborador(nome);
+      if(idColaborador){
+        Object.keys(selectedAgendamentos).forEach((sevicoId) => {
+          if(addServicoColaborador(idColaborador, sevicoId, setFavoriteAgendamentos[sevicoId])){
+            Alert.alert("Adicionado com sucesso!");
+          }
+        });
         Toast.show("Adicionado!");
+      }
+       
       else 
       Toast.show("Erro!");
 
     }
-    
     setNome(''); 
     setId('');
-    setRefresh(!refresh); 
+    setFavoriteAgendamentos({});
+    setSelectedAgendamentos({});
+    setRefresh(!refresh);
   };
 
   const handleEdit = (id) => {
     const r = viewColaborador(id)
+    const rServicos = viewServicoColaborador(id);
+    rServicos.forEach((servico) => {
+      setSelectedAgendamentos(prevState => ({
+        ...prevState,
+        [servico.codServico]: true,
+      }));
+      setFavoriteAgendamentos(prevState => ({
+        ...prevState,
+        [servico.id]: servico.favorito == 1 ? true : false,
+      }));
+    });
+    console.log(rServicos);
     setId(r.id);
     setNome(r.nome);
+    console.log(selectedAgendamentos)
   }
 
   const handleDelete = (id) => {
