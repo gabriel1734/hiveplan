@@ -14,18 +14,19 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
     const fetchColaboradores = async () => {
       const codColaboradores = await viewColaboradorAgendamento(id);
       console.log(codColaboradores);
-      const colaboradoresList = await codColaboradores.map(cod => viewColaborador(cod));
+      const colaboradoresList = await codColaboradores.map(cod => viewColaborador(cod.codColaborador));
       setColaboradores(colaboradoresList);
     };
 
     const fetchServicos = async () => {
-      const servicosList = await viewServicoAgendamento(id);
-      setServicos(servicosList);
+      const servicosList = viewServicoAgendamento(id);
+      const servicosDetail = await Promise.all(servicosList.map(servico => viewServicoID(servico.codServico)));
+      setServicos(servicosDetail);
     };
 
     fetchColaboradores();
     fetchServicos();
-    console.log(`colaboradores : ${colaboradores}`);
+    
   }, [id]);  // Executar este efeito sempre que o `id` mudar
 
   const handleDelete = (id) => {
@@ -66,6 +67,8 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
     style = styles.agendamentoAtrasado;
   }
 
+  dataAgendamento = dataAgendamento.split('T')[0].split('-').reverse().join('/');
+  
   return (
     <View style={style}>
       <Text style={styles.horario}>{horaAgendamento}</Text>
@@ -81,17 +84,19 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
             <MaterialIcons name="date-range" size={14} color="white" /> Data: {dataAgendamento}
           </Text>
           <Text style={styles.infoText}>
-            {servicos.map((servico, index) => (
-              <Text key={index}>
-                <MaterialIcons name="work" size={14} color="white" /> Serviço: {servico?.nome}
-              </Text>
+            
+              <MaterialIcons name="work" size={14} color="white" /> Serviço: {servicos.map((servico, index) => (
+                <Text key={index}>
+                  {servico?.nome} {index < servicos.length - 1 ? ', ' : ''}
+                </Text>
             ))}
+              
           </Text>
 
           <Text style={styles.infoText}>
-            {colaboradores.map((colaborador, index) => (
+            <MaterialIcons name="people" size={14} color="white" /> Colaboradores: {colaboradores.map((colaborador, index) => (
               <Text key={index}>
-                <MaterialIcons name="person" size={14} color="white" /> Colaborador: {colaborador?.nome}
+                {colaborador?.nome} {index < colaboradores.length - 1 ? ', ' : ''} 
               </Text>
             ))}
           </Text>
