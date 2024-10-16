@@ -44,7 +44,7 @@ export default function Colaboradores({ navigation }) {
       ...prevState,
       [id]: !prevState[id],
     }));
-    console.log(favoriteAgendamentos);
+    console.log(favoriteSevicosColaborador);
   };
 
   const handleSave = () => {
@@ -54,7 +54,7 @@ export default function Colaboradores({ navigation }) {
       return;
     }
 
-    if (Object.keys(selectedAgendamentos).length == 0) {
+    if (Object.keys(selectedServicos).length == 0) {
       Alert.alert('Selecione pelo menos um serviço!');
       return;
     }
@@ -81,8 +81,8 @@ export default function Colaboradores({ navigation }) {
     }
     setNome(''); 
     setId('');
-    setFavoriteAgendamentos({});
-    setSelectedAgendamentos({});
+    setFavoriteSevicosColaborador({});
+    setSelectedServicos({});
     setRefresh(!refresh);
   };
 
@@ -90,18 +90,17 @@ export default function Colaboradores({ navigation }) {
     const r = viewColaborador(id)
     const rServicos = viewServicoColaborador(id);
     rServicos.forEach((servico) => {
-      setSelectedAgendamentos(prevState => ({
+      setSelectedServicos(prevState => ({
         ...prevState,
         [servico.codServico]: true,
       }));
-      setFavoriteAgendamentos(prevState => ({
+      setFavoriteSevicosColaborador(prevState => ({
         ...prevState,
         [servico.id]: servico.favorito == 1 ? true : false,
       }));
     });
     setId(r.id);
     setNome(r.nome);
-    console.log(selectedAgendamentos)
   }
 
   const handleDelete = (id) => {
@@ -126,8 +125,8 @@ export default function Colaboradores({ navigation }) {
   const handleClear = () => {
     setNome('');
     setId('');
-    setSelectedAgendamentos({});
-    setFavoriteAgendamentos({});
+    setFavoriteSevicosColaborador({});
+    setSelectedServicos({});
   }
 
   const onRefresh = () => {

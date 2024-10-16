@@ -466,7 +466,7 @@ export function addColaborador(nome) {
   }
 }
 //Função para cadastrar um serviço para um colaborador, ela já adiciona ele como favorito se o valor passado for 1
-export function   addServicoColaborador(idColaborador, idServico, favorito) {
+export function addServicoColaborador(idColaborador, idServico, favorito) {
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.runSync(
