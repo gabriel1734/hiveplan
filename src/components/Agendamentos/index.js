@@ -13,18 +13,19 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
   useEffect(() => {
     const fetchColaboradores = async () => {
       const codColaboradores = await viewColaboradorAgendamento(id);
-      const colaboradoresList = await Promise.all(codColaboradores.map(cod => viewColaborador(cod)));
+      console.log(codColaboradores);
+      const colaboradoresList = await codColaboradores.map(cod => viewColaborador(cod));
       setColaboradores(colaboradoresList);
     };
 
     const fetchServicos = async () => {
-      const codServicos = await viewServicoAgendamento(id);
-      const servicosList = await Promise.all(codServicos.map(cod => viewServicoID(cod)));
+      const servicosList = await viewServicoAgendamento(id);
       setServicos(servicosList);
     };
 
     fetchColaboradores();
     fetchServicos();
+    console.log(`colaboradores : ${colaboradores}`);
   }, [id]);  // Executar este efeito sempre que o `id` mudar
 
   const handleDelete = (id) => {

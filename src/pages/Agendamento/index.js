@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { Checkbox } from 'react-native-paper'; // Importação do Checkbox
 import { TextInputMask } from 'react-native-masked-text';
-import { addAgendamento, viewServicoAll, viewAgendamentoID, viewColaboradorAll, editarAgendamento } from '../../database';
+import { addAgendamento, viewServicoAll, viewAgendamentoID, viewColaboradorAll, editarAgendamento, updateAgendamento } from '../../database';
 import BtnAddServ from '../../components/BtnAddServ';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Toast from 'react-native-root-toast';
@@ -98,11 +98,15 @@ const Agendamento = ({ navigation, route }) => {
     }
     if (hasErrors) return;
 
+    const selectedServicesArray = Object.keys(selectedServices).filter((key) => selectedServices[key]);
+    const selectedColaboradoresArray = Object.keys(selectedColaboradores).filter((key) => selectedColaboradores[key]);
+
     if (idAgendamento) {
-      console.log('Editar agendamento');
+      if(updateAgendamento(idAgendamento,selectedDate,time,clientName,telefone,observation,selectedServicesArray,selectedColaboradoresArray))
+      Toast.show("Atualizado com sucesso!");
+      navigation.navigate('Home');
     } else {
-      const selectedServicesArray = Object.keys(selectedServices).filter((key) => selectedServices[key]);
-      const selectedColaboradoresArray = Object.keys(selectedColaboradores).filter((key) => selectedColaboradores[key]);
+      
 
       if (addAgendamento(selectedDate, time, clientName, telefone, observation, selectedServicesArray, selectedColaboradoresArray)) {
         Alert.alert('Sucesso', 'Agendamento realizado com sucesso!');

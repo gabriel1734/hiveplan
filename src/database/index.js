@@ -369,18 +369,23 @@ export function deleteAgendamento(id) {
   }
 }
 //Função para editar o agendamento
-export function editarAgendamento(
+export function updateAgendamento(
   id,
   data,
   hora,
   nomeCliente,
   telCliente,
-  descricao
+  descricao,
+  vetorServico,
+  vetorColaborador
 ) {
   try {
     const db = SQLite.openDatabaseSync("database.db");
 
-    const result = db.runSync(
+    db.withTransactionSync(() =>{
+    
+
+     db.runSync(
       `
             UPDATE dboAgendamento
                 SET dataAgendamento = (?), 
@@ -392,8 +397,42 @@ export function editarAgendamento(
             `,
       [data, hora, nomeCliente, telCliente, descricao, id]
     );
+    
+    db.runSync('DELETE FROM dboAgendamentoColaborador WHERE codAgendamento = (?)', [id]);
 
-    if (result.changes > 0) return true;
+    // Inserindo colaboradores
+    let countC = 0;
+    vetorColaborador.forEach((idColaborador) => {
+      const result = db.runSync(
+        "INSERT INTO dboAgendamentoColaborador VALUES (?, ?)",
+        [id, idColaborador]
+      );
+
+      if (result.changes > 0) countC++;
+    });
+
+    if (countC < vetorColaborador.length) {
+      throw new Error("Nem todos os colaboradores foram inseridos");
+    }
+
+    // Inserindo serviços
+    let countS = 0;
+    db.runSync('DELETE FROM dboAgendamentoServico WHERE codAgendamento = (?)', [id]);
+
+    vetorServico.forEach((idServico) => {
+      const result = db.runSync("INSERT INTO dboAgendamentoServico VALUES (?, ?)", [
+        id,
+        idServico,
+      ]);
+
+      if (result.changes > 0) countS++;
+    });
+    if (countS < vetorServico.length) {
+      throw new Error("Erro ao inserir serviços!");
+    }
+
+  });
+  return true;
   } catch (error) {
     console.log("Erro ao editar agendamento: ", error);
     return false;
