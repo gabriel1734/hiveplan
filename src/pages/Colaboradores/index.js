@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Checkbox } from 'react-native-paper'; // Importação do Checkbox do react-native-paper
-import { viewServicoAll, viewColaboradorAll, updateColaborador, addColaborador, viewColaborador, addAgendamentoColaborador, addServicoColaborador, viewServicoColaborador } from "../../database";
+import { viewServicoAll, viewColaboradorAll, updateColaborador, addColaborador, viewColaborador, addAgendamentoColaborador, addServicoColaborador, viewServicoColaborador, delColaborador } from "../../database";
 import Toast from "react-native-root-toast";
 
 export default function Colaboradores({ navigation }) {
@@ -35,7 +35,7 @@ export default function Colaboradores({ navigation }) {
     setSelectedAgendamentos(prevState => ({
       ...prevState,
       [id]: !prevState[id],
-    }));
+    }));  
     
   };
 
@@ -44,6 +44,7 @@ export default function Colaboradores({ navigation }) {
       ...prevState,
       [id]: !prevState[id],
     }));
+    console.log(favoriteAgendamentos);
   };
 
   const handleSave = () => {
@@ -69,7 +70,7 @@ export default function Colaboradores({ navigation }) {
       const idColaborador = addColaborador(nome);
       if(idColaborador){
         Object.keys(selectedAgendamentos).forEach((sevicoId) => {
-          if(addServicoColaborador(idColaborador, sevicoId, setFavoriteAgendamentos[sevicoId])){
+          if(addServicoColaborador(idColaborador, sevicoId, setFavoriteAgendamentos[sevicoId] ? 1 : 0)){
             Alert.alert("Adicionado com sucesso!");
           }
         });
@@ -100,7 +101,6 @@ export default function Colaboradores({ navigation }) {
         [servico.id]: servico.favorito == 1 ? true : false,
       }));
     });
-    console.log(rServicos);
     setId(r.id);
     setNome(r.nome);
     console.log(selectedAgendamentos)
@@ -113,16 +113,24 @@ export default function Colaboradores({ navigation }) {
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", onPress: () => {
-           if(deleteServico(id))
+           if(delColaborador(id))
             Toast.show("Exluido com sucesso!") // Exclui do banco de dados
             console.log('Excluiu');
-            setRefresh(!refresh); 
+            setRefresh(!refresh);
             onRefresh();
+            handleClear();
           }
         }
       ]
     );
   };
+
+  const handleClear = () => {
+    setNome('');
+    setId('');
+    setSelectedAgendamentos({});
+    setFavoriteAgendamentos({});
+  }
 
   const onRefresh = () => {
     setRefreshList(true);
@@ -137,7 +145,7 @@ export default function Colaboradores({ navigation }) {
   return (
     <>
     <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
-      <AntDesign name="arrowleft" size={24} color="black" onPress={() =>{navigation.navigate('Agendamento')}} />
+      <AntDesign name="arrowleft" size={24} color="black" onPress={() => {navigation.navigate("Agendamento", { refreshColab: true })}} />
     </LinearGradient>
     <SafeAreaView style={styles.container} refreshControl={
               <RefreshControl refreshing={refreshList} onRefresh={onRefresh} />

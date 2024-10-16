@@ -30,7 +30,10 @@ const Agendamento = ({ navigation, route }) => {
   const [isTimePickerVisible, setTimePickerVisible] = useState(false);	
 
   useEffect(() => {
-    const { id } = route.params || {};
+    const { id, refreshColab } = route.params || {};
+    if (refreshColab) {
+      setRefresh(!refresh);
+    }
     if (id) {
       const result = viewAgendamentoID(id);
       setSelectedDate(result.dataAgendamento);
@@ -119,7 +122,7 @@ const Agendamento = ({ navigation, route }) => {
     setObservation('');
     setSelectedServices({});
     setTime(localeDate);
-    setColaboradores([]);
+    setSelectedColaboradores({});
     route.params = {};
   }
 
