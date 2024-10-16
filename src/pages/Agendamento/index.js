@@ -5,7 +5,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
 import { Checkbox } from 'react-native-paper'; // Importação do Checkbox
 import { TextInputMask } from 'react-native-masked-text';
-import { addAgendamento, viewServicoAll, viewAgendamentoID, viewColaboradorAll, editarAgendamento, updateAgendamento } from '../../database';
+import { addAgendamento, viewServicoAll, viewAgendamentoID, viewColaboradorAll, editarAgendamento, updateAgendamento, viewServicoAgendamento, viewColaboradorAgendamento } from '../../database';
 import BtnAddServ from '../../components/BtnAddServ';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Toast from 'react-native-root-toast';
@@ -40,6 +40,22 @@ const Agendamento = ({ navigation, route }) => {
       setClientName(result.nomeCliente);
       setTelefone(result.telCliente);
       setObservation(result.descricao);
+      
+      const rServicos = viewServicoAgendamento(id);
+      const rColaboradores = viewColaboradorAgendamento(id);
+
+      const selectedServicesList = {};
+      rServicos.forEach((servico) => {
+        selectedServicesList[servico.codServico] = true;
+      })
+      setSelectedServices(selectedServicesList);
+
+      const selectedColaboradoresList = {};
+      rColaboradores.forEach((colaborador) => { 
+        selectedColaboradoresList[colaborador.codColaborador] = true;
+      });
+      setSelectedColaboradores(selectedColaboradoresList);
+
       setIdAgendamento(id);
     }
   }, [route.params]);

@@ -12,15 +12,14 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
   // Use useEffect para carregar colaboradores e serviços uma vez quando o ID estiver disponível
   useEffect(() => {
     const fetchColaboradores = async () => {
-      const codColaboradores = await viewColaboradorAgendamento(id);
-      console.log(codColaboradores);
-      const colaboradoresList = await codColaboradores.map(cod => viewColaborador(cod.codColaborador));
+      const codColaboradores = viewColaboradorAgendamento(id);
+      const colaboradoresList = codColaboradores.map(cod => viewColaborador(cod.codColaborador));
       setColaboradores(colaboradoresList);
     };
 
     const fetchServicos = async () => {
       const servicosList = viewServicoAgendamento(id);
-      const servicosDetail = await Promise.all(servicosList.map(servico => viewServicoID(servico.codServico)));
+      const servicosDetail = servicosList.map(servico => viewServicoID(servico.codServico));
       setServicos(servicosDetail);
     };
 

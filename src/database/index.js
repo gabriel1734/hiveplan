@@ -274,7 +274,6 @@ export function viewServicoID(id) {
   const result = db.getFirstSync("SELECT * from dboServico WHERE id = (?)", [
     id,
   ]);
-
   return result;
 }
 //Função para atualizar o serviço
@@ -572,6 +571,7 @@ export function viewServicoAgendamento(codAgendamento) {
     "SELECT codServico FROM dboAgendamentoServico WHERE codAgendamento = (?)",
     [codAgendamento]
   );
+  
   return result;
 }
 //Função para retornar todos os colaboradores
