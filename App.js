@@ -13,7 +13,7 @@ export const AgendamentoScreenContext = createContext();
 const Stack = createNativeStackNavigator();  // Create a stack navigator
 
 export default function App() {
-  
+ // dropTables();
   create();
 
   return (

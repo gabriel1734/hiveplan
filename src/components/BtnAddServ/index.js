@@ -161,7 +161,7 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
                     <Text style={styles.agendamentoText}>{servico.nome}</Text>
                     <TouchableOpacity onPress={() => handleToggleFavorito(servico.id)}>
                       <AntDesign
-                        name={servico.favorito == 1 ? 'staro' : 'star'}
+                        name={servico.favorito == 1 ? 'star' : 'staro'}
                         size={24}
                         color='gold'
                       />

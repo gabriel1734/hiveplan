@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Checkbox } from 'react-native-paper'; // Importação do Checkbox do react-native-paper
-import { viewServicoAll, viewColaboradorAll, updateColaborador, addColaborador, viewColaborador, addServicoColaborador, viewServicoColaborador } from "../../database";
+import { viewServicoAll, viewColaboradorAll, updateColaborador, addColaborador, viewColaborador, addAgendamentoColaborador, addServicoColaborador, viewServicoColaborador, delColaborador } from "../../database";
 import Toast from "react-native-root-toast";
 
 export default function Colaboradores({ navigation }) {
@@ -35,8 +35,8 @@ export default function Colaboradores({ navigation }) {
     setSelectedServicos(prevState => ({
       ...prevState,
       [id]: !prevState[id],
-    }));
-    console.log('selectedServicos', selectedServicos);
+    }));  
+    
   };
 
   const handleStarPress = (id) => {
@@ -44,19 +44,24 @@ export default function Colaboradores({ navigation }) {
       ...prevState,
       [id]: !prevState[id],
     }));
-    console.log('favoriteSevicosColaborador', favoriteSevicosColaborador);
+    console.log(favoriteAgendamentos);
   };
 
   const handleSave = () => {
 
+    if (!nome) {
+      Alert.alert('Nome do colaborador é obrigatório!');
+      return;
+    }
+
+    if (Object.keys(selectedAgendamentos).length == 0) {
+      Alert.alert('Selecione pelo menos um serviço!');
+      return;
+    }
+
     if (id) {
-      if (updateColaborador(id, nome)) {
-        Object.keys(selectedServicos).forEach((idServico) => {
-          if (selectedServicos[idServico]) {
-            addServicoColaborador(id, idServico, favoriteSevicosColaborador[idServico] ? 1 : 0);
-          }
-        });
-        Toast.show("Atualizado com sucesso!");
+      if(updateColaborador(id,nome)){
+        Toast.show("Atualizado!")
       }
       else
       Toast.show("Erro!");
@@ -74,20 +79,29 @@ export default function Colaboradores({ navigation }) {
        Alert.alert('Erro', 'Erro ao adicionar colaborador'); 
       }
     }
-    
     setNome(''); 
     setId('');
-    setRefresh(!refresh); 
+    setFavoriteAgendamentos({});
+    setSelectedAgendamentos({});
+    setRefresh(!refresh);
   };
 
   const handleEdit = (id) => {
     const r = viewColaborador(id)
+    const rServicos = viewServicoColaborador(id);
+    rServicos.forEach((servico) => {
+      setSelectedAgendamentos(prevState => ({
+        ...prevState,
+        [servico.codServico]: true,
+      }));
+      setFavoriteAgendamentos(prevState => ({
+        ...prevState,
+        [servico.id]: servico.favorito == 1 ? true : false,
+      }));
+    });
     setId(r.id);
     setNome(r.nome);
-    const rServicos = viewServicoColaborador(id);
-    const selectedServicosTemp = {};
-    const favoriteSevicosColaboradorTemp = {};
-    console.log('rServicos', rServicos);
+    console.log(selectedAgendamentos)
   }
 
   const handleDelete = (id) => {
@@ -97,16 +111,24 @@ export default function Colaboradores({ navigation }) {
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", onPress: () => {
-           if(deleteServico(id)) // Função que exclui o colaborador'
+           if(delColaborador(id))
             Toast.show("Exluido com sucesso!") // Exclui do banco de dados
             console.log('Excluiu');
-            setRefresh(!refresh); 
+            setRefresh(!refresh);
             onRefresh();
+            handleClear();
           }
         }
       ]
     );
   };
+
+  const handleClear = () => {
+    setNome('');
+    setId('');
+    setSelectedAgendamentos({});
+    setFavoriteAgendamentos({});
+  }
 
   const onRefresh = () => {
     setRefreshList(true);
@@ -121,7 +143,7 @@ export default function Colaboradores({ navigation }) {
   return (
     <>
     <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
-      <AntDesign name="arrowleft" size={24} color="black" onPress={() =>{navigation.navigate('Agendamento')}} />
+      <AntDesign name="arrowleft" size={24} color="black" onPress={() => {navigation.navigate("Agendamento", { refreshColab: true })}} />
     </LinearGradient>
     <SafeAreaView style={styles.container} refreshControl={
               <RefreshControl refreshing={refreshList} onRefresh={onRefresh} />

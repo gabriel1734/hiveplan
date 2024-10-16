@@ -102,7 +102,7 @@ export function addServico(nome, descricao) {
   }
 }
 
-//Função para adicionar agendamento
+// Função para adicionar agendamento
 export function addAgendamento(
   data,
   horaAgendamento,
@@ -119,38 +119,115 @@ export function addAgendamento(
       "Atenção!",
       "Já existe um agendamento cadastrado neste horário!"
     );
+    return false; // Retorna falso se já existe
   }
 
   try {
-    const result = db.runSync(
-      "INSERT INTO dboAgendamento (dataAgendamento, horaAgendamento, descricao, nomeCliente, telCliente) VALUES (?, ?, ?, ?, ?)",
-      [data, horaAgendamento, descricao, nomeCliente, telCliente]
-    );
-
-    if (result.changes > 0) {
-      //essa parte insere os dados nas tabelas de relacionamento do Agendamento
-      const insertAgendamentoServico = addAgendamentoServico(
-        result.lastInsertRowId,
-        vetorColaborador
-      );
-      const insertAgendamentoColaborador = addAgendamentoColaborador(
-        result.lastInsertRowId,
-        vetorServico
+    db.withTransactionSync(() => {
+      // Inserindo agendamento
+      const result = db.runSync(
+        "INSERT INTO dboAgendamento (dataAgendamento, horaAgendamento, descricao, nomeCliente, telCliente) VALUES (?, ?, ?, ?, ?)",
+        [data, horaAgendamento, descricao, nomeCliente, telCliente]
       );
 
-      if (
-        insertAgendamentoServico == true &&
-        insertAgendamentoColaborador == true
-      ) {
-        return true;
+      if (result.changes > 0) {
+        const idAgendamento = result.lastInsertRowId;
+        let countS = 0;
+        let countC = 0;
+
+        // Inserindo serviços
+        vetorServico.forEach((idServico) => {
+          const result = db.runSync("INSERT INTO dboAgendamentoServico VALUES (?, ?)", [
+            idAgendamento,
+            idServico,
+          ]);
+  
+          if (result.changes > 0) countS++;
+        });
+        if (countS < vetorServico.length) {
+          throw new Error("Erro ao inserir serviços!");
+        }
+
+        // Inserindo colaboradores
+        vetorColaborador.forEach((idColaborador) => {
+          const result = db.runSync(
+            "INSERT INTO dboAgendamentoColaborador VALUES (?, ?)",
+            [idAgendamento, idColaborador]
+          );
+  
+          if (result.changes > 0) countC++;
+        });
+  
+        if (countC < vetorColaborador.length) {
+          throw new Error("Nem todos os colaboradores foram inseridos");
+        }
+      
+
       } else {
-        console.log(error);
-        return false;
+        throw new Error("Erro ao inserir agendamento");
       }
-    } else return false;
+    });
+    return true; // Sucesso
   } catch (error) {
     console.log("Erro ao adicionar agendamento: ", error);
-    return false;
+    return false; // Falha
+  }
+}
+
+// Função para adicionar um serviço novo no agendamento
+export function addAgendamentoServico(idAgendamento, vetorServico) {
+  const db = SQLite.openDatabaseSync("database.db");
+  try {
+    db.withTransactionSync(() => {
+      let count = 0;
+
+      vetorServico.forEach((idServico) => {
+        const result = db.runSync("INSERT INTO dboAgendamentoServico VALUES (?, ?)", [
+          idAgendamento,
+          idServico,
+        ]);
+
+        if (result.changes > 0) count++;
+      });
+
+      if (count < vetorServico.length) {
+        throw new Error("Nem todos os serviços foram inseridos");
+      }
+    });
+
+    return true; // Sucesso
+  } catch (error) {
+    console.log("Erro ao adicionar serviço ao agendamento", error);
+    return false; // Falha
+  }
+}
+
+// Função para adicionar um novo colaborador ao agendamento
+export function addAgendamentoColaborador(idAgendamento, vetorColaborador) {
+  const db = SQLite.openDatabaseSync("database.db");
+  try {
+    //essa tranzação faz com que o agendamento só seja adicionado quando tudo estiver ok
+    db.withTransactionSync(() => {
+      let count = 0;
+
+      vetorColaborador.forEach((idColaborador) => {
+        const result = db.runSync(
+          "INSERT INTO dboAgendamentoColaborador VALUES (?, ?)",
+          [idAgendamento, idColaborador]
+        );
+
+        if (result.changes > 0) count++;
+      });
+
+      if (count < vetorColaborador.length) {
+        throw new Error("Nem todos os colaboradores foram inseridos");
+      }
+    });
+
+    return true; // Sucesso
+  } catch (error) {
+    console.log("Erro ao adicionar colaborador ao agendamento", error);
+    return false; // Falha
   }
 }
 
@@ -292,18 +369,23 @@ export function deleteAgendamento(id) {
   }
 }
 //Função para editar o agendamento
-export function editarAgendamento(
+export function updateAgendamento(
   id,
   data,
   hora,
   nomeCliente,
   telCliente,
-  descricao
+  descricao,
+  vetorServico,
+  vetorColaborador
 ) {
   try {
     const db = SQLite.openDatabaseSync("database.db");
 
-    const result = db.runSync(
+    db.withTransactionSync(() =>{
+    
+
+     db.runSync(
       `
             UPDATE dboAgendamento
                 SET dataAgendamento = (?), 
@@ -315,8 +397,42 @@ export function editarAgendamento(
             `,
       [data, hora, nomeCliente, telCliente, descricao, id]
     );
+    
+    db.runSync('DELETE FROM dboAgendamentoColaborador WHERE codAgendamento = (?)', [id]);
 
-    if (result.changes > 0) return true;
+    // Inserindo colaboradores
+    let countC = 0;
+    vetorColaborador.forEach((idColaborador) => {
+      const result = db.runSync(
+        "INSERT INTO dboAgendamentoColaborador VALUES (?, ?)",
+        [id, idColaborador]
+      );
+
+      if (result.changes > 0) countC++;
+    });
+
+    if (countC < vetorColaborador.length) {
+      throw new Error("Nem todos os colaboradores foram inseridos");
+    }
+
+    // Inserindo serviços
+    let countS = 0;
+    db.runSync('DELETE FROM dboAgendamentoServico WHERE codAgendamento = (?)', [id]);
+
+    vetorServico.forEach((idServico) => {
+      const result = db.runSync("INSERT INTO dboAgendamentoServico VALUES (?, ?)", [
+        id,
+        idServico,
+      ]);
+
+      if (result.changes > 0) countS++;
+    });
+    if (countS < vetorServico.length) {
+      throw new Error("Erro ao inserir serviços!");
+    }
+
+  });
+  return true;
   } catch (error) {
     console.log("Erro ao editar agendamento: ", error);
     return false;
@@ -354,7 +470,7 @@ export function   addServicoColaborador(idColaborador, idServico, favorito) {
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.runSync(
-      "INSER INTO dboColaboradorServico VALUES (?, ?, ?)",
+      "INSERT INTO dboColaboradorServico VALUES (?, ?, ?)",
       [idColaborador, idServico, favorito]
     );
 
@@ -365,46 +481,17 @@ export function   addServicoColaborador(idColaborador, idServico, favorito) {
     return false;
   }
 }
-//Função para adicionar um serviço novo no agendamento
-export function addAgendamentoServico(idAgendamento, vetorServico) {
+
+//Função para deletar um colaborador 
+export function delColaborador(idColaborador){
   const db = SQLite.openDatabaseSync("database.db");
-  try {
-    const result = "";
-    let count = 0;
-    vetorServico.forEach((idServico) => {
-      result = db.runSync("INSER INTO dboAgendamentoServico VALUES (?, ?)", [
-        idAgendamento,
-        idServico,
-      ]);
 
-      if (result.changes > 0) count++;
-    });
-
-    if (count >= vetorServico.length()) return true;
-    else return false;
-  } catch (error) {
-    console.log("erro", error);
-    return false;
-  }
-}
-//Função para adicionar um novo colaborador ao agendamento
-export function addAgendamentoColaborador(idAgendamento, vetorColaborador) {
-  const db = SQLite.openDatabaseSync("database.db");
-  try {
-    let count;
-    const result = "";
-    vetorColaborador.forEach((idColaborador) => {
-      result = db.runSync(
-        "INSER INTO dboAgendamentoColaborador VALUES (?, ?)",
-        [idAgendamento, idColaborador]
-      );
-      if (result.changes > 0) count++;
-    });
-
-    if (count >= vetorColaborador.length()) return true;
-    else return false;
-  } catch (error) {
-    console.log("erro", error);
+  try{
+    const result = db.runSync("DELETE FROM dboColaborador WHERE id = (?)",[idColaborador]);
+    if(result.changes > 0 )
+      return true;
+  }catch(error){
+    console.log("erro ao deletar colaborador: ", error);
     return false;
   }
 }
@@ -456,10 +543,11 @@ export function deleteAgendamentoColaborador(idAgendamento, idColaborador) {
 }
 //Função para saber quais serviços um colaborador realiza
 export function viewServicoColaborador(codColaborador) {
+  console.log("codColaborador", codColaborador);
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.getAllSync(
-      "SELECT * FROM dboColaboradorServico WHERE codColaborador = (?)"[
+      "SELECT * FROM dboColaboradorServico WHERE codColaborador = (?)", [
         codColaborador
       ]
     );
@@ -500,7 +588,7 @@ export function viewColaboradoresServico(codServico) {
     [codServico]
   );
   const servNFav = db.getAllSync(
-    "SELECT codColaborador FROM dboColaboradorServico WHERE codServico = (?) AND favorito is null",
+    "SELECT codColaborador FROM dboColaboradorServico WHERE codServico = (?) AND favorito = 0",
     [codServico]
   );
 
@@ -615,7 +703,7 @@ export function getDaysOfWeek(startDate) {
 
     const day = String(newDate.getDate()).padStart(2, "0"); // Pega o dia com dois dígitos
     const month = monthNames[newDate.getMonth()]; // Nome do mês abreviado
-    newDate.setDate(newDate.getDate() - 1);
+    newDate.setDate(newDate.getDate());
     const date = newDate.toISOString().split("T")[0]; // Formato 'YYYY-MM-DD'
     //console.log(`date: ${date}, i: ${i}, day: ${day}, month: ${month}`);
     daysOfWeek.push({ dia: day, mes: month, date: date });
