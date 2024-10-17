@@ -11,6 +11,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import Toast from 'react-native-root-toast';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
 
+
 const Agendamento = ({ navigation, route }) => {
   const date = new Date().toLocaleTimeString().split(':');
   const localeDate = `${date[0]}:${date[1]}`;
@@ -125,10 +126,10 @@ const Agendamento = ({ navigation, route }) => {
       
 
       if (addAgendamento(selectedDate, time, clientName, telefone, observation, selectedServicesArray, selectedColaboradoresArray)) {
-        Alert.alert('Sucesso', 'Agendamento realizado com sucesso!');
+        Toast.show("Agendamento realizado com sucesso!",{position:Toast.positions.TOP,backgroundColor:"green",duration: Toast.durations.LONG});
         navigation.navigate('Home');
       } else {
-        Alert.alert('Erro', 'Erro ao realizar o agendamento.');
+       Toast.show("Erro ao realizar agendamento!",{position:Toast.positions.TOP,backgroundColor:"red", duration:Toast.durations.LONG})
       }
     }
 
