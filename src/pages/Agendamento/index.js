@@ -208,9 +208,10 @@ const Agendamento = ({ navigation, route }) => {
               />
               <Text style={styles.serviceText}>{service.nome}</Text>
               <Text>
-                {service.favorito && (
+                {service.favorito == 1 ? (
                   <AntDesign name="star" size={24} color="yellow" />
-                )}
+                ):
+                ''}
               </Text>
             </View>
           ))}
