@@ -64,7 +64,7 @@ const Agendamento = ({ navigation, route }) => {
   useEffect(() => {
     const resultTiposServico = viewServicoAll();
     if (resultTiposServico.length > 0) {
-      setTiposServico(resultTiposServico);
+      setTiposServico(resultTiposServico.sort((a) => a.favorito ? -1 : 1));
     } else {
       setTiposServico([
         {
@@ -147,8 +147,6 @@ const Agendamento = ({ navigation, route }) => {
     route.params = {};
   }
 
-  
-
   return (
     <ScrollView
       style={styles.container}
@@ -209,6 +207,11 @@ const Agendamento = ({ navigation, route }) => {
                 onPress={() => handleCheckboxChange(service.id)}
               />
               <Text style={styles.serviceText}>{service.nome}</Text>
+              <Text>
+                {service.favorito && (
+                  <AntDesign name="star" size={24} color="yellow" />
+                )}
+              </Text>
             </View>
           ))}
         </ScrollView>

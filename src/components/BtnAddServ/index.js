@@ -94,6 +94,7 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
   setTimeout(() => {
     loadAgendamentos();
     setRefreshList(false);
+    setRefresh(!refresh);
   }, 500);
   };
 
