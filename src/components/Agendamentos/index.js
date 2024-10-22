@@ -62,7 +62,7 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
 
   let style = atendimento ? styles.agendamentoConcluido : styles.agendamento;
 
-  if (horaAgendamento < new Date().toLocaleTimeString() && !atendimento && dataAgendamento != new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }).split('/').reverse().join('-')) {
+  if (horaAgendamento < new Date().toLocaleTimeString() && !atendimento && dataAgendamento == new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }).split('/').reverse().join('-')) {
     style = styles.agendamentoAtrasado;
   }
 
