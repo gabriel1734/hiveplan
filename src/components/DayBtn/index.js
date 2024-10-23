@@ -7,6 +7,7 @@ export default function DayBtn({ dias }) {
   const [refreshing, setRefreshing] = useState(false);
   const [dia, setDia] = useState(dias);
 
+
   useEffect(() => {
     onRefresh();
   }, [dias]);
@@ -20,8 +21,11 @@ export default function DayBtn({ dias }) {
   };
 
   const handleDayPress = (selectedDay) => {
+    console.log(selectedDay);
     setData(selectedDay);
   };
+
+  
 
   return (
     <View style={styles.container}>
@@ -37,8 +41,8 @@ export default function DayBtn({ dias }) {
         {dia.map((item, index) => (
           <TouchableOpacity
             key={index}
-            style={data === item.date ? styles.btnDataSelected : styles.btnData}
-            onPress={() => handleDayPress(item.date)}
+            style={data == item.date ? styles.btnDataSelected : styles.btnData}
+            onPress={() => handleDayPress(item.date)} 
           >
             <Text style={data == item.date ? styles.buttonTextSelected : styles.buttonText}>{item.dia}</Text>
             <Text style={data == item.date ? styles.buttonTextSelected : styles.buttonText}>{item.mes}</Text>

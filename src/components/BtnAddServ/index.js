@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, TouchableOpacity, Modal, View, TextInput, ScrollView, Alert, RefreshControl } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { adicionarTipoAgendamento, editarTipoAgendamento, excluirAgendamento, excluirTipoAgendamento, verTipoAgendamento, verTipoAgendamentos } from "../../database";
+import { addServico, adicionarTipoAgendamento, deleteServico, editarTipoAgendamento, deleteAgendamento, excluirTipoAgendamento, updateServico, verTipoAgendamento, verTipoAgendamentos, viewServicoAll, viewServicoID, updateServicoFavorito } from "../../database";
+import Toast from "react-native-root-toast";
 
 const BtnAddServ = ({ refresh, setRefresh }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -10,10 +11,26 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
   const [descricao, setDescricao] = useState('');
   const [tiposAgendamentos, setTiposAgendamentos] = useState([]);
   const [refreshList, setRefreshList] = useState(false);
+  const [favoritos, setFavoritos] = useState({});
+
+
+  const handleToggleFavorito = (id) => {
+    setFavoritos(prevState => ({
+      ...prevState,
+      [id]: !prevState[id],
+    }));
+    updateServicoFavorito(id, tiposAgendamentos.find(servico => servico.id === id).favorito == 1 ? 0 : 1);
+    onRefresh();
+  };
 
   // Função para carregar todos os agendamentos
   const loadAgendamentos = () => {
-    setTiposAgendamentos(verTipoAgendamentos());
+    setTiposAgendamentos(viewServicoAll());
+    const favoritosTemp = {};
+    tiposAgendamentos.forEach((servico) => {
+      favoritosTemp[servico.id] = servico.favorito == 1 ? true : false;
+    });
+    setFavoritos(favoritosTemp);
   };
 
   // Carregar os agendamentos ao montar o componente
@@ -28,9 +45,16 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
   const handleSave = () => {
 
     if (id) {
-      editarTipoAgendamento(id, nome, descricao);
+      if(updateServico(id,nome,descricao))
+        Toast.show("Atualizado!")
+      else
+      Toast.show("Erro!");
     } else {
-      adicionarTipoAgendamento(nome, descricao);
+      if(addServico(nome, descricao))
+        Toast.show("Adicionado!");
+      else 
+      Toast.show("Erro!");
+
     }
     
     setNome(''); 
@@ -41,20 +65,21 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
   };
 
   const handleEdit = (id) => {
-    const r = verTipoAgendamento(id);
+    const r = viewServicoID(id)
     setId(r.id);
-    setNome(r.nomeTipo);
+    setNome(r.nome);
     setDescricao(r.descricao);
   }
 
   const handleDelete = (id) => {
     Alert.alert(
-      "Excluir Agendamento",
-      "Você tem certeza que deseja excluir este agendamento?",
+      "Excluir Serviço",
+      "Você tem certeza que deseja excluir este serviço?",
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", onPress: () => {
-            excluirTipoAgendamento(id); // Exclui do banco de dados
+           if(deleteServico(id))
+            Toast.show("Exluido com sucesso!") // Exclui do banco de dados
             console.log('Excluiu');
             setRefresh(!refresh); 
             onRefresh();
@@ -69,7 +94,8 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
   setTimeout(() => {
     loadAgendamentos();
     setRefreshList(false);
-  }, 1000);
+    setRefresh(!refresh);
+  }, 500);
   };
 
 
@@ -91,6 +117,9 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
         }}
       >
         <View style={styles.modalView}>
+          <View style={styles.buttonContainer}>
+            <AntDesign name="close" size={32} color="black" onPress={() => setModalVisible(false)}/>
+          </View>
           <Text style={styles.modalText}>Adicionar Tipo de Serviço</Text>
           <Text
             placeholder="ID"
@@ -127,13 +156,22 @@ const BtnAddServ = ({ refresh, setRefresh }) => {
               <RefreshControl refreshing={refreshList} onRefresh={onRefresh} />
               }
             >
-              {tiposAgendamentos.map((agendamento) => (
-                <View key={agendamento.id} style={styles.agendamentoItem}>
-                  <Text style={styles.agendamentoText}>{agendamento.nomeTipo}</Text>
-                  <Text style={styles.agendamentoText}>{agendamento.descricao}</Text>
+              {tiposAgendamentos.map((servico) => (
+                <View key={servico.id} style={styles.agendamentoItem}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <Text style={styles.agendamentoText}>{servico.nome}</Text>
+                    <TouchableOpacity onPress={() => handleToggleFavorito(servico.id)}>
+                      <AntDesign
+                        name={servico.favorito == 1 ? 'star' : 'staro'}
+                        size={24}
+                        color='gold'
+                      />
+                    </TouchableOpacity>
+                  </View>
+                  <Text style={styles.agendamentoText}>{servico.descricao}</Text>
                   <View style={styles.actionButtons}>
-                    <Text style={styles.editButton} onPress={() => handleEdit(agendamento.id)}>Editar</Text>
-                    <Text style={styles.deleteButton} onPress={() => handleDelete(agendamento.id)}>Excluir</Text>
+                    <Text style={styles.editButton} onPress={() => handleEdit(servico.id)}>Editar</Text>
+                    <Text style={styles.deleteButton} onPress={() => handleDelete(servico.id)}>Excluir</Text>
                   </View>
                 </View>
               ))}

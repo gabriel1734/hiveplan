@@ -1,162 +1,164 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
 import { Calendar } from 'react-native-calendars';
-import RNPickerSelect from 'react-native-picker-select';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import RNDateTimePicker from '@react-native-community/datetimepicker';
-import { TextInputMask } from 'react-native-masked-text'; // Importação da máscara de texto
-import { adicionarAgendamento, editarAgendamento, getAgendamento, verTipoAgendamentos } from '../../database';
+import { Checkbox } from 'react-native-paper'; // Importação do Checkbox
+import { TextInputMask } from 'react-native-masked-text';
+import { addAgendamento, viewServicoAll, viewAgendamentoID, viewColaboradorAll, editarAgendamento, updateAgendamento, viewServicoAgendamento, viewColaboradorAgendamento } from '../../database';
 import BtnAddServ from '../../components/BtnAddServ';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import Toast from 'react-native-root-toast';
+import RNDateTimePicker from '@react-native-community/datetimepicker';
 
-const Agendamento = ({navigation, route}) => {
+
+const Agendamento = ({ navigation, route }) => {
   const date = new Date().toLocaleTimeString().split(':');
   const localeDate = `${date[0]}:${date[1]}`;
 
   const [selectedDate, setSelectedDate] = useState(null);
-  const [serviceType, setServiceType] = useState('');
   const [clientName, setClientName] = useState('');
-  const [startTime, setStartTime] = useState(localeDate);
-  const [endTime, setEndTime] = useState(localeDate);
+  const [time, setTime] = useState(localeDate);
   const [observation, setObservation] = useState('');
   const [telefone, setTelefone] = useState('');
-  const [isTimePickerVisible, setTimePickerVisible] = useState(false);
-  const [isEndTimePickerVisible, setEndTimePickerVisible] = useState(false);
   const [tiposServico, setTiposServico] = useState([]);
+  const [selectedServices, setSelectedServices] = useState({}); // Para rastrear os serviços selecionados
   const [refresh, setRefresh] = useState(false);
   const [idAgendamento, setIdAgendamento] = useState(null);
   const [erroTelefone, setErroTelefone] = useState(false);
+  const [colaboradores, setColaboradores] = useState([]);
+  const [selectedColaboradores, setSelectedColaboradores] = useState({});
+  const [isTimePickerVisible, setTimePickerVisible] = useState(false);	
 
   useEffect(() => {
-    const { id } = route.params || {};
-    
+    const { id, refreshColab } = route.params || {};
+    if (refreshColab) {
+      setRefresh(!refresh);
+    }
     if (id) {
-      const result = getAgendamento(id);
-      console.log(result);
+      const result = viewAgendamentoID(id);
       setSelectedDate(result.dataAgendamento);
-      setServiceType(result.tipoAgendamento);
       setClientName(result.nomeCliente);
       setTelefone(result.telCliente);
-      setStartTime(result.horaInicioAgendamento);
-      setEndTime(result.horaFimAgendamento);
       setObservation(result.descricao);
+      
+      const rServicos = viewServicoAgendamento(id);
+      const rColaboradores = viewColaboradorAgendamento(id);
+
+      const selectedServicesList = {};
+      rServicos.forEach((servico) => {
+        selectedServicesList[servico.codServico] = true;
+      })
+      setSelectedServices(selectedServicesList);
+
+      const selectedColaboradoresList = {};
+      rColaboradores.forEach((colaborador) => { 
+        selectedColaboradoresList[colaborador.codColaborador] = true;
+      });
+      setSelectedColaboradores(selectedColaboradoresList);
+
       setIdAgendamento(id);
     }
   }, [route.params]);
-  
-  
 
   useEffect(() => {
-    const resultTiposServico = verTipoAgendamentos();
-
+    const resultTiposServico = viewServicoAll();
     if (resultTiposServico.length > 0) {
-      setTiposServico(resultTiposServico.map((tipo) => ({label: tipo.nomeTipo, value: tipo.id})));
+      setTiposServico(resultTiposServico.sort((a) => a.favorito ? -1 : 1));
     } else {
-      setTiposServico([{label: 'Nenhum tipo de serviço encontrado', value: 0}]);
+      setTiposServico([
+        {
+          id: null,
+          nome: "Sem serviço cadastrado"
+        }
+      ]);
     }
+
+    const resultColaboradores = viewColaboradorAll();
+    if (resultColaboradores.length > 0) {
+      setColaboradores(resultColaboradores);
+    } else {
+      setColaboradores([{
+        id: 1, nome: 'Sem colaborador cadastrado',
+      }]);
+    }
+
   }, [refresh]);
 
-  const onDayPress = (day) => {
-    setSelectedDate(day.dateString);
+  const handleCheckboxChange = (id) => {
+    setSelectedServices(prevState => ({
+      ...prevState,
+      [id]: !prevState[id],
+    }));
   };
 
-  const compareTimes = (start, end) => {
-    const [startHour, startMinute] = start.split(':').map(Number);
-    const [endHour, endMinute] = end.split(':').map(Number);
-    const startDate = new Date();
-    const endDate = new Date();
-
-    startDate.setHours(startHour, startMinute);
-    endDate.setHours(endHour, endMinute);
-
-    return startDate < endDate;
-  };
-
+  const handleCheckboxChangeColaborador = (id) => {
+    setSelectedColaboradores(prevState => ({
+      ...prevState,
+      [id]: !prevState[id],
+    }));
+  }
   const handleStartTimePickerChange = (event, selectedDate) => {
     setTimePickerVisible(false);
     if (event.type === 'set' && selectedDate) { 
       const formattedTime = selectedDate.toISOString().split('T')[1].substring(0, 5);
-      if (!compareTimes(formattedTime, endTime)) {
-        Alert.alert('Erro', 'A hora de início não pode ser maior ou igual à hora de fim.');
-      } else {
-        setStartTime(formattedTime);
-      }
-    }
-  };
-
-  const handleEndTimePickerChange = (event, selectedDate) => {
-    setEndTimePickerVisible(false);
-    if (event.type === 'set' && selectedDate) { 
-      const formattedTime = selectedDate.toISOString().split('T')[1].substring(0, 5);
-      if (!compareTimes(startTime, formattedTime)) {
-        Alert.alert('Erro', 'A hora de fim deve ser maior que a hora de início.');
-      } else {
-        setEndTime(formattedTime);
-      }
+      
+        setTime(formattedTime);
     }
   };
 
   const handleSave = () => {
-  let hasErrors = false;
-
-  // Validation: Check if each field is filled, if not set an error flag and display alert
-  if (!selectedDate) {
-    Alert.alert('Erro', 'Por favor, selecione uma data.');
-    hasErrors = true;
-  }
-  if (!serviceType) {
-    Alert.alert('Erro', 'Por favor, selecione um tipo de serviço.');
-    hasErrors = true;
-  }
-  if (!clientName) {
-     Alert.alert('Erro', 'Por favor, escreva o nome de um cliente.');
-    hasErrors = true;
-  }
-  if (!telefone) {
-    Alert.alert('Erro', 'Por favor, escreva um telefone.');
-    hasErrors = true;
-  }
-  if (!startTime) {
-    Alert.alert('Erro', 'Por favor, selecione uma hora de início.');
-    hasErrors = true;
-  }
-  if (!endTime) {
-    Alert.alert('Erro', 'Por favor, selecione uma hora de fim.');
-    hasErrors = true;
-  }
-    
-    if (telefone.length < 15) {
-      Alert.alert('Erro', 'O telefone deve ter no mínimo 10 dígitos.');
-      setErroTelefone(true);
+    let hasErrors = false;
+    if (!selectedDate || !clientName || !telefone || telefone.length < 15 || Object.keys(selectedServices).length === 0 || Object.keys(selectedColaboradores).length === 0) {
+      Alert.alert('Erro', 'Preencha todos os campos obrigatórios corretamente.');
       hasErrors = true;
+    }
+    if (hasErrors) return;
+
+    const selectedServicesArray = Object.keys(selectedServices).filter((key) => selectedServices[key]);
+    const selectedColaboradoresArray = Object.keys(selectedColaboradores).filter((key) => selectedColaboradores[key]);
+
+    if (idAgendamento) {
+      if(updateAgendamento(idAgendamento,selectedDate,time,clientName,telefone,observation,selectedServicesArray,selectedColaboradoresArray))
+      Toast.show("Atualizado com sucesso!");
+      navigation.navigate('Home');
+    } else {
+      
+
+      if (addAgendamento(selectedDate, time, clientName, telefone, observation, selectedServicesArray, selectedColaboradoresArray)) {
+        Toast.show("Agendamento realizado com sucesso!",{position:Toast.positions.TOP,backgroundColor:"green",duration: Toast.durations.LONG});
+        navigation.navigate('Home');
+      } else {
+       Toast.show("Erro ao realizar agendamento!",{position:Toast.positions.TOP,backgroundColor:"red", duration:Toast.durations.LONG})
+      }
+    }
+
+    
+  };
+
+  const handleClear = () => {
+    setSelectedDate(null);
+    setClientName('');
+    setTelefone('');
+    setObservation('');
+    setSelectedServices({});
+    setTime(localeDate);
+    setSelectedColaboradores({});
+    route.params = {};
   }
 
-  if (hasErrors) {
-    return;
-    }
-    
-    setErroTelefone(false);
-  
-    if (idAgendamento) {
-    console.log('Editar');
-    editarAgendamento(idAgendamento, selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
-  }else{
-    adicionarAgendamento(selectedDate, startTime, endTime, serviceType, clientName, telefone, observation);
-    }
-    
-    navigation.navigate('Home');
-}
-
-  return (      
-    <ScrollView style={styles.container}>
+  return (
+    <ScrollView
+      style={styles.container}
+      nestedScrollEnabled={true}
+    >
       <StatusBar style='auto' backgroundColor='#F7FF89' />
       <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
         <AntDesign name="arrowleft" size={24} color="black" onPress={() =>{navigation.navigate('Home')}} />
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <Calendar
             current={new Date().toISOString().split('T')[0]}
-            onDayPress={onDayPress}
+            onDayPress={(day) => setSelectedDate(day.dateString)}
             markedDates={{
               [selectedDate]: {
                 selected: true,
@@ -178,67 +180,104 @@ const Agendamento = ({navigation, route}) => {
           />
         </View>
       </LinearGradient>
-      
       <View style={{ padding: 20 }}>
         {/* Tipo de Serviço */}
-        <Text style={styles.label}>Tipo de Serviço</Text>
         <View style={styles.tiposServicoContainer}>
-          <View style={styles.pickerSelectTelInput}>
-            <RNPickerSelect
-              onValueChange={(value) => setServiceType(value)}
-              items={tiposServico}
-              placeholder={{ label: 'Selecione o Tipo de Serviço', value: null }}
-              style={styles.pickerSelectTelInput}
-              value={serviceType ? serviceType : null}
-            />
+          <View>
+            <Text style={styles.label}>Serviços Disponíveis</Text>
           </View>
-          <BtnAddServ refresh={refresh} setRefresh={setRefresh} />
-        </View>
-        {/* Nome do Cliente */}
-        <View>
-          <Text style={styles.label}>Nome do Cliente</Text>
-          <TextInput 
-            style={styles.timeInput}
-            value={clientName}
-            onChangeText={(text) => setClientName(text)}
-            placeholder="Nome do Cliente"
-          />
+          <View>
+            <BtnAddServ refresh={refresh} setRefresh={setRefresh} />
+          </View>
         </View>
 
-        {/* Telefone com máscara */}
-        <View>
-          <Text style={styles.label}>Telefone</Text>
-          <TextInputMask
-            type={'cel-phone'}
-            options={{
-              maskType: 'BRL',
-              withDDD: true,
-              dddMask: '(99) '
-            }}
-            style={erroTelefone ? [styles.timeInput, styles.inputError] : styles.timeInput}
-            value={telefone}
-            onChangeText={(text) => {
-              setTelefone(text);
-
-              if (text.length < 10) {
-                setErroTelefone(true);
-              } else {
-                setErroTelefone(false);
-              }
-            }}
-            placeholder="Telefone"
-            keyboardType="numeric"
-          />
+        <View style={styles.serviceScrollArea}>
+          <ScrollView
+            style={{
+              width: '100%',
+              height: 150,
+          }}
+            showsVerticalScrollIndicator={true}
+            nestedScrollEnabled={true}
+        >
+          {tiposServico.map((service) => (
+            <View key={service.id} style={styles.serviceItem}>
+              <Checkbox
+                status={!!selectedServices[service.id] ? 'checked' : 'unchecked'}
+                onPress={() => handleCheckboxChange(service.id)}
+              />
+              <Text style={styles.serviceText}>{service.nome}</Text>
+              <Text>
+                {service.favorito == 1 ? (
+                  <AntDesign name="star" size={24} color="yellow" />
+                ):
+                ''}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+        </View>
+       
+        <View style={styles.tiposServicoContainer}>
+          <View>
+            <Text style={styles.label}>Colaboradores Disponíveis</Text>
+          </View>
+          <View>
+            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Colaboradores')}>
+              <Text style={styles.buttonText}>
+                <AntDesign style={styles.text} name="plussquare" size={24} color="white" />
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Horário de Início */}
+        <View style={styles.serviceScrollArea}>
+          <ScrollView
+            style={{
+              width: '100%',
+              height: 150,
+          }}
+            showsVerticalScrollIndicator={true}
+            nestedScrollEnabled={true}
+        >
+          {colaboradores.map((colaborador) => (
+            <View key={colaborador.id} style={styles.serviceItem}>
+              <Checkbox
+                status={!!selectedColaboradores[colaborador.id] ? 'checked' : 'unchecked'}
+                onPress={() => handleCheckboxChangeColaborador(colaborador.id)}
+              />
+              <Text style={styles.serviceText}>{colaborador.nome}</Text>
+            </View>
+          ))}
+        </ScrollView>
+        </View>
+
+        <Text style={styles.label}>Nome do Cliente</Text>
+        <TextInput
+          style={styles.timeInput}
+          value={clientName}
+          onChangeText={(text) => setClientName(text)}
+          placeholder="Nome do Cliente"
+        />
+
+        <Text style={styles.label}>Telefone</Text>
+        <TextInputMask
+          type={'cel-phone'}
+          options={{ maskType: 'BRL', withDDD: true, dddMask: '(99) ' }}
+          style={erroTelefone ? [styles.timeInput, styles.inputError] : styles.timeInput}
+          value={telefone}
+          onChangeText={(text) => setTelefone(text)}
+          placeholder="Telefone"
+          keyboardType="numeric"
+        />
+
         <View>
-          <Text style={styles.label}>Início</Text>
+          <Text style={styles.label}>Horário</Text>
           <TouchableOpacity
             style={styles.timeButton}
             onPress={() => setTimePickerVisible(true)}
           >
-            <Text style={styles.timeButtonText}>{startTime}</Text>
+            <Text style={styles.timeButtonText}>{time}</Text>
           </TouchableOpacity>
 
           {isTimePickerVisible && (
@@ -253,29 +292,6 @@ const Agendamento = ({navigation, route}) => {
           )}
         </View>
 
-        {/* Horário de Fim */}
-        <View>
-          <Text style={styles.label}>Fim</Text>
-          <TouchableOpacity
-            style={styles.timeButton}
-            onPress={() => setEndTimePickerVisible(true)}
-          >
-            <Text style={styles.timeButtonText}>{endTime}</Text>
-          </TouchableOpacity>
-
-          {isEndTimePickerVisible && (
-            <RNDateTimePicker
-              onChange={handleEndTimePickerChange}
-              mode="time"
-              is24Hour={true}
-              display="default"
-              value={new Date()}
-              timeZoneOffsetInMinutes={0}
-            />
-          )}
-        </View>
-
-        {/* Observação */}
         <Text style={styles.label}>Observação</Text>
         <TextInput
           style={styles.observationInput}
@@ -284,12 +300,14 @@ const Agendamento = ({navigation, route}) => {
           placeholder="Adicione uma observação"
           multiline
         />
-
-        {/* Botão Salvar */}
-        <View style={styles.btnSalvarContainer}>
+        
+        <View style={styles.btnActionContainer}>
+          <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
+              <Text style={styles.ButtonText}>Limpar</Text>
+          </TouchableOpacity>
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={{ width: '50%', alignItems: 'center', height: '100%', borderRadius: 15 }}>
-              <Text style={styles.saveButtonText}>SALVAR</Text>
+            <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.saveButtonGradient}>
+              <Text style={styles.saveButtonText}>Salvar</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
@@ -303,31 +321,60 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  tiposServicoContainer: {
+  serviceScrollArea: {
+    width: '100%',
+  },
+  serviceItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  serviceText: {
+    marginLeft: 10,
+    fontSize: 16,
+  },
+  btnActionContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignContent: 'center',
+  },
+  saveButton: {
+    backgroundColor: 'transparent',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+    width: '50%',
+    height: 50,
+  },
+  saveButtonGradient: {
     width: '100%',
-    height: 50,
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 15,
   },
-  pickerSelectTelInput: {
-    width: '80%',
-    height: 50,
+  saveButtonText: {
+    color: '#000',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
-   inputError: {
-    borderColor: 'red',
+  clearButton: {
+    color: '#6D6B69',
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "white",
+    textAlign: 'center',
+    width: '45%',
+    borderColor: '#6D6B69',
+    borderWidth: 2,
+    fontWeight: 'bold',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   label: {
     fontSize: 16,
     marginVertical: 5,
     color: '#000',
-  },
-  timeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  timeInputContainer: {
-    flex: 1,
-    marginRight: 10,
   },
   timeInput: {
     height: 40,
@@ -346,10 +393,40 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     textAlignVertical: 'top',
   },
-  label: {
-    fontSize: 16,
-    marginVertical: 5,
-    color: '#000',
+  inputError: {
+    borderColor: 'red',
+  },
+  tiposServicoContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  header: {
+    padding: 35,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 10,
+  },
+  text: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  button: {
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#6D6B69",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 50,
+    height: 50,
+    marginBottom: 20,
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
+    textAlign: 'center',
   },
    timeButton: {
     height: 40,
@@ -360,55 +437,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  btnSalvarContainer:{
-    flexDirection:'row',
-    justifyContent:'center',
-    alignContent:'center',
-  },
-  saveButton: {
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems:'center',
-    alignContent:'center',
-    padding: 10,
-    borderRadius: 10,
-    width: 700,
-    height: 70,
-    flexDirection:'row',
-  },
-  saveButtonText: {
-    paddingTop: 15,
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 16,
-    paddingBottom:0,
-  },
-  header: {
-    padding: 35,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-  },
-  text: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  menu: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    borderRadius: 10,
-  },
-  timeInput: {
-    height: 40,
-    borderColor: '#000',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-  },
 });
-
-
 
 export default Agendamento;
