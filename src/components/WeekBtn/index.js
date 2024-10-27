@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
-import BtnAgendamento from '../BtnAgendamento';
 import DayBtn from '../DayBtn';
 import { DataContext } from '../../pages/HomeScreen';
 import { getDaysOfWeek } from '../../database';
@@ -17,7 +16,7 @@ const WeekBtn = ({navigation}) => {
     <>
       <View style={styles.container}>
         <Text style={styles.TextSemana}>Semana</Text>
-        <BtnAgendamento navigation={navigation} />
+        
       </View>
       <View style={{ marginTop: 10 }}>
         <DayBtn dias={dias} />

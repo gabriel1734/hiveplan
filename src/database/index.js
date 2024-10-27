@@ -1,9 +1,11 @@
 import * as SQLite from "expo-sqlite";
 import { Alert } from "react-native";
+import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 
 export function create() {
   const db = SQLite.openDatabaseSync("database.db");
 
+  
   db.execSync(`
         CREATE TABLE IF NOT EXISTS dboAgendamento (
          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
@@ -51,6 +53,7 @@ export function create() {
     
         `);
   insertDefault();
+  useDrizzleStudio(db);
 }
 
 export function dropTables() {
@@ -459,10 +462,19 @@ export function deleteServico(id) {
   const db = SQLite.openDatabaseSync("database.db");
 
   try {
-    const result = db.runSync("DELETE FROM dboServico WHERE id = (?)", [id]);
+    db.withTransactionSync(() =>
+    {
+      const result = db.runSync("DELETE FROM dboServico WHERE id = (?)", [id]);
+      const delServicoAgendamento = db.runSync("DELETE FROM dboAgendamentoServico WHERE codServico = (?)",[id]);
 
-    if (result.changes > 0) return true;
-    else return false;
+    if (result.changes > 0 && delServicoAgendamento.changes > 0) {
+     
+      return true;
+    }
+    else return false; 
+    }
+  )
+    
   } catch (error) {
     console.log("erro:", error);
   }
@@ -673,15 +685,15 @@ export function verSemanasComAgendamentos() {
 }
 
 function getWeekRange(date) {
-  const day = date.getDay(); // Obtém o dia da semana (0 = Domingo, 1 = Segunda, etc.)
+  const day = date.getUTCDay(); // Obtém o dia da semana (0 = Domingo, 1 = Segunda, etc.)
 
   // Calcula a diferença para voltar ao domingo
   const diffToSunday = -day; // Se for domingo (day === 0), diff será 0
   const firstDayOfWeek = new Date(date); // Cria uma nova data
-  firstDayOfWeek.setDate(date.getDate() + diffToSunday); // Ajusta para o domingo mais recente
+  firstDayOfWeek.setDate(date.getUTCDate() + diffToSunday); // Ajusta para o domingo mais recente
 
   const lastDayOfWeek = new Date(firstDayOfWeek); // Clona a data do primeiro dia
-  lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6); // Ajusta para o sábado
+  lastDayOfWeek.setDate(firstDayOfWeek.getUTCDate() + 6); // Ajusta para o sábado
 
   return {
     inicio: firstDayOfWeek.toISOString().split("T")[0], // Formata 'YYYY-MM-DD'
@@ -691,48 +703,56 @@ function getWeekRange(date) {
 
 export function getDaysOfWeek(startDate) {
   const daysOfWeek = [];
+  const diasDaSemana = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
   const monthNames = [
-    "JAN",
-    "FEV",
-    "MAR",
-    "ABR",
-    "MAI",
-    "JUN",
-    "JUL",
-    "AGO",
-    "SET",
-    "OUT",
-    "NOV",
-    "DEZ",
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
   ];
 
   // Garantir que a data de início seja um objeto Date
   let currentDate = new Date(startDate);
-  const dayOfWeek = currentDate.getDay(); // Obtém o dia da semana (0 para domingo, 1 para segunda, etc.)
+  const dayOfWeek = currentDate.getUTCDay(); // Obtém o dia da semana (0 para domingo, 1 para segunda, etc.)
 
   // Ajustar para o último domingo
   currentDate.setDate(currentDate.getDate() - dayOfWeek);
-
+ 
+  /*ACREDITO QUE RESOLVI O PROBLEMA, PRECISO TESTAR DEPOIS NO EMULADOR PRA TER CERTEZA, MAS ACREDITO QUE 
+  MODIFICANDO AS FUNÇÕES PARA getUTC O TIMEZONE FICA CERTO, NÃO SEI EXPLICAR SE REALMENTE ERA ESSE O PROBLEMA,
+  MAS ATÉ O MOMENTO FOI O QUE RESOLVEU */
   for (let i = 0; i < 7; i++) {
     // Loop para os 7 dias da semana (de domingo a sábado)
     const newDate = new Date(currentDate); // Cria uma nova instância de currentDate
-    newDate.setDate(currentDate.getDate() + i); // Adiciona i dias a partir do domingo calculado
+    newDate.setUTCDate(currentDate.getUTCDate() + i); // Adiciona i dias a partir do domingo calculado
 
-    const day = String(newDate.getDate()).padStart(2, "0"); // Pega o dia com dois dígitos
-    const month = monthNames[newDate.getMonth()]; // Nome do mês abreviado
-    newDate.setDate(newDate.getDate());
+    const day = String(newDate.getUTCDate()).padStart(2, "0"); // Pega o dia com dois dígitos
+    const month = monthNames[newDate.getUTCMonth()]; // Nome do mês abreviado
+    const sem = diasDaSemana[newDate.getUTCDay()]; 
+    newDate.setUTCDate(newDate.getUTCDate());
     const date = newDate.toISOString().split("T")[0]; // Formato 'YYYY-MM-DD'
     //console.log(`date: ${date}, i: ${i}, day: ${day}, month: ${month}`);
-    daysOfWeek.push({ dia: day, mes: month, date: date });
+    daysOfWeek.push({ dia: day, mes: month, sem: sem, date: date });
+
   }
 
   return daysOfWeek;
 }
 
 function getFirstDayOfWeek(date) {
-  const day = date.getDay();
-  const diff = date.getDate() - day;
-  return new Date(date.setDate(diff));
+  const day = date.getUTCDay();
+  const diff = date.getUTCDate() - day;
+  const data = new Date(date.getUTCDate(diff));
+
+  return data;
 }
 
 function getLastDayOfWeek(date) {

@@ -49,12 +49,12 @@ const CardAgendamentos = ({navigation}) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 10,
-    height: '50%',
+    padding: 5,
+    height: 445,
   },
   scrollview: {
-    height: '100%',
-    marginBottom: 20,
+    height: '50%',
+    marginBottom: 50,
   },
   text: {
     fontSize: 14,

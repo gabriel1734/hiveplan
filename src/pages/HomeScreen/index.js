@@ -1,10 +1,10 @@
-import { View } from "react-native";
+import { View, SafeAreaView } from "react-native";
 import Header from "../../components/Header";
 import WeekBtn from "../../components/WeekBtn";
 import CardAgendamentosCount from "../../components/CardAgendamentosCount";
 import CardAgendamentos from "../../components/CardAgendamentos";
-import { createContext, useState } from "react";
-
+import { createContext, useEffect, useState } from "react";
+import BtnAgendamento from '../../components/BtnAgendamento';
 
 export const DataContext = createContext();
 
@@ -13,10 +13,8 @@ export default function HomeScreen({navigation}) {
   const [data, setData] = useState(date.split('/').reverse().join('-'));
   const [refreshing, setRefreshing] = useState(false);
 
-  
-
   return (
-    <View>
+    <SafeAreaView> 
       <DataContext.Provider value={
         {
           data,
@@ -29,7 +27,8 @@ export default function HomeScreen({navigation}) {
         <WeekBtn navigation={navigation} />
         <CardAgendamentosCount />
         <CardAgendamentos navigation={navigation} />
+        <View><BtnAgendamento navigation={navigation} /></View>
       </DataContext.Provider>
-    </View>
+    </SafeAreaView>
   );
 }

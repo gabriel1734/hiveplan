@@ -44,8 +44,10 @@ export default function DayBtn({ dias }) {
             style={data == item.date ? styles.btnDataSelected : styles.btnData}
             onPress={() => handleDayPress(item.date)} 
           >
-            <Text style={data == item.date ? styles.buttonTextSelected : styles.buttonText}>{item.dia}</Text>
-            <Text style={data == item.date ? styles.buttonTextSelected : styles.buttonText}>{item.mes}</Text>
+
+            <Text style={data == item.date ? styles.buttonTextSelected : styles.buttonText}>{item.dia}/{item.mes}</Text>
+            <Text style={data == item.date ? styles.buttonTextSelected : styles.buttonText}>{item.sem}</Text>
+            
           </TouchableOpacity>
         ))}
       </ScrollView>

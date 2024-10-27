@@ -9,7 +9,6 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
   const [servicos, setServicos] = useState([]);
   const [colaboradores, setColaboradores] = useState([]);
 
-  // Use useEffect para carregar colaboradores e serviços uma vez quando o ID estiver disponível
   useEffect(() => {
     const fetchColaboradores = async () => {
       const codColaboradores = viewColaboradorAgendamento(id);
@@ -25,8 +24,7 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
 
     fetchColaboradores();
     fetchServicos();
-    
-  }, [id]);  // Executar este efeito sempre que o `id` mudar
+  }, [id]);
 
   const handleDelete = (id) => {
     Alert.alert(
@@ -58,92 +56,94 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
       onRefresh();
     }
     setModalVisible(false);
+  };
+
+  // Formatar a data
+  dataAgendamento = dataAgendamento.split('T')[0];
+
+  // Lógica para definir estilo com base no estado do atendimento e se está atrasado
+  let style = styles.agendamento;
+
+  const isAtrasado = () => {
+    const agora = new Date();
+    const horaAtual = agora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const dataAtual = agora.toISOString().split("T")[0];
+
+    // Compara se a hora do agendamento é anterior à hora atual e se a data é a mesma
+    console.log(horaAgendamento, horaAtual);
+    console.log(dataAgendamento, dataAtual);
+    return (dataAgendamento === dataAtual && horaAgendamento < horaAtual && !atendimento);
+  };
+
+  // Ajustando o estilo
+  if (atendimento) {
+    style = styles.agendamentoConcluido; // Concluído
+  } else if (isAtrasado()) {
+    style = styles.agendamentoAtrasado; // Atrasado
   }
 
-  let style = atendimento ? styles.agendamentoConcluido : styles.agendamento;
-
-  if (horaAgendamento < new Date().toLocaleTimeString() && !atendimento && dataAgendamento == new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }).split('/').reverse().join('-')) {
-    style = styles.agendamentoAtrasado;
-  }
-
-  dataAgendamento = dataAgendamento.split('T')[0].split('-').reverse().join('/');
-  
   return (
-    <View style={style}>
-      <Text style={styles.horario}>{horaAgendamento}</Text>
-      <View style={styles.servicoCliente}>
-        <View style={styles.info}>
-          <Text style={styles.infoText}>
-            <AntDesign name="user" size={14} color="white" /> Nome: {nomeCliente}
-          </Text>
-          <Text style={styles.infoText}>
-            <MaterialIcons name="phone" size={14} color="white" /> Telefone: {telCliente}
-          </Text>
-          <Text style={styles.infoText}>
-            <MaterialIcons name="date-range" size={14} color="white" /> Data: {dataAgendamento}
-          </Text>
-          <Text style={styles.infoText}>
-            
-              <MaterialIcons name="work" size={14} color="white" /> Serviço: {servicos.map((servico, index) => (
+    <TouchableOpacity onPress={() => setModalVisible(true)}>
+    <View style={[style, {marginBottom:5}]}>
+      
+        <Text style={styles.horario}>{horaAgendamento}</Text>
+        <Text style={styles.nomeCliente}>
+          <AntDesign name="user" size={14} color="white" /> {nomeCliente}
+        </Text>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Detalhes do Agendamento</Text>
+            <Text style={styles.infoText}>
+              <MaterialIcons name="phone" size={14} color="black" /> Telefone: {telCliente}
+            </Text>
+            <Text style={styles.infoText}>
+              <MaterialIcons name="date-range" size={14} color="black" /> Data: {dataAgendamento}
+            </Text>
+            <Text style={styles.infoText}>
+              <MaterialIcons name="work" size={14} color="black" /> Serviço: {servicos.map((servico, index) => (
                 <Text key={index}>
                   {servico?.nome} {index < servicos.length - 1 ? ', ' : ''}
                 </Text>
-            ))}
-              
-          </Text>
-
-          <Text style={styles.infoText}>
-            <MaterialIcons name="people" size={14} color="white" /> Colaboradores: {colaboradores.map((colaborador, index) => (
-              <Text key={index}>
-                {colaborador?.nome} {index < colaboradores.length - 1 ? ', ' : ''} 
-              </Text>
-            ))}
-          </Text>
-
-          <Text style={styles.infoText}>
-            <MaterialIcons name="description" size={14} color="white" /> Descrição: {descricao}
-          </Text>
-        </View>
-      </View>
-      <View style={styles.acoes}>
-        <MaterialIcons name="notifications" size={24} color="yellow" />
-
-        {/* Ícone de três pontos com ação */}
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <MaterialIcons name="more-vert" size={24} color="white" />
-        </TouchableOpacity>
-
-        {/* Modal para mostrar as ações */}
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Ações</Text>
-            {!atendimento ? (
-              <Text style={styles.btnConcluir} onPress={() => handleAtendimento(id, 1)}>
-                Concluir
-              </Text>
-            ) : (
-              <Text style={styles.btnDesfazer} onPress={() => handleAtendimento(id, 0)}>
-                Desfazer
-              </Text>
-            )}
-            <Text style={styles.btnAction} onPress={() => handleEdit(id)}>
-              Editar
+              ))}
             </Text>
-            <Text style={styles.btnActionDelete} onPress={() => handleDelete(id)}>
-              Deletar
+            <Text style={styles.infoText}>
+              <MaterialIcons name="people" size={14} color="black" /> Colaboradores: {colaboradores.map((colaborador, index) => (
+                <Text key={index}>
+                  {colaborador?.nome} {index < colaboradores.length - 1 ? ', ' : ''}
+                </Text>
+              ))}
             </Text>
-            <Text style={styles.btnActionCancel} onPress={() => setModalVisible(false)}>
-              Fechar
+            <Text style={styles.infoText}>
+              <MaterialIcons name="description" size={14} color="black" /> Descrição: {descricao}
             </Text>
+
+            <View style={styles.btnContainer}>
+              {!atendimento ? (
+                <Text style={styles.btnConcluir} onPress={() => handleAtendimento(id, 1)}>
+                  Concluir
+                </Text>
+              ) : (
+                <Text style={styles.btnDesfazer} onPress={() => handleAtendimento(id, 0)}>
+                  Desfazer
+                </Text>
+              )}
+              <Text style={styles.btnAction} onPress={() => handleEdit(id)}>Editar</Text>
+              <Text style={styles.btnActionDelete} onPress={() => handleDelete(id)}>Deletar</Text>
+              <Text style={styles.btnActionCancel} onPress={() => setModalVisible(false)}>Fechar</Text>
+            </View>
           </View>
-        </Modal>
-      </View>
+        </View>
+      </Modal>
     </View>
+ </TouchableOpacity>
+
   );
 };
 
@@ -151,56 +151,47 @@ const styles = StyleSheet.create({
   agendamento: {
     backgroundColor: '#6D6B69',
     padding: 15,
-    height: 180,
-    marginBottom: 10,
-    borderRadius: 10,
-    color: 'white',
+    borderRadius: 50,
+    alignContent: "center",
+    alignItems: "center",
   },
   agendamentoConcluido: {
-    backgroundColor: '#228B22',
+    backgroundColor: 'green',  // Fundo branco para agendamentos concluídos
+    borderColor: 'black', // Borda verde
+    borderWidth: 2,
     padding: 15,
-    height: 180,
-    marginBottom: 10,
-    borderRadius: 10,
-    color: 'white',
+    borderRadius: 50,
+    alignContent: "center",
+    alignItems: "center",
   },
   agendamentoAtrasado: {
-    backgroundColor: '#ED213A',
+    backgroundColor: 'red', // Fundo vermelho para agendamentos atrasados
+    borderColor: 'yellow', // Borda amarela
+    borderWidth: 2,
     padding: 15,
-    height: 180,
-    marginBottom: 10,
-    borderRadius: 10,
-    color: 'white',
+    borderRadius: 50,
+    alignContent: "center",
+    alignItems: "center",
   },
   horario: {
     paddingBottom: 5,
-    paddingLeft: 5,
     fontWeight: 'bold',
     fontSize: 20,
     color: 'white',
   },
-  servicoCliente: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  info: {
-    marginLeft: 5,
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-  },
-  infoText: {
+  nomeCliente: {
     color: 'white',
   },
-  acoes: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    bottom: 30,
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Fundo semi-transparente
   },
   modalView: {
     backgroundColor: "white",
     borderRadius: 20,
-    padding: 40,
+    padding: 20,
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: {
@@ -210,63 +201,72 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    height: '100%',
-    width: '100%',
-    display: 'flex',
-    justifyContent: 'center',
-    alignContent: 'center',
-    gap: 20,
+    width: '80%', // Largura do modal
   },
   modalText: {
     marginBottom: 15,
     textAlign: "center",
     fontSize: 24,
   },
+  infoText: {
+    marginVertical: 0,
+    color: 'black',
+    fontSize: 16,
+    alignSelf: "baseline", 
+  },
+  btnContainer: {
+    marginTop: 20,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+  },
   btnAction: {
-    padding: 20,
+    padding: 10,
     borderRadius: 10,
     backgroundColor: "#6D6B69",
-    textAlign: 'center',
-    width: '45%',
     color: 'white',
-    fontSize: 24,
+    textAlign: 'center',
+    width: '90%',
+    marginVertical: 5, // Espaçamento entre os botões
   },
   btnActionDelete: {
-    padding: 20,
+    padding: 10,
     borderRadius: 10,
     backgroundColor: "#ED213A",
-    textAlign: 'center',
-    width: '45%',
     color: 'white',
-    fontSize: 24,
+    textAlign: 'center',
+    width: '90%',
+    marginVertical: 5,
   },
   btnActionCancel: {
-    padding: 20,
+    padding: 10,
     borderRadius: 10,
     backgroundColor: "white",
     textAlign: 'center',
-    width: '45%',
+    width: '90%',
     color: '#6D6B69',
     borderColor: '#6D6B69',
     borderWidth: 1,
-    fontSize: 24,
+    marginVertical: 5,
   },
   btnConcluir: {
-    padding: 20,
+    padding: 10,
     borderRadius: 10,
     backgroundColor: "#228B22",
-    textAlign: 'center',
-    width: '45%',
     color: 'white',
-    fontSize: 24,
+    textAlign: 'center',
+    width: '90%',
+    marginVertical: 5,
   },
   btnDesfazer: {
-    padding: 20,
+    padding: 10,
     borderRadius: 10,
     backgroundColor: "#FFD700",
-    textAlign: 'center',
-    width: '45%',
     color: 'white',
-    fontSize: 24,
-  }
+    textAlign: 'center',
+    width: '90%',
+    marginVertical: 5,
+  },
 });
+

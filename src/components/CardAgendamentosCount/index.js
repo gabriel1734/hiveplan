@@ -46,15 +46,15 @@ const styles = StyleSheet.create({
     padding: 5,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
   card: {
-    width: '45%',
+    width: '46%',
     height: 120,
     backgroundColor: '#6D6B69',
     borderRadius: 10,
     padding: 10,
-    margin: 10,
+    margin: 5,
   },
   cardWeekText: {
     fontSize: 18,

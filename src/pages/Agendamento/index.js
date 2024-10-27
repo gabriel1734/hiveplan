@@ -13,10 +13,11 @@ import RNDateTimePicker from '@react-native-community/datetimepicker';
 
 
 const Agendamento = ({ navigation, route }) => {
+  const hoje = new Date().toISOString().split('T')[0];
   const date = new Date().toLocaleTimeString().split(':');
   const localeDate = `${date[0]}:${date[1]}`;
 
-  const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(hoje);
   const [clientName, setClientName] = useState('');
   const [time, setTime] = useState(localeDate);
   const [observation, setObservation] = useState('');
@@ -38,6 +39,7 @@ const Agendamento = ({ navigation, route }) => {
     if (id) {
       const result = viewAgendamentoID(id);
       setSelectedDate(result.dataAgendamento);
+      setTime(result.horaAgendamento)
       setClientName(result.nomeCliente);
       setTelefone(result.telCliente);
       setObservation(result.descricao);
@@ -137,7 +139,7 @@ const Agendamento = ({ navigation, route }) => {
   };
 
   const handleClear = () => {
-    setSelectedDate(null);
+    setSelectedDate(hoje);
     setClientName('');
     setTelefone('');
     setObservation('');
@@ -160,6 +162,7 @@ const Agendamento = ({ navigation, route }) => {
             current={new Date().toISOString().split('T')[0]}
             onDayPress={(day) => setSelectedDate(day.dateString)}
             markedDates={{
+
               [selectedDate]: {
                 selected: true,
                 selectedColor: '#000',
