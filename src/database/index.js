@@ -724,12 +724,12 @@ export function getDaysOfWeek(startDate) {
   const dayOfWeek = currentDate.getUTCDay(); // Obtém o dia da semana (0 para domingo, 1 para segunda, etc.)
 
   // Ajustar para o último domingo
-  currentDate.setDate(currentDate.getDate() - dayOfWeek);
+  currentDate.setDate(currentDate.getDate() - dayOfWeek - 1);
  
   /*ACREDITO QUE RESOLVI O PROBLEMA, PRECISO TESTAR DEPOIS NO EMULADOR PRA TER CERTEZA, MAS ACREDITO QUE 
   MODIFICANDO AS FUNÇÕES PARA getUTC O TIMEZONE FICA CERTO, NÃO SEI EXPLICAR SE REALMENTE ERA ESSE O PROBLEMA,
   MAS ATÉ O MOMENTO FOI O QUE RESOLVEU */
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 9; i++) {
     // Loop para os 7 dias da semana (de domingo a sábado)
     const newDate = new Date(currentDate); // Cria uma nova instância de currentDate
     newDate.setUTCDate(currentDate.getUTCDate() + i); // Adiciona i dias a partir do domingo calculado
