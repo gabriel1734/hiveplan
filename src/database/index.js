@@ -2,11 +2,21 @@ import * as SQLite from "expo-sqlite";
 import { Alert } from "react-native";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 
+const CURRENT_DB_VERSION = 1;
 export function create() {
   const db = SQLite.openDatabaseSync("database.db");
+  useDrizzleStudio(db);
 
-  
+  const db_version =  db.getFirstSync('PRAGMA user_version');
+
+    if(db_version.user_version >= CURRENT_DB_VERSION)
+      return;
+
+    else if(db_version.user_version === 0){  
   db.execSync(`
+        PRAGMA journal_mode = WAL;
+        PRAGMA foreign_keys = ON;
+
         CREATE TABLE IF NOT EXISTS dboAgendamento (
          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
          nomeCliente TEXT NOT NULL,
@@ -50,10 +60,14 @@ export function create() {
          PRIMARY KEY(codAgendamento, codColaborador)
         );
         
-    
+        PRAGMA user_version = 1
         `);
   insertDefault();
-  useDrizzleStudio(db);
+  }else if(db_version.user_version === 1){
+    //to do 
+    console.log("passou");
+  }
+ 
 }
 
 export function dropTables() {

@@ -14,12 +14,13 @@ import RNDateTimePicker from '@react-native-community/datetimepicker';
 
 const Agendamento = ({ navigation, route }) => {
   const hoje = new Date().toISOString().split('T')[0];
-  const date = new Date().toLocaleTimeString().split(':');
-  const localeDate = `${date[0]}:${date[1]}`;
+  const date = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  console.log("hora", date);
+
 
   const [selectedDate, setSelectedDate] = useState(hoje);
   const [clientName, setClientName] = useState('');
-  const [time, setTime] = useState(localeDate);
+  const [time, setTime] = useState(date);
   const [observation, setObservation] = useState('');
   const [telefone, setTelefone] = useState('');
   const [tiposServico, setTiposServico] = useState([]);
@@ -103,8 +104,8 @@ const Agendamento = ({ navigation, route }) => {
   const handleStartTimePickerChange = (event, selectedDate) => {
     setTimePickerVisible(false);
     if (event.type === 'set' && selectedDate) { 
-      const formattedTime = selectedDate.toISOString().split('T')[1].substring(0, 5);
-      
+      const formattedTime = selectedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      console.log(formattedTime);
         setTime(formattedTime);
     }
   };
@@ -144,7 +145,7 @@ const Agendamento = ({ navigation, route }) => {
     setTelefone('');
     setObservation('');
     setSelectedServices({});
-    setTime(localeDate);
+    setTime(date);
     setSelectedColaboradores({});
     route.params = {};
   }
@@ -290,7 +291,6 @@ const Agendamento = ({ navigation, route }) => {
               is24Hour={true}
               display="default"
               value={new Date()}
-              timeZoneOffsetInMinutes={0}
             />
           )}
         </View>

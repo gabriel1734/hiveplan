@@ -70,9 +70,7 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
     const dataAtual = agora.toISOString().split("T")[0];
 
     // Compara se a hora do agendamento é anterior à hora atual e se a data é a mesma
-    console.log(horaAgendamento, horaAtual);
-    console.log(dataAgendamento, dataAtual);
-    return (dataAgendamento === dataAtual && horaAgendamento < horaAtual && !atendimento);
+    return (dataAgendamento <= dataAtual && horaAgendamento < horaAtual && !atendimento);
   };
 
   // Ajustando o estilo
@@ -151,7 +149,7 @@ const styles = StyleSheet.create({
   agendamento: {
     backgroundColor: '#6D6B69',
     padding: 15,
-    borderRadius: 50,
+    borderRadius: 16,
     alignContent: "center",
     alignItems: "center",
   },
@@ -160,7 +158,7 @@ const styles = StyleSheet.create({
     borderColor: 'black', // Borda verde
     borderWidth: 2,
     padding: 15,
-    borderRadius: 50,
+    borderRadius: 16,
     alignContent: "center",
     alignItems: "center",
   },
@@ -169,7 +167,7 @@ const styles = StyleSheet.create({
     borderColor: 'yellow', // Borda amarela
     borderWidth: 2,
     padding: 15,
-    borderRadius: 50,
+    borderRadius: 16,
     alignContent: "center",
     alignItems: "center",
   },
