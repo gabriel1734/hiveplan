@@ -8,6 +8,7 @@ import { createContext } from 'react';
 import Colaboradores from './src/pages/Colaboradores';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import Estabelecimento from './src/pages/Estabelecimento';
+import Servicos from './src/pages/Servicos';
 
 export const AgendamentoScreenContext = createContext();
 
@@ -20,7 +21,7 @@ export default function App() {
   return (
     <RootSiblingParent>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Estabelecimento"
+      <Stack.Navigator initialRouteName="Servicos"
         screenOptions={{
           headerShown: false,
         }}
@@ -29,6 +30,7 @@ export default function App() {
         <Stack.Screen name="Agendamento" component={Agendamento} />
         <Stack.Screen name="Colaboradores" component={Colaboradores} />
         <Stack.Screen name="Estabelecimento" component={Estabelecimento} />
+        <Stack.Screen name="Servicos" component={Servicos} />
       </Stack.Navigator>
     </NavigationContainer>
     </RootSiblingParent>
