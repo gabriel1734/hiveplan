@@ -7,6 +7,7 @@ import { create, dropTables } from './src/database';
 import { createContext } from 'react';
 import Colaboradores from './src/pages/Colaboradores';
 import { RootSiblingParent } from 'react-native-root-siblings';
+import Estabelecimento from './src/pages/Estabelecimento';
 
 export const AgendamentoScreenContext = createContext();
 
@@ -19,7 +20,7 @@ export default function App() {
   return (
     <RootSiblingParent>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home"
+      <Stack.Navigator initialRouteName="Estabelecimento"
         screenOptions={{
           headerShown: false,
         }}
@@ -27,6 +28,7 @@ export default function App() {
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Agendamento" component={Agendamento} />
         <Stack.Screen name="Colaboradores" component={Colaboradores} />
+        <Stack.Screen name="Estabelecimento" component={Estabelecimento} />
       </Stack.Navigator>
     </NavigationContainer>
     </RootSiblingParent>
