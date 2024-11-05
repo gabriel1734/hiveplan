@@ -49,16 +49,16 @@ export default function Estabelecimento({ navigation }) {
             { label: 'Salão de beleza', value: 'salao' },
             { label: 'Barbearia', value: 'barbearia' },
             { label: 'Estética', value: 'estetica' },
+            { label: 'Mecânica', value: 'mecanica' },
           ]}
         />
-      </View>
-      <View style={styles.container}>
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.saveButtonGradient}>
               <Text style={styles.saveButtonText}>Salvar</Text>
             </LinearGradient>
-          </TouchableOpacity>
+        </TouchableOpacity>
       </View>
+      
     </View>
    
   )
@@ -119,11 +119,21 @@ const styles = StyleSheet.create({
     },
   },
   saveButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: 'white',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
-    width: '50%',
+    marginTop: 60,
     height: 50,
   },
+  saveButtonGradient:{
+    borderRadius: 10,
+    width: '100%',
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  saveButtonText: {
+    
+  }
 })
