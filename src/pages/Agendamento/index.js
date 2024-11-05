@@ -272,7 +272,7 @@ const Agendamento = ({ navigation, route }) => {
           value={telefone}
           onChangeText={(text) => setTelefone(text)}
           placeholder="Telefone"
-          keyboardType="numeric"
+          keyboardType="phone-pad"
         />
 
         <View>

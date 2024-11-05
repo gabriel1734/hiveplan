@@ -37,7 +37,7 @@ export default function Estabelecimento({ navigation }) {
           value={telefone}
           onChangeText={(text) => setTelefone(text)}
           placeholder="Telefone"
-          keyboardType="numeric"
+          keyboardType="phone-pad"
         />
         <TextInput value={endereco} placeholder="Endereço" style={styles.input} onChangeText={setEndereco} />
         <TextInput value={logo} placeholder="Logo" style={styles.input} onChangeText={setLogo} />
