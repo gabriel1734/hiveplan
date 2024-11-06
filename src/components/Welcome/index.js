@@ -12,6 +12,14 @@ const WelcomeModal = ({ visible, onClose }) => {
       description: "Explore as principais funcionalidades do aplicativo.",
     },
     {
+      title: "Acesso ao Menu",
+      description: "Aperte no botão para acessar o menu principal.",
+    },
+    {
+      title: "Menu",
+      description: "Navegue pelas funcionalidades do aplicativo.",
+    },
+    {
       title: "Agendamentos",
       description: "Organize e visualize seus compromissos de forma fácil.",
     },
@@ -22,6 +30,10 @@ const WelcomeModal = ({ visible, onClose }) => {
     {
       title: "Serviços",
       description: "Adicione e edite serviços oferecidos.",
+    },
+    {
+      title: "Configurações",
+      description: "Personalize o aplicativo de acordo com suas preferências e sua empres.",
     },
   ];
 
