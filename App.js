@@ -7,8 +7,9 @@ import { create, dropTables } from './src/database';
 import { createContext } from 'react';
 import Colaboradores from './src/pages/Colaboradores';
 import { RootSiblingParent } from 'react-native-root-siblings';
-import Estabelecimento from './src/pages/Estabelecimento';
 import Servicos from './src/pages/Servicos';
+import Configuracao from './src/pages/Configuracao';
+import MenuScreen from './src/pages/Menu';
 
 export const AgendamentoScreenContext = createContext();
 
@@ -21,15 +22,16 @@ export default function App() {
   return (
     <RootSiblingParent>
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Servicos"
+      <Stack.Navigator initialRouteName="Home"
         screenOptions={{
           headerShown: false,
         }}
       >
+        <Stack.Screen name="Menu" component={MenuScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
         <Stack.Screen name="Agendamento" component={Agendamento} />
         <Stack.Screen name="Colaboradores" component={Colaboradores} />
-        <Stack.Screen name="Estabelecimento" component={Estabelecimento} />
+        <Stack.Screen name="Configuracao" component={Configuracao} />
         <Stack.Screen name="Servicos" component={Servicos} />
       </Stack.Navigator>
     </NavigationContainer>

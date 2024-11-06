@@ -104,12 +104,12 @@ export function insertDefault() {
 }
 
 //Função para adicionar um serviço
-export function addServico(nome, descricao) {
+export function addServico(nome, descricao, favorito = 0) {
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.runSync(
       "INSERT INTO dboServico (nome, descricao, favorito) VALUES (?, ?, ?)",
-      [nome, descricao, 0]
+      [nome, descricao, favorito]
     );
 
     if (result.changes > 0) return true;
@@ -293,7 +293,7 @@ export function viewServicoAll() {
   const db = SQLite.openDatabaseSync("database.db");
 
   const resultFavoritos = db.getAllSync(
-    "SELECT * FROM dboServico ORDER BY favorito"
+    "SELECT * FROM dboServico ORDER BY favorito DESC"
   );
 
   return resultFavoritos;
@@ -308,13 +308,16 @@ export function viewServicoID(id) {
   return result;
 }
 //Função para atualizar o serviço
-export function updateServico(id, nome, descricao) {
+export function updateServico(id, nome, descricao, favorito = 0) {
   const db = SQLite.openDatabaseSync("database.db");
   const result = db.runSync(
     "UPDATE dboServico SET nome = (?), descricao = (?) WHERE id = (?)",
     [nome, descricao, id]
   );
-  if (result.changes > 0) return true;
+  if (result.changes > 0) {
+    updateServicoFavorito(id, favorito);
+    return true;
+  }
   else return false;
 }
 //Função que adiciona o servico como favorito

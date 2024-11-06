@@ -4,9 +4,10 @@ import { TouchableOpacity } from "react-native";
 import { StyleSheet, Text, TextInput, View } from "react-native";
 import { TextInputMask } from "react-native-masked-text";
 import RNPickerSelect from 'react-native-picker-select';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 
-export default function Estabelecimento({ navigation }) {
+export default function Configuracao({ navigation }) {
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
   const [endereco, setEndereco] = useState('');
@@ -26,7 +27,8 @@ export default function Estabelecimento({ navigation }) {
   return (
     <View>
       <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.containerHeader}>
-        <Text style={styles.title}>Estabelecimento</Text>
+        <AntDesign name="arrowleft" size={24} color="black" onPress={() => navigation.goBack()} />
+        <Text style={styles.title}>Configuração</Text>
       </LinearGradient>
       <View style={styles.container}>
         <TextInput value={nome} placeholder="Nome" style={styles.input} onChangeText={setNome} />

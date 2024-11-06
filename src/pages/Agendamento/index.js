@@ -157,7 +157,9 @@ const Agendamento = ({ navigation, route }) => {
     >
       <StatusBar style='auto' backgroundColor='#F7FF89' />
       <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
-        <AntDesign name="arrowleft" size={24} color="black" onPress={() =>{navigation.navigate('Home')}} />
+        <View style={styles.goBack}>
+          <AntDesign  name="arrowleft" size={48} color="black" onPress={() =>{navigation.goBack()}} />
+        </View>
         <View style={{ justifyContent: 'center', alignItems: 'center' }}>
           <Calendar
             current={new Date().toISOString().split('T')[0]}
@@ -323,6 +325,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  goBack: {
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    width: '100%',
   },
   serviceScrollArea: {
     width: '100%',

@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, Modal, View, TextInput, ScrollView,
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { addServico, adicionarTipoAgendamento, deleteServico, editarTipoAgendamento, deleteAgendamento, excluirTipoAgendamento, updateServico, verTipoAgendamento, verTipoAgendamentos, viewServicoAll, viewServicoID, updateServicoFavorito } from "../../database";
 import Toast from "react-native-root-toast";
+import { Checkbox } from "react-native-paper";
 
 const Servicos = ({ navigation }) => {
   const [nome, setNome] = useState('');
@@ -11,6 +12,7 @@ const Servicos = ({ navigation }) => {
   const [tiposAgendamentos, setTiposAgendamentos] = useState([]);
   const [refreshList, setRefreshList] = useState(false);
   const [favoritos, setFavoritos] = useState({});
+  const [favorito, setFavorito] = useState(0);
 
 
   const handleToggleFavorito = (id) => {
@@ -40,12 +42,12 @@ const Servicos = ({ navigation }) => {
   const handleSave = () => {
 
     if (id) {
-      if(updateServico(id,nome,descricao))
+      if(updateServico(id,nome,descricao, favorito))
         Toast.show("Atualizado!")
       else
       Toast.show("Erro!");
     } else {
-      if(addServico(nome, descricao))
+      if(addServico(nome, descricao, favorito))
         Toast.show("Adicionado!");
       else 
       Toast.show("Erro!");
@@ -53,6 +55,7 @@ const Servicos = ({ navigation }) => {
     setNome(''); 
     setDescricao('');
     setId('');
+    setFavorito(0);
     onRefresh();
   };
 
@@ -61,6 +64,7 @@ const Servicos = ({ navigation }) => {
     setId(r.id);
     setNome(r.nome);
     setDescricao(r.descricao);
+    setFavorito(r.favorito);
   }
 
   const handleDelete = (id) => {
@@ -79,6 +83,13 @@ const Servicos = ({ navigation }) => {
       ]
     );
   };
+
+  const handleClear = () => {
+    setNome('');
+    setDescricao('');
+    setId('');
+    setFavorito(0);
+  }
 
   const onRefresh = () => {
   setRefreshList(true);
@@ -111,8 +122,17 @@ const Servicos = ({ navigation }) => {
             value={descricao}
             onChangeText={setDescricao}
           />
+          <View style={styles.containerFavorito}>
+            <Text style={styles.textFavorito} >
+              Favorito
+            </Text>
+            <Checkbox
+              status={favorito ? 'checked' : 'unchecked'}
+              onPress={() => setFavorito(favorito ? 0 : 1)}
+            />
+          </View>
           <View style={styles.buttonContainer}>
-            <Text style={styles.btnActionCancel} onPress={() => setModalVisible(false)}>
+            <Text style={styles.btnActionCancel} onPress={() => handleClear()}>
               Cancelar
             </Text>
             <Text style={styles.btnActionSave} onPress={handleSave}>
@@ -123,7 +143,7 @@ const Servicos = ({ navigation }) => {
             <ScrollView
               style={{
                 width: '100%',
-                height: '80%',
+                height: '60%',
               }}
               refreshControl={
               <RefreshControl refreshing={refreshList} onRefresh={onRefresh} />
@@ -158,6 +178,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  containerFavorito: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginBottom: 15,
+    width: '100%',
+  },
+  textFavorito:{
+    fontSize: 16,
   },
   button: {
     padding: 10,
@@ -201,7 +231,6 @@ const styles = StyleSheet.create({
   },
   modalView: {
     backgroundColor: "white",
-    borderRadius: 20,
     padding: 35,
     alignItems: "center",
     shadowColor: "#000",

@@ -142,7 +142,7 @@ export default function Colaboradores({ navigation }) {
   return (
     <>
     <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
-      <AntDesign name="arrowleft" size={24} color="black" onPress={() => {navigation.navigate("Agendamento", { refreshColab: true })}} />
+        <AntDesign name="arrowleft" size={24} color="black" onPress={() => { navigation.goBack() }} />
     </LinearGradient>
     <SafeAreaView style={styles.container} refreshControl={
               <RefreshControl refreshing={refreshList} onRefresh={onRefresh} />

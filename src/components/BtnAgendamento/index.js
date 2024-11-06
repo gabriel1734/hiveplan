@@ -1,17 +1,18 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import AntDesign from '@expo/vector-icons/AntDesign';
+
+import { Entypo } from '@expo/vector-icons';
 
 const BtnAgendamento = ({ navigation }) => {
   const handleCreateOrEditAgendamento = () => {
-    navigation.navigate('Agendamento'); // Navigate to the 'Agendamento' screen
+    navigation.navigate('Menu'); // Navigate to the 'Agendamento' screen
   };
 
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.button} onPress={handleCreateOrEditAgendamento}>
         <Text style={styles.buttonText}>
-          <AntDesign style={styles.text} name="plussquare" size={40} color="white" />
+          <Entypo style={styles.text} name="menu" size={40} color="white" />
         </Text>
       </TouchableOpacity>
     </View>
