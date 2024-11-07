@@ -2,6 +2,9 @@
 import React, { useState } from 'react';
 import { View, Text, Modal, Button, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import PagerView from 'react-native-pager-view';
+import { Animated } from 'react-native-web';
+
+const AnimatedPager = Animated.createAnimatedComponent(PagerView);
 
 const WelcomeModal = ({ visible, onClose }) => {
   const [pageIndex, setPageIndex] = useState(0);
@@ -74,10 +77,10 @@ const WelcomeModal = ({ visible, onClose }) => {
     >
       <View style={styles.overlay}>
         <View style={styles.modalContent}>
-          <PagerView
+          <AnimatedPager
             style={styles.pagerView}
             initialPage={0}
-            onPageSelected={e => setPageIndex(e.nativeEvent.position)}
+            onPageSelected={(e) => setPageIndex(e.nativeEvent.position)}
           >
             {pages.map((page, index) => (
               <View key={index} style={styles.page}>
@@ -86,7 +89,7 @@ const WelcomeModal = ({ visible, onClose }) => {
                 {page.Image ? <Image source={page.Image} style={{ width: 200, height: 200 }} /> : null}
               </View>
             ))}
-          </PagerView>
+          </AnimatedPager>
 
           <View style={styles.buttonContainer}>
             {pageIndex < pages.length - 1 ? (
