@@ -166,7 +166,11 @@ const Agendamento = ({ navigation, route }) => {
       <Content>
         <ServiceHeader>
           <Label>Serviços Disponíveis</Label>
-          <BtnAddServ refresh={refresh} setRefresh={setRefresh} />
+          <AddButton onPress={() => navigation.navigate('Servicos')}>
+            <ButtonText>
+              <AntDesign name="plussquare" size={24} color="white" />
+            </ButtonText>
+          </AddButton>
         </ServiceHeader>
 
         <ServiceScroll   showsVerticalScrollIndicator={true}
