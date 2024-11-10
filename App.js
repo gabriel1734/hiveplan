@@ -10,6 +10,12 @@ import { RootSiblingParent } from 'react-native-root-siblings';
 import Servicos from './src/pages/Servicos';
 import Configuracao from './src/pages/Configuracao';
 import MenuScreen from './src/pages/Menu';
+import { ThemeProvider } from 'styled-components';
+import dark from './src/theme/dark';
+import light from './src/theme/light';
+import { useColorScheme } from 'react-native';
+import themes
+ from './src/theme';
 
 export const AgendamentoScreenContext = createContext();
 
@@ -19,8 +25,13 @@ export default function App() {
  //dropTables();
   create();
 
+  const deviceTheme = useColorScheme();
+  const theme = themes[deviceTheme] || theme.dark
+  console.log(themes);
+
   return (
     <RootSiblingParent>
+      <ThemeProvider theme={theme}>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="Home"
         screenOptions={{
@@ -35,6 +46,7 @@ export default function App() {
         <Stack.Screen name="Servicos" component={Servicos} />
       </Stack.Navigator>
     </NavigationContainer>
+    </ThemeProvider>
     </RootSiblingParent>
   );
 }
