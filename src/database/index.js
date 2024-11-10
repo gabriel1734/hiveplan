@@ -2,7 +2,8 @@ import * as SQLite from "expo-sqlite";
 import { Alert } from "react-native";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 
-const CURRENT_DB_VERSION = 1;
+const CURRENT_DB_VERSION = 2;
+
 export function create() {
   const db = SQLite.openDatabaseSync("database.db");
   useDrizzleStudio(db);
@@ -12,7 +13,7 @@ export function create() {
     if(db_version.user_version >= CURRENT_DB_VERSION)
       return;
 
-    else if(db_version.user_version === 0){  
+   if(db_version.user_version === 0){  
   db.execSync(`
         PRAGMA journal_mode = WAL;
         PRAGMA foreign_keys = ON;
@@ -63,9 +64,21 @@ export function create() {
         PRAGMA user_version = 1
         `);
   insertDefault();
-  }else if(db_version.user_version === 1){
-    //to do 
-    console.log("passou");
+  }
+   if(db_version.user_version === 1){
+    db.execSync(`
+      
+      CREATE TABLE IF NOT EXISTS dboEmpresa(
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        nomeEmpresa TEXT NOT NULL,
+        telefoneEmpresa TEXT NOT NULL,
+        enderecoEmpresa TEXT NOT NULL,
+        logo TEXT ,
+        ramoEmpresa TEXT NOT NULL
+        );
+
+      PRAGMA user_version = 2
+      `);
   }
  
 }
@@ -635,7 +648,7 @@ export function viewColaboradoresServico(codServico) {
   );
   const servNFav = db.getAllSync(
     "SELECT codColaborador FROM dboColaboradorServico WHERE codServico = (?) AND favorito = 0",
-    [codServico]
+    [codServico] 
   );
 
   let vetorFav = servFav.sort((a, b) => a.nome.localeCompare(b.nome));
@@ -666,6 +679,86 @@ export function updateColaborador(id, nome) {
     console.log(error);
   }
 }
+
+export function addServicoRamo(ramoSelecionado) {
+
+  // Lista de serviços com descrição
+  const ramo = {
+    restaurante: [
+      { nome: "Serviço de mesa", descricao: "Atendimento e organização das mesas para os clientes." },
+      { nome: "Cozinha", descricao: "Preparação e confecção de refeições com alta qualidade." },
+      { nome: "Limpeza", descricao: "Manutenção e limpeza do ambiente do restaurante." },
+      { nome: "Delivery", descricao: "Serviço de entrega de pedidos a domicílio." },
+      { nome: "Atendimento ao cliente", descricao: "Suporte ao cliente para informações e dúvidas." }
+    ],
+    salaoDeBeleza: [
+      { nome: "Corte de cabelo", descricao: "Serviço de corte e estilização do cabelo." },
+      { nome: "Coloração", descricao: "Tintura e coloração de cabelo com técnicas variadas." },
+      { nome: "Manicure", descricao: "Manicure e pedicure com esmaltação." },
+      { nome: "Maquiagem", descricao: "Serviço de maquiagem para diversas ocasiões." },
+      { nome: "Tratamentos faciais", descricao: "Limpeza e cuidados estéticos para a pele do rosto." }
+    ],
+    oficinaMecanica: [
+      { nome: "Troca de óleo", descricao: "Substituição de óleo do motor para veículos." },
+      { nome: "Balanceamento de rodas", descricao: "Correção do balanceamento para segurança e conforto." },
+      { nome: "Revisão elétrica", descricao: "Análise e reparo de problemas no sistema elétrico." },
+      { nome: "Alinhamento", descricao: "Ajuste do alinhamento das rodas para melhor direção." },
+      { nome: "Inspeção de freios", descricao: "Verificação e manutenção do sistema de freios." }
+    ],
+    academia: [
+      { nome: "Musculação", descricao: "Treinamento de força com acompanhamento profissional." },
+      { nome: "Personal Trainer", descricao: "Sessões personalizadas com treinador especializado." },
+      { nome: "Aulas de Yoga", descricao: "Aulas de Yoga para equilíbrio e relaxamento." },
+      { nome: "Aulas de dança", descricao: "Dança para condicionamento físico e diversão." },
+      { nome: "Avaliação física", descricao: "Análise do condicionamento e composição corporal." }
+    ],
+    petShop: [
+      { nome: "Banho e Tosa", descricao: "Higienização e cuidados estéticos para pets." },
+      { nome: "Vacinação", descricao: "Aplicação de vacinas para proteção animal." },
+      { nome: "Hospedagem", descricao: "Serviço de hospedagem para animais de estimação." },
+      { nome: "Consultas Veterinárias", descricao: "Consultas com veterinários para avaliação de saúde." },
+      { nome: "Pet Shop", descricao: "Venda de produtos para cuidados e diversão dos pets." }
+    ]
+  };
+  
+  const servicos = ramo[ramoSelecionado];
+  
+  if (!servicos) {
+    console.log("Atividade não encontrada.");
+    return;
+  }
+  let count = 0;
+
+  servicos.forEach(servico => {
+    if(addServico(servico.nome, servico.descricao,1)){
+      count++;
+      console.log("Serviços adicionados com sucesso!");
+      }
+  });
+  
+  if(count == servicos.length) return true;
+    else return false;
+}
+
+export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa){
+
+  const db = SQLite.openDatabaseSync("database.db");
+
+  try{
+    db.withTransactionSync(() =>
+    {
+     db.runSync("INSERT INTO dboEmpresa (nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa) VALUES (?, ?, ?, ?, ?)",[nomeEmpresa, telefoneEmpresa, enderecoEmpresa,logo,ramoEmpresa]);
+
+  });
+  return true;
+  }
+  catch(e){
+    console.log("erro inseir dados empresa", e);
+    return false;
+  }
+
+}
+
 // daqui pra baixo nada é meu //
 export function verSemanasComAgendamentos() {
   const db = SQLite.openDatabaseSync("database.db");
