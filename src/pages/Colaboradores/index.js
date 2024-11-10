@@ -1,13 +1,13 @@
-import { SafeAreaView, View, TextInput, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, RefreshControl } from "react-native";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { SafeAreaView, View, TextInput, Text, TouchableOpacity, ScrollView, Alert, RefreshControl } from "react-native";
+import styled from 'styled-components/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Checkbox } from 'react-native-paper'; // Importação do Checkbox do react-native-paper
-import { viewServicoAll, viewColaboradorAll, updateColaborador, addColaborador, viewColaborador, addAgendamentoColaborador, addServicoColaborador, viewServicoColaborador, delColaborador } from "../../database";
+import { Checkbox } from 'react-native-paper';
+import { viewServicoAll, viewColaboradorAll, updateColaborador, addColaborador, viewColaborador, addServicoColaborador, viewServicoColaborador, delColaborador } from "../../database";
 import Toast from "react-native-root-toast";
 
 export default function Colaboradores({ navigation }) {
-
   const [tiposAgendamentos, setTiposAgendamentos] = useState([]);
   const [selectedServicos, setSelectedServicos] = useState({});
   const [favoriteSevicosColaborador, setFavoriteSevicosColaborador] = useState({});
@@ -23,20 +23,18 @@ export default function Colaboradores({ navigation }) {
 
   const loadColaboradores = () => {
     setColaboradores(viewColaboradorAll());
-  }
+  };
 
   useEffect(() => {
     loadAgendamentos();
     loadColaboradores();
   }, [refresh]);
 
-
   const handleCheckboxChange = (id) => {
     setSelectedServicos(prevState => ({
       ...prevState,
       [id]: !prevState[id],
     }));  
-    
   };
 
   const handleStarPress = (id) => {
@@ -44,27 +42,23 @@ export default function Colaboradores({ navigation }) {
       ...prevState,
       [id]: !prevState[id],
     }));
-    console.log(favoriteSevicosColaborador);
   };
 
   const handleSave = () => {
-
     if (!nome) {
       Alert.alert('Nome do colaborador é obrigatório!');
       return;
     }
-
-    if (Object.keys(selectedServicos).length == 0) {
+    if (Object.keys(selectedServicos).length === 0) {
       Alert.alert('Selecione pelo menos um serviço!');
       return;
     }
-
     if (id) {
-      if(updateColaborador(id,nome)){
-        Toast.show("Atualizado!")
+      if (updateColaborador(id, nome)) {
+        Toast.show("Atualizado!");
+      } else {
+        Toast.show("Erro!");
       }
-      else
-      Toast.show("Erro!");
     } else {
       const idColaborador = addColaborador(nome);
       if (idColaborador) {
@@ -74,9 +68,8 @@ export default function Colaboradores({ navigation }) {
           }
         });
         Toast.show("Adicionado com sucesso!");
-      }
-      else {
-       Alert.alert('Erro', 'Erro ao adicionar colaborador'); 
+      } else {
+        Alert.alert('Erro', 'Erro ao adicionar colaborador'); 
       }
     }
     setNome(''); 
@@ -96,12 +89,12 @@ export default function Colaboradores({ navigation }) {
       }));
       setFavoriteSevicosColaborador(prevState => ({
         ...prevState,
-        [servico.codServico]: servico.favorito == 1 ? true : false,
+        [servico.codServico]: servico.favorito === 1 ? true : false,
       }));
     });
     setId(r.id);
     setNome(r.nome);
-  }
+  };
 
   const handleDelete = (id) => {
     Alert.alert(
@@ -110,14 +103,13 @@ export default function Colaboradores({ navigation }) {
       [
         { text: "Cancelar", style: "cancel" },
         { text: "Excluir", onPress: () => {
-           if(delColaborador(id))
-            Toast.show("Exluido com sucesso!") // Exclui do banco de dados
-            console.log('Excluiu');
+          if (delColaborador(id)) {
+            Toast.show("Excluído com sucesso!");
             setRefresh(!refresh);
             onRefresh();
             handleClear();
           }
-        }
+        }},
       ]
     );
   };
@@ -127,7 +119,7 @@ export default function Colaboradores({ navigation }) {
     setId('');
     setFavoriteSevicosColaborador({});
     setSelectedServicos({});
-  }
+  };
 
   const onRefresh = () => {
     setRefreshList(true);
@@ -136,164 +128,168 @@ export default function Colaboradores({ navigation }) {
       loadColaboradores();
       setRefreshList(false);
     }, 1000);
-    };
-
+  };
 
   return (
     <>
-    <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
+      <Header colors={['#F7FF89', '#F6FF77', '#E8F622']}>
         <AntDesign name="arrowleft" size={24} color="black" onPress={() => { navigation.goBack() }} />
-    </LinearGradient>
-    <SafeAreaView style={styles.container} refreshControl={
-              <RefreshControl refreshing={refreshList} onRefresh={onRefresh} />
-              }>
-      <View style={styles.inputContainer}>
-        <Text style={styles.label}>Nome do colaborador:</Text>
-        <TextInput 
-          style={styles.input} 
-          placeholder="Nome do colaborador" 
-          placeholderTextColor="#888"
-          value = {nome}
-          onChangeText={setNome}
-        />
-      </View>
-      <Text style={styles.label}>Serviços do Colaborador:</Text>
-      <ScrollView style={styles.scrollArea}>
-        {tiposAgendamentos.map((agendamento) => (
-          <View key={agendamento.id} style={styles.agendamentoItem}>
-            <Checkbox
-              status={!!selectedServicos[agendamento.id] ? 'checked' : 'unchecked'}
-              onPress={() => handleCheckboxChange(agendamento.id)}
-            />
-            <Text style={styles.agendamentoText}>{agendamento.nome}</Text>
-            <TouchableOpacity style={styles.star} onPress={() => handleStarPress(agendamento.id)}>
-              <AntDesign
-                name="star"
-                size={24}
-                color={favoriteSevicosColaborador[agendamento.id] ? 'yellow' : 'black'}
+      </Header>
+      <Container refreshControl={<RefreshControl refreshing={refreshList} onRefresh={onRefresh} />}>
+        <InputContainer>
+          <Label>Nome do colaborador:</Label>
+          <StyledInput 
+            placeholder="Nome do colaborador" 
+            placeholderTextColor="#888"
+            value={nome}
+            onChangeText={setNome}
+          />
+        </InputContainer>
+        <Label>Serviços do Colaborador:</Label>
+        <StyledScrollView>
+          {tiposAgendamentos.map((agendamento) => (
+            <AgendamentoItem key={agendamento.id}>
+              <Checkbox
+                status={!!selectedServicos[agendamento.id] ? 'checked' : 'unchecked'}
+                onPress={() => handleCheckboxChange(agendamento.id)}
               />
-            </TouchableOpacity>
-          </View>
-        ))}
-      </ScrollView>
-      <View style={styles.buttonContainer}>
-            <Text style={styles.btnActionCancel} onPress={() =>{navigation.navigate('Agendamento')}}>
-              Cancelar
-            </Text>
-            <Text style={styles.btnActionSave} onPress={handleSave}>
-              Salvar
-            </Text>
-      </View>
-      <Text style={styles.label}>Colaboradores cadastrados:</Text>      
-      <ScrollView style={styles.scrollArea}>
-        {colaboradores.map((colaborador) => (
-          <View key={colaborador.id} style={styles.agendamentoItem}>
-            <Text style={styles.agendamentoText}>{colaborador.nome}</Text>
-            <View style={styles.actionButtons}>
-              <Text style={styles.editButton} onPress={() => handleEdit(colaborador.id)}>Editar</Text>
-              <Text style={styles.deleteButton} onPress={() => handleDelete(colaborador.id)}>Excluir</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-    </SafeAreaView>
+              <AgendamentoText>{agendamento.nome}</AgendamentoText>
+              <TouchableOpacity onPress={() => handleStarPress(agendamento.id)}>
+                <AntDesign
+                  name="star"
+                  size={24}
+                  color={favoriteSevicosColaborador[agendamento.id] ? 'yellow' : 'black'}
+                />
+              </TouchableOpacity>
+            </AgendamentoItem>
+          ))}
+        </StyledScrollView>
+        <ButtonContainer>
+          <ActionButtonCancel onPress={() => navigation.navigate('Agendamento')}>
+            Cancelar
+          </ActionButtonCancel>
+          <ActionButtonSave onPress={handleSave}>
+            Salvar
+          </ActionButtonSave>
+        </ButtonContainer>
+        <Label>Colaboradores cadastrados:</Label>      
+        <StyledScrollView>
+          {colaboradores.map((colaborador) => (
+            <AgendamentoItem key={colaborador.id}>
+              <AgendamentoText>{colaborador.nome}</AgendamentoText>
+              <ActionButtons>
+                <EditButton onPress={() => handleEdit(colaborador.id)}>Editar</EditButton>
+                <DeleteButton onPress={() => handleDelete(colaborador.id)}>Excluir</DeleteButton>
+              </ActionButtons>
+            </AgendamentoItem>
+          ))}
+        </StyledScrollView>
+      </Container>
     </>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#f5f5f5', // Cor de fundo suave
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
-  },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    backgroundColor: '#fff',
-  },
-  scrollArea: {
-    marginTop: 10,
-    backgroundColor: '#f5f5f5',
-    maxHeight: 200,
-  },
-  agendamentoItem: {
-    flexDirection: 'row', // Para alinhar o checkbox e texto em linha
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'gray',
-    padding: 15,
-    borderRadius: 5,
-    marginBottom: 10,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
-  },
-  agendamentoText: {
-    fontSize: 14,
-    color: '#fff',
-    marginLeft: 10, 
-  },
-  header: {
-    padding: 50,
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    borderRadius: 10,
-  },
-  star: {
-    padding: 10,
-  },
-  editButton: {
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 5,
-    color: '#6D6B69',
-  },
-  deleteButton: {
-    backgroundColor: '#f44336',
-    padding: 10,
-    borderRadius: 5,
-    color: 'white',
-  },
-  btnActionSave: {
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "#6D6B69",
-    textAlign: 'center',
-    width: '45%',
-    color: 'white',
-  },
-  btnActionCancel: {
-    color: '#6D6B69',
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "white",
-    textAlign: 'center',
-    width: '45%',
-    borderColor: '#6D6B69',
-    borderWidth: 2,
-    fontWeight: 'bold',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-    paddingBottom: 20,
-  },
-});
+
+const Container = styled.SafeAreaView`
+  flex: 1;
+  padding: 20px;
+  background-color: ${props => props.theme.background};
+`;
+
+const Header = styled(LinearGradient)`
+  padding: 35px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+`;
+
+const InputContainer = styled.View`
+  margin-bottom: 20px;
+`;
+
+const Label = styled.Text`
+  font-size: 16px;
+  font-weight: bold;
+  color: ${props => props.theme.text};
+  margin-bottom: 8px;
+`;
+
+const StyledInput = styled.TextInput`
+  height: 40px;
+  border: 1px solid ${props => props.theme.borderColor};
+  border-radius: 5px;
+  padding: 0 10px;
+  background-color: ${props => props.theme.inputBackground};
+  color: ${props => props.theme.text};
+`;
+
+const StyledScrollView = styled.ScrollView`
+  margin-top: 10px;
+  background-color: ${props => props.theme.background};
+  max-height: 200px;
+`;
+
+const AgendamentoItem = styled.View`
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  background-color: ${props => props.theme.agendamentoBackground};
+  padding: 15px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  border: 1px solid ${props => props.theme.borderColor};
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const AgendamentoText = styled.Text`
+  font-size: 14px;
+  color: ${props => props.theme.agendamentoText};
+  margin-left: 10px;
+`;
+
+const ButtonContainer = styled.View`
+  padding-top: 20px;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  padding-bottom: 20px;
+`;
+
+const ActionButtonSave = styled.Text`
+  padding: 10px;
+  border-radius: 10px;
+  background-color: ${props => props.theme.buttonBackground};
+  text-align: center;
+  width: 45%;
+  color: ${props => props.theme.buttonText};
+`;
+
+const ActionButtonCancel = styled.Text`
+  color: ${props => props.theme.primary};
+  padding: 10px;
+  border-radius: 10px;
+  background-color: ${props => props.theme.buttonText};
+  text-align: center;
+  width: 45%;
+  border: 2px solid ${props => props.theme.primary};
+  font-weight: bold;
+`;
+
+const ActionButtons = styled.View`
+  flex-direction: row;
+`;
+
+const EditButton = styled.Text`
+  background-color: ${props => props.theme.buttonText};
+  padding: 10px;
+  border-radius: 5px;
+  color: ${props => props.theme.primary};
+  margin-right: 5px;
+`;
+
+const DeleteButton = styled.Text`
+  background-color: ${props => props.theme.secondary};
+  padding: 10px;
+  border-radius: 5px;
+  color: ${props => props.theme.buttonText};
+`;
+
