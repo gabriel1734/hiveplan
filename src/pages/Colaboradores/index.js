@@ -179,7 +179,7 @@ export default function Colaboradores({ navigation }) {
               <AgendamentoText>{colaborador.nome}</AgendamentoText>
               <ActionButtons>
                 <EditButton onPress={() => handleEdit(colaborador.id)}>Editar</EditButton>
-                <DeleteButton onPress={() => handleDelete(colaborador.id)}>Excluir</DeleteButton>
+                <ExcludeButton onPress={() => handleDelete(colaborador.id)}>Excluir</ExcludeButton>
               </ActionButtons>
             </AgendamentoItem>
           ))}
@@ -286,7 +286,7 @@ const EditButton = styled.Text`
   margin-right: 5px;
 `;
 
-const DeleteButton = styled.Text`
+const ExcludeButton = styled.Text`
   background-color: ${props => props.theme.secondary};
   padding: 10px;
   border-radius: 5px;

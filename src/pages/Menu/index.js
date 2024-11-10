@@ -1,91 +1,101 @@
 import { TouchableOpacity } from "react-native";
 import { StyleSheet, Text, View } from "react-native";
 import AntDesign from '@expo/vector-icons/AntDesign';
+import styled from "styled-components";
 
 export default function MenuScreen({ navigation }) {
   return (
-    <View style={styles.container}>
+    <Container>
       <AntDesign style={styles.goBack} name="arrowleft" size={48} color="black" onPress={() => navigation.goBack()} />
-      <Text style={styles.title}>Menu</Text>
-      <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate('Home')}>
+      <Title>Menu</Title>
+      <Button  onPress={() => navigation.navigate('Home')}>
         <AntDesign name="home" size={24} color="black" />
-        <View style={styles.textBtn}>
-          <Text style={styles.text}>
+        <TextContainer>
+          <TextMenu>
             Home
-          </Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate('Agendamento')}>
+          </TextMenu>
+        </TextContainer>
+      </Button>
+      <Button onPress={() => navigation.navigate('Agendamento')}>
         <AntDesign name="calendar" size={24} color="black" />
-        <View style={styles.textBtn}>
-          <Text style={styles.text}>
+        <TextContainer>
+          <TextMenu>
             Agendamento
-          </Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate('Colaboradores')}>
+          </TextMenu>
+        </TextContainer>
+      </Button>
+      <Button onPress={() => navigation.navigate('Colaboradores')}>
         <AntDesign name="team" size={24} color="black" />
-        <View style={styles.textBtn}>
-          <Text style={styles.text}>
+        <TextContainer>
+          <TextMenu>
             Colaboradores
-          </Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate('Configuracao')}>
+          </TextMenu>
+        </TextContainer>
+      </Button>
+      <Button onPress={() => navigation.navigate('Configuracao')}>
         <AntDesign name="setting" size={24} color="black" />
-        <View style={styles.textBtn}>
-          <Text style={styles.text}>
+        <TextContainer>
+          <TextMenu>
             Configuração
-          </Text>
-        </View>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.btn} onPress={() => navigation.navigate('Servicos')}>
+          </TextMenu>
+        </TextContainer>
+      </Button>
+      <Button onPress={() => navigation.navigate('Servicos')}>
         <AntDesign name="tool" size={24} color="black" />
-        <View style={styles.textBtn}>
-          <Text style={styles.text}>
+        <TextContainer>
+          <TextMenu>
             Serviços
-          </Text>
-        </View>
-      </TouchableOpacity>
-    </View>
+          </TextMenu>
+        </TextContainer>
+      </Button>
+    </Container>
   );
 }
 
+const Container = styled.View`
+  flex: 1;
+  align-Items: center;
+  justify-Content: center;
+  background-color: ${props => props.theme.background};
+`;
+
+const Title = styled.Text`
+  font-Size: 24px;
+  font-Weight: bold;
+  margin-Bottom: 20px;
+  color: ${props => props.theme.text};
+`;
+
+const Button = styled(TouchableOpacity)`
+  padding: 10px;
+  border-Radius: 10px;
+  flex-Direction: row;
+  background-Color: transparent;
+  width: 60%;
+  border-Width: 2px;
+  justify-Content: space-between;
+  align-Items: center;
+  border-color:${props => props.theme.primary};
+  margin: 10px;
+`;
+
+const TextContainer = styled.View`
+  width: 100%;
+  flex-Direction: row;
+  justify-Content: center;
+  align-Items: center;
+`;
+
+const TextMenu = styled.Text`
+  font-Size: 24;
+  font-Weight: bold;
+  color: ${props => props.theme.text};
+`;
+
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  btn: {
-    padding: 10,
-    borderRadius: 10,
-    flexDirection: 'row',
-    backgroundColor: "transparent",
-    width: '60%',
-    borderWidth: 2,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    margin: 10,
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
   goBack: {
     position: 'absolute',
     top: 80,
     left: 40,
-  },
-  textBtn: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
   }
 })

@@ -4,6 +4,7 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { addServico, adicionarTipoAgendamento, deleteServico, editarTipoAgendamento, deleteAgendamento, excluirTipoAgendamento, updateServico, verTipoAgendamento, verTipoAgendamentos, viewServicoAll, viewServicoID, updateServicoFavorito } from "../../database";
 import Toast from "react-native-root-toast";
 import { Checkbox } from "react-native-paper";
+import styled from 'styled-components/native';
 
 const Servicos = ({ navigation }) => {
   const [nome, setNome] = useState('');
@@ -100,59 +101,55 @@ const Servicos = ({ navigation }) => {
 
 
   return (
-        <View style={styles.modalView}>
-          <View style={styles.buttonContainer}>
+        <Container>
+          <Arrow>
             <AntDesign name="arrowleft" size={32} color="black" onPress={() => {navigation.goBack()}}/>
-          </View>
-          <Text style={styles.modalText}>Adicionar Tipo de Serviço</Text>
+          </Arrow>
+          <Label>Adicionar Tipo de Serviço</Label>
           <Text
             placeholder="ID"
             style={{ display: 'none' }}
             value={id}
           />
-          <TextInput
+          <StyledInput
             placeholder="Nome do Serviço"
-            style={styles.input}
+            placeholderTextColor="#888"
             value={nome}
             onChangeText={setNome}
           />
-          <TextInput
+          <StyledInput
             placeholder="Descrição"
-            style={styles.input}
+            placeholderTextColor="#888"
             value={descricao}
             onChangeText={setDescricao}
           />
-          <View style={styles.containerFavorito}>
-            <Text style={styles.textFavorito} >
+          <FavoritoContainer>
+            <FavoritoText>
               Favorito
-            </Text>
+            </FavoritoText>
             <Checkbox
               status={favorito ? 'checked' : 'unchecked'}
               onPress={() => setFavorito(favorito ? 0 : 1)}
             />
-          </View>
-          <View style={styles.buttonContainer}>
-            <Text style={styles.btnActionCancel} onPress={() => handleClear()}>
+          </FavoritoContainer>
+          <ButtonContainer>
+            <ActionButtonCancel onPress={() => handleClear()}>
               Cancelar
-            </Text>
-            <Text style={styles.btnActionSave} onPress={handleSave}>
+            </ActionButtonCancel>
+            <ActionButtonSave onPress={handleSave}>
               Salvar
-            </Text>
-          </View>
-          <View style={styles.actionContainer}>
-            <ScrollView
-              style={{
-                width: '100%',
-                height: '60%',
-              }}
+            </ActionButtonSave>
+          </ButtonContainer>
+          <ScrollContainer>
+            <StyledScrollView
               refreshControl={
               <RefreshControl refreshing={refreshList} onRefresh={onRefresh} />
               }
             >
               {tiposAgendamentos.map((servico) => (
-                <View key={servico.id} style={styles.agendamentoItem}>
-                  <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-                    <Text style={styles.agendamentoText}>{servico.nome}</Text>
+                <AgendamentoItem key={servico.id}>
+                  <ServicoContainer>
+                    <ServicoText>{servico.nome}</ServicoText>
                     <TouchableOpacity onPress={() => handleToggleFavorito(servico.id)}>
                       <AntDesign
                         name={servico.favorito == 1 ? 'star' : 'staro'}
@@ -160,149 +157,144 @@ const Servicos = ({ navigation }) => {
                         color='gold'
                       />
                     </TouchableOpacity>
-                  </View>
-                  <Text style={styles.agendamentoText}>{servico.descricao}</Text>
-                  <View style={styles.actionButtons}>
-                    <Text style={styles.editButton} onPress={() => handleEdit(servico.id)}>Editar</Text>
-                    <Text style={styles.deleteButton} onPress={() => handleDelete(servico.id)}>Excluir</Text>
-                  </View>
-                </View>
+                  </ServicoContainer>
+                  <ServicoText>{servico.descricao}</ServicoText>
+                  <ActionButtons>
+                    <EditButton onPress={() => handleEdit(servico.id)}>Editar</EditButton>
+                    <ExcludeButton onPress={() => handleDelete(servico.id)}>Excluir</ExcludeButton>
+                  </ActionButtons>
+                </AgendamentoItem>
               ))}
-          </ScrollView>
-        </View>
-        </View>
+          </StyledScrollView>
+          </ScrollContainer>
+        </Container>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  containerFavorito: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    marginBottom: 15,
-    width: '100%',
-  },
-  textFavorito:{
-    fontSize: 16,
-  },
-  button: {
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "#6D6B69",
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 50,
-    height: 50,
-    marginBottom: 20,
-  },
-  headerText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  btnActionSave: {
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "#6D6B69",
-    textAlign: 'center',
-    width: '45%',
-    color: 'white',
-  },
-  btnActionCancel: {
-    color: '#6D6B69',
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "white",
-    textAlign: 'center',
-    width: '45%',
-    borderColor: '#6D6B69',
-    borderWidth: 2,
-    fontWeight: 'bold',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  modalView: {
-    backgroundColor: "white",
-    padding: 35,
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    width: '100%',
-    height: '100%',
-  },
-  actionContainer: {
-    marginTop: 20,
-    width: '100%',
-    marginBottom: 20,
-  },
-  modalText: {
-    marginBottom: 15,
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 15,
-    width: '100%',
-    paddingLeft: 10,
-    borderRadius: 5,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  agendamentoItem: {
-    backgroundColor: '#6D6B69',
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 10,
-  },
-  agendamentoText: {
-    fontSize: 16,
-    marginBottom: 5,
-    color: 'white',
-  },
-  actionButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  editButton: {
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 5,
-    color: '#6D6B69',
+const Container = styled.View`
+  flex: 1;
+  background-color:${props=>props.theme.background};
+  padding: 35px;
+  align-Items: center;
+  width: 100%;
+  height: 100%;
+`;
 
-  },
-  deleteButton: {
-    backgroundColor: '#f44336',
-    padding: 10,
-    borderRadius: 5,
-    color: 'white',
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-});
+const Arrow = styled.View`
+  flex-Direction: 'row';
+  justify-Content: 'space-between';
+  width: 100%;
+`;
+
+const Label = styled.Text`
+  margin-Bottom: 15px;
+  text-Align: center;
+  font-Size: 18px;
+  font-Weight: bold;
+  color: ${props => props.theme.text};
+`;
+const StyledInput = styled.TextInput`
+  height: 40px;
+  border: 1px solid ${props => props.theme.borderColor};
+  border-radius: 5px;
+  padding: 0 10px;
+  background-color: ${props => props.theme.inputBackground};
+  color: ${props => props.theme.text};
+  height: 40;
+  border-Width: 1px;
+  margin-Bottom: 15px;
+  width: 100%;
+  padding-Left: 10px;
+`;
+
+const FavoritoContainer = styled.View`
+    flex-Direction: row;
+    justify-Content: flex-end;
+    align-Items: center;
+    margin-Bottom: 15;
+    width: 100%;
+`;
+
+const FavoritoText = styled.Text`
+  font-Size: 16px;
+  color: ${props => props.theme.text};
+`;
+
+const ButtonContainer = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  padding-bottom: 20px;
+`;
+
+const ActionButtonCancel = styled.Text`
+  color: ${props => props.theme.primary};
+  padding: 10px;
+  border-radius: 10px;
+  background-color: ${props => props.theme.buttonText};
+  text-align: center;
+  width: 45%;
+  border: 2px solid ${props => props.theme.primary};
+  font-weight: bold;
+`;
+
+const ActionButtonSave = styled.Text`
+  padding: 10px;
+  border-radius: 10px;
+  background-color: ${props => props.theme.buttonBackground};
+  text-align: center;
+  width: 45%;
+  color: ${props => props.theme.buttonText};
+`;
+
+const ScrollContainer = styled.View`
+  margin-Top: 20;
+  width: 100%;
+  margin-Bottom: 20;
+`;
+
+const StyledScrollView = styled.ScrollView`
+  width: 100%;
+  height: 60%;
+`;
+
+const AgendamentoItem = styled.View`
+  background-color: ${props => props.theme.agendamentoBackground};
+  padding: 10px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 1px solid ${props => props.theme.borderColor};
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+`;
+const ServicoContainer = styled.View`
+  flex-Direction: row;
+  justify-Content: space-between;
+`;
+const ServicoText = styled.Text`
+  font-Size: 16px;
+  margin-Bottom: 5px;
+  color: ${props => props.theme.agendamentoText};
+`;
+
+const ActionButtons = styled.View`
+  flex-Direction: row;
+  justify-Content: space-between;
+  margin-Top: 10px;
+`;
+
+const EditButton = styled.Text`
+  background-color: ${props => props.theme.buttonText};
+  padding: 10px;
+  border-radius: 5px;
+  color: ${props => props.theme.primary};
+  margin-right: 5px;
+`;
+
+const ExcludeButton = styled.Text`
+  background-color: ${props => props.theme.secondary};
+  padding: 10px;
+  border-radius: 5px;
+  color: ${props => props.theme.buttonText};
+`;
 
 export default Servicos;
