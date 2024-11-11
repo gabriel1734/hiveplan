@@ -2,7 +2,7 @@ import { useState, useContext, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native';
 import Agendamentos from '../Agendamentos';
 import { viewAgendamentosPorDia } from '../../database';
-import { DataContext } from '../../pages/HomeScreen';
+import { DataContext } from '../../context';
 
 const CardAgendamentos = ({navigation}) => {
   

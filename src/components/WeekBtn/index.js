@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import DayBtn from '../DayBtn';
-import { DataContext } from '../../pages/HomeScreen';
+import { DataContext } from '../../context';
 import { getDaysOfWeek } from '../../database';
 
 const WeekBtn = ({navigation}) => {
