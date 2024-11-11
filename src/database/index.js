@@ -740,7 +740,7 @@ export function addServicoRamo(ramoSelecionado) {
     else return false;
 }
 
-export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa){
+export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo, ramoEmpresa= ''){
 
   const db = SQLite.openDatabaseSync("database.db");
 
@@ -757,6 +757,34 @@ export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpr
     return false;
   }
 
+}
+
+export function updateDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo = '', ramoEmpresa = '') {
+  const db = SQLite.openDatabaseSync("database.db");
+  try {
+    const result = db.runSync(
+      "UPDATE dboEmpresa SET nomeEmpresa = (?), telefoneEmpresa = (?), enderecoEmpresa = (?), logo = (?), ramoEmpresa = (?)",
+      [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa]
+    );
+
+    if (result.changes > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export function viewEmpresa() {
+  const db = SQLite.openDatabaseSync("database.db");
+  try {
+    const result = db.getFirstSync("SELECT * FROM dboEmpresa");
+    return result;
+  } catch (error) {
+    console.log("Erro", error);
+  }
 }
 
 // daqui pra baixo nada é meu //
