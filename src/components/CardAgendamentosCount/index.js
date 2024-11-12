@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useContext, useState, useEffect, startTransition } from "react";
 import { DataContext } from "../../context";
 import { countAgendamentosPorDia, countAgendamentosPorSemana } from "../../database";
+import styled from "styled-components";
 
 export default function CardAgendamentosCount() {
   const { data, refreshing } = useContext(DataContext);
@@ -28,18 +29,48 @@ export default function CardAgendamentosCount() {
   }, [data, refreshing]);
 
   return (
-    <View style={styles.container}>
+    <Container style={styles.container}>
       <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.card}>
         <Text style={styles.cardTodayText}>Agendamentos para Hoje</Text>   
         <Text style={styles.cardTodayTextNumber}>{countDia}</Text>
       </LinearGradient>
-      <View style={styles.card}>
-        <Text style={styles.cardWeekText}>Agendamentos para a Semana</Text>
-        <Text style={styles.cardWeekTextNumber}>{countSemana}</Text>
-      </View>
-    </View>
+      <Card>
+        <StyledText>Agendamentos para a Semana</StyledText>
+        <TextNumber>{countSemana}</TextNumber>
+      </Card>
+    </Container>
   );
 }
+
+const Container = styled.View`
+  padding: 5px;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Card = styled.View`
+  width: 46%;
+  height: 120;
+  background-color: ${props => props.theme.buttonBackground};
+  border-radius:10px;
+  padding:10px;
+  margin: 5px;
+`;
+
+const StyledText = styled.Text`
+  font-size: 18px;
+  font-weight: bold;
+  color: ${props => props.theme.buttonText};
+  text-transform: uppercase;
+`;
+
+const TextNumber = styled.Text`
+  font-size:32;
+  font-weight: bold;
+  color: ${props => props.theme.buttonText};
+  text-align: right;
+`;
 
 const styles = StyleSheet.create({
   container: {

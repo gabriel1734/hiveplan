@@ -321,7 +321,7 @@ const ObservationInput = styled(TextInput)`
   height: 80;
   border-Width: 1;
   margin-Bottom: 10;
-  text-align:'top';
+  text-align: top;
 `
 
 const StyledTextInputMask = styled(TextInputMask)`
@@ -380,7 +380,7 @@ const ServiceText = styled(Text)`
 `;
 
 const AddButton = styled(TouchableOpacity)`
-  background-color: #6D6B69;
+  background-color: ${props => props.theme.buttonBackground};
   padding: 5px;
   border-radius: 5px;
 `;

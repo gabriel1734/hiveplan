@@ -9,6 +9,7 @@ import WelcomeModal from "../../components/Welcome";
 import { DataContext } from "../../context";
 import { viewEmpresa } from "../../database";
 import { useEffect } from "react";
+import styled from "styled-components";
 
 
 export default function HomeScreen({navigation}) {
@@ -25,7 +26,7 @@ export default function HomeScreen({navigation}) {
 
 
   return (
-    <SafeAreaView> 
+    <Container> 
       <DataContext.Provider value={
         {
           data,
@@ -47,6 +48,10 @@ export default function HomeScreen({navigation}) {
         <CardAgendamentos navigation={navigation} />
         <View><BtnAgendamento navigation={navigation} /></View>
       </DataContext.Provider>
-    </SafeAreaView>
+    </Container>
   );
 }
+
+const Container = styled.SafeAreaView`
+background-color:${props=>props.theme.background};
+`

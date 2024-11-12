@@ -18,9 +18,9 @@ const WeekBtn = ({navigation}) => {
       <Container>
         <StyledText>Semana</StyledText>
       </Container>
-      <View style={{ marginTop: 10 }}>
+      <DayView>
         <DayBtn dias={dias} />
-      </View>
+      </DayView>
     </>
   );
 };
@@ -43,6 +43,10 @@ const StyledText = styled.Text`
   font-weight: bold;
 `;
 
+const DayView = styled.View`
+  background-color: ${props => props.theme.background};
+  margin-top:10px;
+`;
 const styles = StyleSheet.create({
   container: {
     height: 50,

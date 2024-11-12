@@ -1,5 +1,6 @@
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import styled from 'styled-components';
 
 import { Entypo } from '@expo/vector-icons';
 
@@ -9,15 +10,40 @@ const BtnAgendamento = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.button} onPress={handleCreateOrEditAgendamento}>
-        <Text style={styles.buttonText}>
-          <Entypo style={styles.text} name="menu" size={40} color="white" />
-        </Text>
-      </TouchableOpacity>
-    </View>
+    <Container>
+      <StyledButton onPress={handleCreateOrEditAgendamento}>
+        <StyledText>
+          <Entypo style={styles.text} name="menu" size={40} />
+        </StyledText>
+      </StyledButton>
+    </Container>
   );
 };
+
+const Container = styled.View`
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  align-items: center;
+  color: green;
+`;
+
+const StyledButton = styled.TouchableOpacity`
+  padding: 1px;
+  border-Radius: 10px;
+  background-Color: ${props=> props.theme.buttonBackground};
+  align-Items: center;
+  justify-Content: center;
+  width: 100;
+  height: 50;
+`;
+
+const StyledText = styled.Text`
+  font-Size: 40;
+  font-Weight: bold;
+  color: ${props=> props.theme.buttonText};
+`;
 
 const styles = StyleSheet.create({
   container: {

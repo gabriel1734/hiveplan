@@ -3,6 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, Modal, Alert } from "react-na
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { deleteAgendamento, setAtendimento, viewColaborador, viewColaboradorAgendamento, viewServicoAgendamento, viewServicoID } from "../../database";
 import Toast from "react-native-root-toast";
+import styled from "styled-components";
 
 export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, nomeCliente, descricao, id, atendimento, onRefresh, navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -82,12 +83,12 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
 
   return (
     <TouchableOpacity onPress={() => setModalVisible(true)}>
-    <View style={[style, {marginBottom:5}]}>
+    <StyledAgendamento>
       
-        <Text style={styles.horario}>{horaAgendamento}</Text>
-        <Text style={styles.nomeCliente}>
+        <Horario>{horaAgendamento}</Horario>
+        <TextCliente >
           <AntDesign name="user" size={14} color="white" /> {nomeCliente}
-        </Text>
+        </TextCliente>
 
       <Modal
         animationType="slide"
@@ -95,34 +96,33 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalView}>
-            <Text style={styles.modalText}>Detalhes do Agendamento</Text>
-            <Text style={styles.infoText}>
+        <StyledModal>
+          <StyledModalView>
+            <ModalText >Detalhes do Agendamento</ModalText>
+            <InfoText>
               <MaterialIcons name="phone" size={14} color="black" /> Telefone: {telCliente}
-            </Text>
-            <Text style={styles.infoText}>
+            </InfoText>
+            <InfoText>
               <MaterialIcons name="date-range" size={14} color="black" /> Data: {dataAgendamento}
-            </Text>
-            <Text style={styles.infoText}>
+            </InfoText>
+            <InfoText>
               <MaterialIcons name="work" size={14} color="black" /> Serviço: {servicos.map((servico, index) => (
                 <Text key={index}>
                   {servico?.nome} {index < servicos.length - 1 ? ', ' : ''}
                 </Text>
               ))}
-            </Text>
-            <Text style={styles.infoText}>
+            </InfoText>
+            <InfoText>
               <MaterialIcons name="people" size={14} color="black" /> Colaboradores: {colaboradores.map((colaborador, index) => (
                 <Text key={index}>
                   {colaborador?.nome} {index < colaboradores.length - 1 ? ', ' : ''}
                 </Text>
               ))}
-            </Text>
-            <Text style={styles.infoText}>
+            </InfoText>
+            <InfoText>
               <MaterialIcons name="description" size={14} color="black" /> Descrição: {descricao}
-            </Text>
-
-            <View style={styles.btnContainer}>
+            </InfoText>
+            <Container>
               {!atendimento ? (
                 <Text style={styles.btnConcluir} onPress={() => handleAtendimento(id, 1)}>
                   Concluir
@@ -133,17 +133,86 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
                 </Text>
               )}
               <Text style={styles.btnAction} onPress={() => handleEdit(id)}>Editar</Text>
-              <Text style={styles.btnActionDelete} onPress={() => handleDelete(id)}>Deletar</Text>
-              <Text style={styles.btnActionCancel} onPress={() => setModalVisible(false)}>Fechar</Text>
-            </View>
-          </View>
-        </View>
+              <Text style={styles.btnActionDelete} onPress={() => handleDelete(id)}>Excluir</Text>
+              <BotaoFechar onPress={() => setModalVisible(false)}>Fechar</BotaoFechar>
+            </Container>
+          </StyledModalView>
+        </StyledModal>
       </Modal>
-    </View>
+    </StyledAgendamento>
  </TouchableOpacity>
 
   );
 };
+
+const StyledAgendamento = styled.View`
+  background-color: ${props => props.theme.buttonBackground};
+  padding: 15px;
+  margin-bottom:10px;
+  border-radius: 16px;
+  align-content: center;
+  align-items: center;
+`;
+
+const Horario = styled.Text`
+  padding-Bottom: 5px;
+  font-Weight: bold;
+  font-Size: 20px;
+  color: ${props => props.theme.buttonText};
+`;
+
+const TextCliente = styled.Text`
+  color: ${props=>props.theme.buttonText};
+`;
+
+const StyledModal = styled.View`
+  flex: 1;
+  justify-Content: center;
+  align-Items: center;
+  background-Color: rgba(0, 0, 0, 0.5);
+`;
+
+const StyledModalView = styled.View`
+  background-Color: ${props=> props.theme.background};
+  border-Radius: 20px;
+  padding: 20px;
+  align-Items: center;
+  width: 80%;
+`;
+
+const ModalText = styled.Text`
+  color: ${props => props.theme.text};
+  margin-Bottom: 15;
+  text-Align: center;
+  font-Size: 24;
+`;
+
+const InfoText = styled.Text`
+  color: ${props => props.theme.text};
+  font-Size: 16px;
+  align-Self: baseline; 
+`;
+
+const Container = styled.View`
+  margin-Top: 20;
+  flex-Direction: column;
+  justify-Content: space-between;
+  align-Items: center;
+  width: 100%;
+`;
+
+const BotaoFechar = styled.Text`
+  padding: 10px;
+  border-Radius: 10px;
+  background-Color: ${props=>props.theme.primary};
+  text-Align: center;
+  width: 90%;
+  color: white;
+  border-Color: #6D6B69;
+  border-Width: 1px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+`;
 
 const styles = StyleSheet.create({
   agendamento: {

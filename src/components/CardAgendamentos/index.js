@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, RefreshControl } from 'react-native
 import Agendamentos from '../Agendamentos';
 import { viewAgendamentosPorDia } from '../../database';
 import { DataContext } from '../../context';
+import styled from 'styled-components';
 
 const CardAgendamentos = ({navigation}) => {
   
@@ -26,9 +27,8 @@ const CardAgendamentos = ({navigation}) => {
 
   return(
     agendamentos.length > 0 ? (
-      <View style={styles.container}>
-        <ScrollView
-          style={styles.scrollview}
+      <Container>
+        <StyledScrollView
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
@@ -37,15 +37,36 @@ const CardAgendamentos = ({navigation}) => {
             
           <Agendamentos key={agendamento.id} {...agendamento} onRefresh={onRefresh} navigation={navigation} />
         ))}
-          </ScrollView>
-      </View>
+          </StyledScrollView>
+      </Container>
     ) : (
-      <View style={styles.container}>
-        <Text style={styles.text}>Nenhum agendamento encontrado para o dia!</Text>
-      </View>
+      <Container style={styles.container}>
+        <StyledText>Nenhum agendamento encontrado para o dia!</StyledText>
+      </Container>
     )
   );
 };
+
+const Container = styled.View`
+  padding: 5px;
+  height: 445px;
+`;
+
+const StyledText = styled.Text`
+  font-size:14px;
+  font-weight:bold;
+  text-align: center;
+  margin-top: 10px;
+  background-color:${props => props.theme.buttonBackground};
+  padding: 20px;
+  color: ${props => props.theme.buttonText};
+  border-radius: 10px;
+`;
+
+const StyledScrollView = styled.ScrollView`
+  height: 50%;
+  margin-bottom: 50;
+`;
 
 const styles = StyleSheet.create({
   container: {

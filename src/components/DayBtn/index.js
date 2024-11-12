@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { DataContext } from "../../context";
+import styled from "styled-components";
 
 export default function DayBtn({ dias }) {
   const { data, setData } = useContext(DataContext);
@@ -28,32 +29,54 @@ export default function DayBtn({ dias }) {
   
 
   return (
-    <View style={styles.container}>
-      <ScrollView
+    <Container>
+      <StyledScrollView
         horizontal
         showsHorizontalScrollIndicator={true}
         contentContainerStyle={{ paddingHorizontal: 5 }}
-        style={styles.scrollView}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         {dia.map((item, index) => (
-          <TouchableOpacity
+          <Button
             key={index}
-            style={data == item.date ? styles.btnDataSelected : styles.btnData}
             onPress={() => handleDayPress(item.date)} 
           >
 
-            <Text style={data == item.date ? styles.buttonTextSelected : styles.buttonText}>{item.dia}/{item.mes}</Text>
-            <Text style={data == item.date ? styles.buttonTextSelected : styles.buttonText}>{item.sem}</Text>
+            <ButtonText>{item.dia}/{item.mes}</ButtonText>
+            <ButtonText>{item.sem}</ButtonText>
             
-          </TouchableOpacity>
+          </Button>
         ))}
-      </ScrollView>
-    </View>
+      </StyledScrollView>
+    </Container>
   );
 }
+
+const Container = styled.View`
+  background-color: ${props => props.theme.background};
+  padding:10px;
+`;
+
+const StyledScrollView = styled.ScrollView`
+  flex-direction: row;
+`
+
+const Button = styled(TouchableOpacity)`
+  padding: 10px;
+  border-Radius: 10px;  
+  flex-Direction: column;
+  margin-right:5px;
+  margin-left:5px;
+  align-Items: center;
+  justify-Content: 'center';
+  background-color: ${props=> props.theme.buttonBackground};
+`;
+
+const ButtonText = styled.Text`
+ color: ${props => props.theme.buttonText};
+`;
 
 const styles = {
   container: {
