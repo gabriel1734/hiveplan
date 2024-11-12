@@ -7,7 +7,7 @@ import { useState } from "react";
 import BtnAgendamento from '../../components/BtnAgendamento';
 import WelcomeModal from "../../components/Welcome";
 import { DataContext } from "../../context";
-import { viewEmpresa } from "../../database";
+import { checkEmpresa } from "../../database";
 import { useEffect } from "react";
 
 
@@ -19,7 +19,7 @@ export default function HomeScreen({navigation}) {
   const [welcome, setWelcome] = useState(false);
 
   useEffect(() => {
-    setWelcome(viewEmpresa());
+    setWelcome(checkEmpresa());
     console.log('Welcome:', welcome);
   }, []);
 
