@@ -6,10 +6,10 @@ import styled from "styled-components";
 export default function MenuScreen({ navigation }) {
   return (
     <Container>
-      <AntDesign style={styles.goBack} name="arrowleft" size={48} color="black" onPress={() => navigation.goBack()} />
+      <GoBack name="arrowleft" size={48} onPress={() => navigation.goBack()} />
       <Title>Menu</Title>
       <Button  onPress={() => navigation.navigate('Home')}>
-        <AntDesign name="home" size={24} color="black" />
+        <DesignColor name="home" size={24}/>
         <TextContainer>
           <TextMenu>
             Home
@@ -17,7 +17,7 @@ export default function MenuScreen({ navigation }) {
         </TextContainer>
       </Button>
       <Button onPress={() => navigation.navigate('Agendamento')}>
-        <AntDesign name="calendar" size={24} color="black" />
+        <DesignColor name="calendar" size={24}/>
         <TextContainer>
           <TextMenu>
             Agendamento
@@ -25,7 +25,7 @@ export default function MenuScreen({ navigation }) {
         </TextContainer>
       </Button>
       <Button onPress={() => navigation.navigate('Colaboradores')}>
-        <AntDesign name="team" size={24} color="black" />
+        <DesignColor name="team" size={24} />
         <TextContainer>
           <TextMenu>
             Colaboradores
@@ -33,7 +33,7 @@ export default function MenuScreen({ navigation }) {
         </TextContainer>
       </Button>
       <Button onPress={() => navigation.navigate('Configuracao')}>
-        <AntDesign name="setting" size={24} color="black" />
+        <DesignColor name="setting" size={24}/>
         <TextContainer>
           <TextMenu>
             Configuração
@@ -41,7 +41,7 @@ export default function MenuScreen({ navigation }) {
         </TextContainer>
       </Button>
       <Button onPress={() => navigation.navigate('Servicos')}>
-        <AntDesign name="tool" size={24} color="black" />
+        <DesignColor name="tool" size={24}/>
         <TextContainer>
           <TextMenu>
             Serviços
@@ -58,6 +58,13 @@ const Container = styled.View`
   justify-Content: center;
   background-color: ${props => props.theme.background};
 `;
+
+const GoBack = styled(AntDesign)`
+  position: absolute;
+  top: 80;
+  left: 40;
+  color: ${props => props.theme.text};
+`
 
 const Title = styled.Text`
   font-Size: 24px;
@@ -92,10 +99,6 @@ const TextMenu = styled.Text`
   color: ${props => props.theme.text};
 `;
 
-const styles = StyleSheet.create({
-  goBack: {
-    position: 'absolute',
-    top: 80,
-    left: 40,
-  }
-})
+const DesignColor = styled(AntDesign)`
+  color: ${props=> props.theme.text};
+`;

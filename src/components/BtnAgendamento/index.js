@@ -22,7 +22,7 @@ const BtnAgendamento = ({ navigation }) => {
 
 const Container = styled.View`
   position: absolute;
-  bottom: 0px;
+  bottom: 20px;
   left: 0px;
   right: 0px;
   align-items: center;

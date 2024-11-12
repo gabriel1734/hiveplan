@@ -4,6 +4,7 @@ export default {
     secondary: '#f44336',
     text: '#333',
     inputBackground: '#fff',
+    starcolor:'gold',
     placeholder: '#888',
     buttonText: '#fff',
     buttonBackground: '#6D6B69',

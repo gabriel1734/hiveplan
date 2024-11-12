@@ -140,7 +140,7 @@ const Agendamento = ({ navigation, route }) => {
       <StatusBar style='auto' backgroundColor='#F7FF89' />
       <Header colors={['#F7FF89', '#F6FF77', '#E8F622']}>
         <Goback>
-          <AntDesign name="arrowleft" size={24} color="black" onPress={() => { navigation.goBack() }} />        
+          <DesignColor name="arrowleft" size={24} onPress={() => { navigation.goBack() }} />        
         </Goback>
         <CalendarContainer>
           <Calendar
@@ -383,6 +383,10 @@ const AddButton = styled(TouchableOpacity)`
   background-color: ${props => props.theme.buttonBackground};
   padding: 5px;
   border-radius: 5px;
+`;
+
+const DesignColor = styled(AntDesign)`
+  color: ${props=> props.theme.text};
 `;
 
 export default Agendamento;

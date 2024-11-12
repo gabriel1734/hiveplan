@@ -103,7 +103,7 @@ const Servicos = ({ navigation }) => {
   return (
         <Container>
           <Arrow>
-            <AntDesign name="arrowleft" size={32} color="black" onPress={() => {navigation.goBack()}}/>
+            <DesignColor name="arrowleft" size={32} onPress={() => {navigation.goBack()}}/>
           </Arrow>
           <Label>Adicionar Tipo de Serviço</Label>
           <Text
@@ -295,6 +295,10 @@ const ExcludeButton = styled.Text`
   padding: 10px;
   border-radius: 5px;
   color: ${props => props.theme.buttonText};
+`;
+
+const DesignColor = styled(AntDesign)`
+  color: ${props=> props.theme.text};
 `;
 
 export default Servicos;

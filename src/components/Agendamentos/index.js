@@ -87,7 +87,7 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
       
         <Horario>{horaAgendamento}</Horario>
         <TextCliente >
-          <AntDesign name="user" size={14} color="white" /> {nomeCliente}
+          <DesignColor name="user" size={14} /> {nomeCliente}
         </TextCliente>
 
       <Modal
@@ -100,27 +100,27 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
           <StyledModalView>
             <ModalText >Detalhes do Agendamento</ModalText>
             <InfoText>
-              <MaterialIcons name="phone" size={14} color="black" /> Telefone: {telCliente}
+              <DesignIcons name="phone" size={14}/> Telefone: {telCliente}
             </InfoText>
             <InfoText>
-              <MaterialIcons name="date-range" size={14} color="black" /> Data: {dataAgendamento}
+              <DesignIcons name="date-range" size={14}/> Data: {dataAgendamento}
             </InfoText>
             <InfoText>
-              <MaterialIcons name="work" size={14} color="black" /> Serviço: {servicos.map((servico, index) => (
+              <DesignIcons name="work" size={14}/> Serviço: {servicos.map((servico, index) => (
                 <Text key={index}>
                   {servico?.nome} {index < servicos.length - 1 ? ', ' : ''}
                 </Text>
               ))}
             </InfoText>
             <InfoText>
-              <MaterialIcons name="people" size={14} color="black" /> Colaboradores: {colaboradores.map((colaborador, index) => (
+              <DesignIcons name="people" size={14}/> Colaboradores: {colaboradores.map((colaborador, index) => (
                 <Text key={index}>
                   {colaborador?.nome} {index < colaboradores.length - 1 ? ', ' : ''}
                 </Text>
               ))}
             </InfoText>
             <InfoText>
-              <MaterialIcons name="description" size={14} color="black" /> Descrição: {descricao}
+              <DesignIcons name="description" size={14}/> Descrição: {descricao}
             </InfoText>
             <Container>
               {!atendimento ? (
@@ -164,6 +164,14 @@ const Horario = styled.Text`
 const TextCliente = styled.Text`
   color: ${props=>props.theme.buttonText};
 `;
+
+const DesignColor = styled(AntDesign)`
+  color: ${props=> props.theme.buttonText};
+`;
+
+const DesignIcons = styled(MaterialIcons)`
+  color: ${props=> props.theme.text};
+`
 
 const StyledModal = styled.View`
   flex: 1;

@@ -46,7 +46,7 @@ export default function HomeScreen({navigation}) {
         <WeekBtn navigation={navigation} />
         <CardAgendamentosCount /> 
         <CardAgendamentos navigation={navigation} />
-        <View><BtnAgendamento navigation={navigation} /></View>
+        <BtnAgendamento navigation={navigation} />
       </DataContext.Provider>
     </Container>
   );

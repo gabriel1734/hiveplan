@@ -199,7 +199,6 @@ const Container = styled.SafeAreaView`
 const Header = styled(LinearGradient)`
   padding: 35px;
   border-radius: 10px;
-  margin-bottom: 10px;
 `;
 
 const InputContainer = styled.View`
@@ -244,6 +243,10 @@ const AgendamentoText = styled.Text`
   font-size: 14px;
   color: ${props => props.theme.agendamentoText};
   margin-left: 10px;
+`;
+
+const StarDesign = styled(AntDesign)`
+  color: ${props=> props.theme.text};
 `;
 
 const ButtonContainer = styled.View`
