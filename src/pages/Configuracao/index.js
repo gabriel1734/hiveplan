@@ -4,8 +4,10 @@ import { TouchableOpacity, StyleSheet, Text, TextInput, View } from "react-nativ
 import { TextInputMask } from "react-native-masked-text";
 import RNPickerSelect from 'react-native-picker-select';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { addServicoRamo, adicionarDadosEmpresa } from "../../database";
+import { addServicoRamo, adicionarDadosEmpresa, updateDadosEmpresa, viewEmpresa } from "../../database";
 import styled from "styled-components";
+import Toast from 'react-native-root-toast';
+
 
 export default function Configuracao({ navigation }) {
   const [nome, setNome] = useState('');
