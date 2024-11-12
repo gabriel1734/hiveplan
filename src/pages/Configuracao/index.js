@@ -5,6 +5,7 @@ import { TextInputMask } from "react-native-masked-text";
 import RNPickerSelect from 'react-native-picker-select';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { addServicoRamo, adicionarDadosEmpresa } from "../../database";
+import styled from "styled-components";
 
 export default function Configuracao({ navigation }) {
   const [nome, setNome] = useState('');
@@ -48,28 +49,29 @@ export default function Configuracao({ navigation }) {
   }
   
   return (
-    <View style={{ flex: 1 }}>
+    <Page>
       <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.containerHeader}>
         <AntDesign name="arrowleft" size={24} color="black" onPress={() => navigation.goBack()} />
-        <Text style={styles.title}>Configuração</Text>
+        <Title>Configuração</Title>
       </LinearGradient>
-      <View style={styles.container}>
-        <TextInput value={nome} placeholder="Nome" style={styles.input} onChangeText={setNome} />
-        <TextInputMask
+      <Container>
+        <StyledInput value={nome} placeholder="Nome"  placeholderTextColor="#888" onChangeText={setNome} />
+        <StyledTextInputMask
           type={'cel-phone'}
           options={{ maskType: 'BRL', withDDD: true, dddMask: '(99) ' }}
-          style={styles.input}
           value={telefone}
           onChangeText={setTelefone}
+          placeholderTextColor="#888"
           placeholder="Telefone"
           keyboardType="phone-pad"
         />
-        <TextInput value={endereco} placeholder="Endereço" style={styles.input} onChangeText={setEndereco} />
-        <TextInput value={logo} placeholder="Logo" style={styles.input} onChangeText={setLogo} />
+        <StyledInput value={endereco} placeholder="Endereço"  placeholderTextColor="#888" onChangeText={setEndereco} />
+        <StyledInput value={logo} placeholder="Logo"  placeholderTextColor="#888" onChangeText={setLogo} />
         
-        <Text style={styles.label}>Selecione a Atividade:</Text>
+        <Label>Selecione a Atividade:</Label>
         <RNPickerSelect
           style={pickerSelectStyles}
+          placeholderTextColor="#888"
           onValueChange={handleAtividadeChange}
           items={[
             { label: "Restaurante", value: "restaurante" },
@@ -86,10 +88,64 @@ export default function Configuracao({ navigation }) {
             <Text style={styles.saveButtonText}>Salvar</Text>
           </LinearGradient>
         </TouchableOpacity>
-      </View>
-    </View>
+      </Container>
+    </Page>
   );
 }
+
+const Page = styled.View`
+ flex:1;
+  background-color: ${props => props.theme.background};
+`;
+
+const Container = styled.View`
+  flex: 1;
+  padding: 24px;
+`;
+
+const Title = styled.Text`
+  font-size:24px;
+  font-weight: bold;
+`;
+
+const StyledInput = styled.TextInput`
+  height: 50px;
+  border-Color: ${props => props.theme.borderColor};
+  border-Width: 1px;
+  border-Radius: 5px;
+  background-Color: ${props => props.theme.inputBackground};
+  padding: 10px;
+  margin-Bottom: 10px;
+  color: ${props => props.theme.text};
+`;
+
+const StyledTextInputMask = styled(TextInputMask)`
+  height: 50px;
+  border-Color: ${props => props.theme.borderColor};
+  border-Width: 1px;
+  border-Radius: 5px;
+  background-Color: ${props => props.theme.inputBackground};
+  padding: 10px;
+  margin-Bottom: 10px;
+  color: ${props => props.theme.text};
+`;
+
+const Label = styled.Text`
+  padding-top:10px;
+  font-Size: 18px;
+  font-Weight: bold;
+  color: ${props => props.theme.text};
+`
+
+const StyledPickerSelect = styled(RNPickerSelect)`
+  font-Size: 16px;
+  border-Width: 1px;
+  border-Color: ${props => props.theme.borderColor};
+  background-Color: ${props => props.theme.inputBackground};
+  border-Radius: 5px;
+  color: ${props => props.theme.text};
+  padding-Right: 30px;
+`
 
 const styles = StyleSheet.create({
   container: {

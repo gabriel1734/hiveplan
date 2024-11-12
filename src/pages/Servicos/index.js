@@ -181,8 +181,8 @@ const Container = styled.View`
 `;
 
 const Arrow = styled.View`
-  flex-Direction: 'row';
-  justify-Content: 'space-between';
+  flex-Direction: row;
+  justify-Content: space-between;
   width: 100%;
 `;
 

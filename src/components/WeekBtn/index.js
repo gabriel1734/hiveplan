@@ -3,6 +3,7 @@ import { Dimensions, StyleSheet, Text, View } from 'react-native';
 import DayBtn from '../DayBtn';
 import { DataContext } from '../../pages/HomeScreen';
 import { getDaysOfWeek } from '../../database';
+import styled from 'styled-components';
 
 const WeekBtn = ({navigation}) => {
   const { data } = useContext(DataContext);
@@ -14,16 +15,33 @@ const WeekBtn = ({navigation}) => {
   
   return (
     <>
-      <View style={styles.container}>
-        <Text style={styles.TextSemana}>Semana</Text>
-        
-      </View>
+      <Container>
+        <StyledText>Semana</StyledText>
+      </Container>
       <View style={{ marginTop: 10 }}>
         <DayBtn dias={dias} />
       </View>
     </>
   );
 };
+
+const Container = styled.View`
+  height: 50px;
+  padding: 10px;
+  flex-Direction: row;
+  align-Items: center;
+  justify-Content: space-between;
+  background-color: ${props => props.theme.background};
+  border-Radius: 10px;
+  margin-Top: 10px;
+  width: '100%';
+`;
+
+const StyledText = styled.Text`
+  font-size:24px;
+  color: ${props => props.theme.text};
+  font-weight: bold;
+`;
 
 const styles = StyleSheet.create({
   container: {
