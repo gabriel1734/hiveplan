@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { TouchableOpacity, StyleSheet, Text, TextInput, View } from "react-native";
 import { TextInputMask } from "react-native-masked-text";
 import RNPickerSelect from 'react-native-picker-select';
@@ -7,6 +7,10 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import { addServicoRamo, adicionarDadosEmpresa, updateDadosEmpresa, viewEmpresa } from "../../database";
 import styled from "styled-components";
 import Toast from 'react-native-root-toast';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import light from "../../theme/light";
+import dark from "../../theme/dark";
+import { DataTheme } from "../../context";
 
 
 export default function Configuracao({ navigation }) {
@@ -17,13 +21,15 @@ export default function Configuracao({ navigation }) {
   const [ramoAtividade, setRamoAtividade] = useState('');
   const [ramoChange, setRamoChange] = useState(false);
   const [idEmpresa, setIdEmpresa] = useState('');
+  const { theme, setTheme } = useContext(DataTheme);
+
 
   const handleAtividadeChange = (atividade) => {
     setRamoAtividade(atividade);
     setRamoChange(true);
   };
 
-  handleGet = () => {
+  handleGet = async () => {
     const dadosEmpresa = viewEmpresa();
     if(dadosEmpresa){
       setNome(dadosEmpresa.nomeEmpresa);
@@ -33,6 +39,8 @@ export default function Configuracao({ navigation }) {
       setRamoAtividade(dadosEmpresa.ramoEmpresa);
       setIdEmpresa(dadosEmpresa.id);
     }
+    const savedTheme = await AsyncStorage.getItem('theme');
+    setTheme(savedTheme === 'dark' ? dark : light);
   }
 
   useEffect(() => {
@@ -97,10 +105,24 @@ export default function Configuracao({ navigation }) {
 
     }
   }
+
+  const toggleTheme = async () => {
+    const newTheme = theme === light ? dark : light;
+    setTheme(newTheme);
+    await AsyncStorage.setItem('theme', newTheme === dark ? 'dark' : 'light');
+    Toast.show(`Tema alterado para ${newTheme === dark ? 'Escuro' : 'Claro'}`, {
+      duration: Toast.durations.SHORT,
+      position: Toast.positions.BOTTOM,
+      backgroundColor: '#00FF00',
+    });
+  };
+
+  const backgroundColor = theme === light ? ['#F7FF89', '#F6FF77', '#E8F622'] : ['#bb86fc', '#bb86fc', '#bb86fc'];
+
   
   return (
     <Page>
-      <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.containerHeader}>
+      <LinearGradient colors={backgroundColor} style={styles.containerHeader}>
         <AntDesign name="arrowleft" size={24} color="black" onPress={() => navigation.goBack()} />
         <Title>Configuração</Title>
       </LinearGradient>
@@ -120,8 +142,34 @@ export default function Configuracao({ navigation }) {
         
         <Label>Selecione a Atividade:</Label>
         <RNPickerSelect
-          style={pickerSelectStyles}
-          placeholderTextColor="#888"
+          style={{
+            inputIOS: {
+              color: theme.text, // Cor do texto
+              backgroundColor: theme.inputBackground, // Fundo
+              paddingVertical: 12,
+              paddingHorizontal: 10,
+              borderWidth: 1,
+              borderColor: theme.borderColor,
+              borderRadius: 5,
+              marginTop: 10,
+              marginBottom: 10,
+            },
+            inputAndroid: {
+              color: theme.text, // Cor do texto
+              backgroundColor: theme.inputBackground, // Fundo
+              paddingVertical: 8,
+              paddingHorizontal: 10,
+              borderWidth: 1,
+              borderColor: theme.borderColor,
+              borderRadius: 5,
+              marginTop: 10,
+              marginBottom: 10,
+            },
+            placeholder: {
+              color: theme.placeholder || '#888', // Cor do placeholder, com fallback
+            },
+          }}
+          placeholderTextColor={theme.text}
           onValueChange={handleAtividadeChange}
           items={[
             { label: "Restaurante", value: "restaurante" },
@@ -133,9 +181,13 @@ export default function Configuracao({ navigation }) {
           value={ramoAtividade}
           placeholder={{ label: "Escolha uma atividade...", value: "" }}
         />
-        
+         <TouchableOpacity onPress={toggleTheme}>
+          <ThemeSelect>
+             <ThemeBtn>Alternar Tema</ThemeBtn>
+           </ThemeSelect>
+          </TouchableOpacity>
         <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.saveButtonGradient}>
+          <LinearGradient colors={backgroundColor} style={styles.saveButtonGradient}>
             <Text style={styles.saveButtonText}>Salvar</Text>
           </LinearGradient>
         </TouchableOpacity>
@@ -188,15 +240,20 @@ const Label = styled.Text`
   font-Weight: bold;
   color: ${props => props.theme.text};
 `
-
-const StyledPickerSelect = styled(RNPickerSelect)`
-  font-Size: 16px;
-  border-Width: 1px;
-  border-Color: ${props => props.theme.borderColor};
-  background-Color: ${props => props.theme.inputBackground};
-  border-Radius: 5px;
-  color: ${props => props.theme.text};
-  padding-Right: 30px;
+const ThemeSelect = styled.View`
+  border-color: ${props => props.theme.borderColor};
+  border-width: 1px;
+  background-color: ${props => props.theme.inputBackground};
+  border-radius: 5px;
+  width: '100%';
+`
+const ThemeBtn = styled.Text`
+  padding: 10px;
+  border-radius: 10px;
+  background-color: ${props => props.theme.buttonBackground};
+  text-align: center;
+  width: '100%';
+  color: ${props => props.theme.buttonText};
 `
 
 const styles = StyleSheet.create({

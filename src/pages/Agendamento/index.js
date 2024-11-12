@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -11,6 +11,8 @@ import AntDesign from '@expo/vector-icons/AntDesign';
 import Toast from 'react-native-root-toast';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
 import styled from 'styled-components/native';
+import { DataTheme } from '../../context';
+import light from '../../theme/light';
 
 const Agendamento = ({ navigation, route }) => {
   const hoje = new Date().toISOString().split('T')[0];
@@ -28,6 +30,8 @@ const Agendamento = ({ navigation, route }) => {
   const [colaboradores, setColaboradores] = useState([]);
   const [selectedColaboradores, setSelectedColaboradores] = useState({});
   const [isTimePickerVisible, setTimePickerVisible] = useState(false);
+  const { theme } = useContext(DataTheme);
+  const backgroundColor = theme === light ? ['#F7FF89', '#F6FF77', '#E8F622'] : ['#bb86fc', '#bb86fc', '#bb86fc'];
 
   useEffect(() => {
     const { id, refreshColab } = route.params || {};
@@ -137,8 +141,8 @@ const Agendamento = ({ navigation, route }) => {
 
   return (
     <Container  nestedScrollEnabled={true}>
-      <StatusBar style='auto' backgroundColor='#F7FF89' />
-      <Header colors={['#F7FF89', '#F6FF77', '#E8F622']}>
+      <StatusBar style='auto' backgroundColor={theme === light ? '#F7FF89': '#bb86fc'} />
+      <Header colors={backgroundColor}>
         <Goback>
           <DesignColor name="arrowleft" size={24} onPress={() => { navigation.goBack() }} />        
         </Goback>
@@ -153,8 +157,8 @@ const Agendamento = ({ navigation, route }) => {
               backgroundColor: 'transparent',
               calendarBackground: 'transparent',
               textSectionTitleColor: '#000',
-              selectedDayBackgroundColor: '#000',
-              selectedDayTextColor: '#ffffff',
+              selectedDayBackgroundColor: `${theme.text}`,
+              selectedDayTextColor: `${theme.background}`,
               todayTextColor: '#000',
               dayTextColor: '#000',
               arrowColor: 'black',

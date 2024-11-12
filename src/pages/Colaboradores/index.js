@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { SafeAreaView, View, TextInput, Text, TouchableOpacity, ScrollView, Alert, RefreshControl } from "react-native";
 import styled from 'styled-components/native';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -6,6 +6,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { Checkbox } from 'react-native-paper';
 import { viewServicoAll, viewColaboradorAll, updateColaborador, addColaborador, viewColaborador, addServicoColaborador, viewServicoColaborador, delColaborador } from "../../database";
 import Toast from "react-native-root-toast";
+import { DataTheme } from "../../context";
+import light from "../../theme/light";
 
 export default function Colaboradores({ navigation }) {
   const [tiposAgendamentos, setTiposAgendamentos] = useState([]);
@@ -16,6 +18,9 @@ export default function Colaboradores({ navigation }) {
   const [id, setId] = useState('');
   const [refresh, setRefresh] = useState(false);
   const [refreshList, setRefreshList] = useState(false);
+  const { theme } = useContext(DataTheme);
+
+  const backgroundColor = theme === light ? ['#F7FF89', '#F6FF77', '#E8F622'] : ['#bb86fc', '#bb86fc', '#bb86fc'];
 
   const loadAgendamentos = () => {
     setTiposAgendamentos(viewServicoAll());
@@ -132,7 +137,7 @@ export default function Colaboradores({ navigation }) {
 
   return (
     <>
-      <Header colors={['#F7FF89', '#F6FF77', '#E8F622']}>
+      <Header colors={backgroundColor}>
         <AntDesign name="arrowleft" size={24} color="black" onPress={() => { navigation.goBack() }} />
       </Header>
       <Container refreshControl={<RefreshControl refreshing={refreshList} onRefresh={onRefresh} />}>
@@ -198,7 +203,6 @@ const Container = styled.SafeAreaView`
 
 const Header = styled(LinearGradient)`
   padding: 35px;
-  border-radius: 10px;
 `;
 
 const InputContainer = styled.View`

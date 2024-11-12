@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './src/pages/HomeScreen';
@@ -16,6 +16,8 @@ import light from './src/theme/light';
 import { useColorScheme } from 'react-native';
 import themes
  from './src/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { DataTheme } from './src/context';
 
 export const AgendamentoScreenContext = createContext();
 
@@ -25,28 +27,45 @@ export default function App() {
  //dropTables();
   create();
 
-  const deviceTheme = useColorScheme();
-  const theme = themes[deviceTheme] || theme.dark
-  console.log(themes);
+  const [theme, setTheme] = useState(themes.dark);
+
+  const handleTheme = async () => {
+    const themeStorage = await AsyncStorage.getItem('theme');
+    if (!themeStorage) {
+      const device = useColorScheme();
+      await AsyncStorage.setItem('theme', device);
+      setTheme(themes[device] || themes.dark);
+    } else {
+      setTheme(themes[themeStorage] || themes.dark);
+    }
+  }
+
+  useEffect(() => {
+    handleTheme();
+  }, []);
+
+  console.log(theme);
 
   return (
     <RootSiblingParent>
-      <ThemeProvider theme={theme}>
-    <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home"
-        screenOptions={{
-          headerShown: false,
-        }}
-      >
-        <Stack.Screen name="Menu" component={MenuScreen} />
-        <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Agendamento" component={Agendamento} />
-        <Stack.Screen name="Colaboradores" component={Colaboradores} />
-        <Stack.Screen name="Configuracao" component={Configuracao} />
-        <Stack.Screen name="Servicos" component={Servicos} />
-      </Stack.Navigator>
-    </NavigationContainer>
-    </ThemeProvider>
+      <DataTheme.Provider value={{ theme, setTheme }}>
+        <ThemeProvider theme={theme}>
+          <NavigationContainer>
+            <Stack.Navigator initialRouteName="Home"
+              screenOptions={{
+                headerShown: false,
+              }}
+            >
+              <Stack.Screen name="Menu" component={MenuScreen} />
+              <Stack.Screen name="Home" component={HomeScreen} />
+              <Stack.Screen name="Agendamento" component={Agendamento} />
+              <Stack.Screen name="Colaboradores" component={Colaboradores} />
+              <Stack.Screen name="Configuracao" component={Configuracao} />
+              <Stack.Screen name="Servicos" component={Servicos} />
+            </Stack.Navigator>
+          </NavigationContainer>
+        </ThemeProvider>
+        </DataTheme.Provider>
     </RootSiblingParent>
   );
 }
