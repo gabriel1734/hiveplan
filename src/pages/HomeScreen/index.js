@@ -53,5 +53,6 @@ export default function HomeScreen({navigation}) {
 }
 
 const Container = styled.SafeAreaView`
+flex:1;
 background-color:${props=>props.theme.background};
 `
