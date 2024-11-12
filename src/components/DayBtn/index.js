@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { RefreshControl, ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { DataContext } from '../../pages/HomeScreen';
+import { DataContext } from "../../context";
 
 export default function DayBtn({ dias }) {
   const { data, setData } = useContext(DataContext);

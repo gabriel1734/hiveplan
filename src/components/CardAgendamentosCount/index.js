@@ -1,7 +1,7 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, Text, View } from "react-native";
 import { useContext, useState, useEffect, startTransition } from "react";
-import { DataContext } from "../../pages/HomeScreen";
+import { DataContext } from "../../context";
 import { countAgendamentosPorDia, countAgendamentosPorSemana } from "../../database";
 
 export default function CardAgendamentosCount() {

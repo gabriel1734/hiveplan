@@ -1,5 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TouchableOpacity, StyleSheet, Text, TextInput, View } from "react-native";
 import { TextInputMask } from "react-native-masked-text";
 import RNPickerSelect from 'react-native-picker-select';
@@ -13,39 +13,87 @@ export default function Configuracao({ navigation }) {
   const [endereco, setEndereco] = useState('');
   const [logo, setLogo] = useState('');
   const [ramoAtividade, setRamoAtividade] = useState('');
+  const [ramoChange, setRamoChange] = useState(false);
+  const [idEmpresa, setIdEmpresa] = useState('');
 
   const handleAtividadeChange = (atividade) => {
     setRamoAtividade(atividade);
+    setRamoChange(true);
   };
 
-  const handleSave = () => {
-    
-   const dadosEmpresa = adicionarDadosEmpresa(nome,telefone,endereco,logo,ramoAtividade);
-   console.log(dadosEmpresa);
-
+  handleGet = () => {
+    const dadosEmpresa = viewEmpresa();
     if(dadosEmpresa){
-      try{
-        const servicos =  addServicoRamo(ramoAtividade);
-        if(servicos) navigation.navigate("Home");
-        else {
-          console.log("erro serviço", servicos);
-          return false;
+      setNome(dadosEmpresa.nomeEmpresa);
+      setTelefone(dadosEmpresa.telefoneEmpresa);
+      setEndereco(dadosEmpresa.enderecoEmpresa);
+      setLogo(dadosEmpresa.logo);
+      setRamoAtividade(dadosEmpresa.ramoEmpresa);
+      setIdEmpresa(dadosEmpresa.id);
+    }
+  }
+
+  useEffect(() => {
+    handleGet();
+  },[])
+
+  const handleSave = () => {
+    if (nome == '' || nome == null) {
+      Toast.show('Preencha o campo Nome', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#FF0000',
+      });
+      return;
+    }
+    if (telefone == '' || telefone == null) {
+      Toast.show('Preencha o campo Telefone', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#FF0000',
+      });
+      return;
+    }
+    
+    if (idEmpresa) {
+      if (updateDadosEmpresa(idEmpresa, nome, telefone, endereco, logo, ramoAtividade)) {
+        if (ramoChange) {
+          addServicoRamo(ramoAtividade);
         }
+        Toast.show('Atualizado!', {
+          duration: Toast.durations.SHORT,
+          position: Toast.positions.BOTTOM,
+          backgroundColor: '#00FF00',
+        });
       }
-      catch(e){
-        console.log("erro ao adicionar serviços", e);
+        
+      else {
+        Toast.show('Erro!', {
+          duration: Toast.durations.SHORT,
+          position: Toast.positions.BOTTOM,
+          backgroundColor: '#FF0000',
+        });
       }
+    } else {
+      if (adicionarDadosEmpresa(nome, telefone, endereco, logo, ramoAtividade)) {
+        if (ramoAtividade) {
+          addServicoRamo(ramoAtividade);
+        }
+        Toast.show('Adicionado!', {
+          duration: Toast.durations.SHORT,
+          position: Toast.positions.BOTTOM,
+          backgroundColor: '#00FF00',
+        });
+        
+      } else {
+        Toast.show('Erro!', {
+          duration: Toast.durations.SHORT,
+          position: Toast.positions.BOTTOM,
+          backgroundColor: '#FF0000',
+        });
+      }
+
     }
-    else{
-      console.log("erro ao inseir dados de empresa e serviços!");
-    }
-    console.log({
-      nome,
-      telefone,
-      endereco,
-      logo,
-      ramoAtividade,
-    });
   }
   
   return (
@@ -80,6 +128,7 @@ export default function Configuracao({ navigation }) {
             { label: "Academia", value: "academia" },
             { label: "Pet Shop", value: "petShop" },
           ]}
+          value={ramoAtividade}
           placeholder={{ label: "Escolha uma atividade...", value: "" }}
         />
         
@@ -89,6 +138,7 @@ export default function Configuracao({ navigation }) {
           </LinearGradient>
         </TouchableOpacity>
       </Container>
+      <Toast />
     </Page>
   );
 }
