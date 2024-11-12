@@ -787,6 +787,16 @@ export function viewEmpresa() {
   }
 }
 
+export function checkEmpresa() {
+  const db = SQLite.openDatabaseSync("database.db");
+  try {
+    const result = db.getFirstSync("SELECT COUNT(*) FROM dboEmpresa");
+    return result["COUNT(*)"] > 0;
+  } catch (error) {
+    console.log("Erro", error);
+  }
+}
+
 // daqui pra baixo nada é meu //
 export function verSemanasComAgendamentos() {
   const db = SQLite.openDatabaseSync("database.db");
