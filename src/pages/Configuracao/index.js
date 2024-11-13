@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useState, useEffect, useContext } from "react";
-import { TouchableOpacity, StyleSheet, Text, TextInput, View } from "react-native";
+import { TouchableOpacity, StyleSheet, Text, TextInput, View, SafeAreaView } from "react-native";
 import { TextInputMask } from "react-native-masked-text";
 import RNPickerSelect from 'react-native-picker-select';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -168,7 +168,24 @@ export default function Configuracao({ navigation }) {
       console.log('Erro ao carregar o logo: ', error);
     }
   };
-
+  const handleDelete = async () => {
+    try {
+      await AsyncStorage.removeItem('logo');
+      setLogo('');
+      Toast.show('Logo removido!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#00FF00',
+      });
+    } catch (error) {
+      console.log('Erro ao remover o logo: ', error);
+      Toast.show('Erro ao remover o logo!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#FF0000',
+      });
+    }
+  }
   // Carrega o logo quando o componente monta
   useEffect(() => {
     loadLogo();
@@ -195,80 +212,86 @@ export default function Configuracao({ navigation }) {
         <Title>Configuração</Title>
       </LinearGradient>
       <Container>
-        <StyledInput value={nome} placeholder="Nome"  placeholderTextColor="#888" onChangeText={setNome} />
-        <StyledTextInputMask
-          type={'cel-phone'}
-          options={{ maskType: 'BRL', withDDD: true, dddMask: '(99) ' }}
-          value={telefone}
-          onChangeText={setTelefone}
-          placeholderTextColor="#888"
-          placeholder="Telefone"
-          keyboardType="phone-pad"
-        />
-        <StyledInput value={endereco} placeholder="Endereço"  placeholderTextColor="#888" onChangeText={setEndereco} />
-        <View style={{ alignItems: 'center', justifyContent: 'center', padding:20, height: 300}}>
-          <Image
-            source={logo ? { uri: logo }: theme === light ? require('../../../assets/img/HIVEPLAN.png') :  require('../../../assets/img/HIVEPLAN-WHITE.png') }
-            style={{ width: 200, height: 200, borderRadius: 10}}
+        <Content>
+          <StyledInput value={nome} placeholder="Nome"  placeholderTextColor="#888" onChangeText={setNome} />
+          <StyledTextInputMask
+            type={'cel-phone'}
+            options={{ maskType: 'BRL', withDDD: true, dddMask: '(99) ' }}
+            value={telefone}
+            onChangeText={setTelefone}
+            placeholderTextColor="#888"
+            placeholder="Telefone"
+            keyboardType="phone-pad"
           />
-          <TouchableOpacity style={{marginTop:10}} onPress={pickImage}>
+          <StyledInput value={endereco} placeholder="Endereço"  placeholderTextColor="#888" onChangeText={setEndereco} />
+          <View style={{ alignItems: 'center', justifyContent: 'center', padding:20, height: 300}}>
+            <Image
+              source={logo ? { uri: logo }: theme === light ? require('../../../assets/img/HIVEPLAN.png') :  require('../../../assets/img/HIVEPLAN-WHITE.png') }
+              style={{ width: 200, height: 200, borderRadius: 10}}
+            />
+            <View style={{ marginTop: 10, flexDirection: 'row', alignItems:'center', justifyContent: 'center', width: '100%', gap:10}}>
+              <TouchableOpacity style={{marginTop:10}} onPress={pickImage}>
+                <ThemeSelect>
+                  <ThemeBtn>Alternar Logo</ThemeBtn>
+                </ThemeSelect>
+              </TouchableOpacity>
+              <ExcludeButton onPress={() => handleDelete()}><AntDesign name="delete" size={24} color="black" /></ExcludeButton>
+            </View>
+            
+        </View>
+          
+          <Label style={{marginTop: 30}}>Selecione a Atividade:</Label>
+          <RNPickerSelect
+            style={{
+              inputIOS: {
+                color: theme.text, // Cor do texto
+                backgroundColor: theme.inputBackground, // Fundo
+                paddingVertical: 12,
+                paddingHorizontal: 10,
+                borderWidth: 1,
+                borderColor: theme.borderColor,
+                borderRadius: 5,
+                marginTop: 10,
+                marginBottom: 10,
+              },
+              inputAndroid: {
+                color: theme.text, // Cor do texto
+                backgroundColor: theme.inputBackground, // Fundo
+                paddingVertical: 8,
+                paddingHorizontal: 10,
+                borderWidth: 1,
+                borderColor: theme.borderColor,
+                borderRadius: 5,
+                marginTop: 10,
+                marginBottom: 10,
+              },
+              placeholder: {
+                color: theme.placeholder || '#888', // Cor do placeholder, com fallback
+              },
+            }}
+            placeholderTextColor={theme.text}
+            onValueChange={handleAtividadeChange}
+            items={[
+              { label: "Restaurante", value: "restaurante" },
+              { label: "Salão de Beleza", value: "salaoDeBeleza" },
+              { label: "Oficina Mecânica", value: "oficinaMecanica" },
+              { label: "Academia", value: "academia" },
+              { label: "Pet Shop", value: "petShop" },
+            ]}
+            value={ramoAtividade}
+            placeholder={{ label: "Escolha uma atividade...", value: "" }}
+          />
+          <TouchableOpacity onPress={toggleTheme}>
             <ThemeSelect>
-              <ThemeBtn>Alternar Logo</ThemeBtn>
+              <ThemeBtn>Alternar Tema</ThemeBtn>
             </ThemeSelect>
-            </TouchableOpacity>
-      </View>
-        
-        <Label style={{marginTop: 30}}>Selecione a Atividade:</Label>
-        <RNPickerSelect
-          style={{
-            inputIOS: {
-              color: theme.text, // Cor do texto
-              backgroundColor: theme.inputBackground, // Fundo
-              paddingVertical: 12,
-              paddingHorizontal: 10,
-              borderWidth: 1,
-              borderColor: theme.borderColor,
-              borderRadius: 5,
-              marginTop: 10,
-              marginBottom: 10,
-            },
-            inputAndroid: {
-              color: theme.text, // Cor do texto
-              backgroundColor: theme.inputBackground, // Fundo
-              paddingVertical: 8,
-              paddingHorizontal: 10,
-              borderWidth: 1,
-              borderColor: theme.borderColor,
-              borderRadius: 5,
-              marginTop: 10,
-              marginBottom: 10,
-            },
-            placeholder: {
-              color: theme.placeholder || '#888', // Cor do placeholder, com fallback
-            },
-          }}
-          placeholderTextColor={theme.text}
-          onValueChange={handleAtividadeChange}
-          items={[
-            { label: "Restaurante", value: "restaurante" },
-            { label: "Salão de Beleza", value: "salaoDeBeleza" },
-            { label: "Oficina Mecânica", value: "oficinaMecanica" },
-            { label: "Academia", value: "academia" },
-            { label: "Pet Shop", value: "petShop" },
-          ]}
-          value={ramoAtividade}
-          placeholder={{ label: "Escolha uma atividade...", value: "" }}
-        />
-         <TouchableOpacity onPress={toggleTheme}>
-          <ThemeSelect>
-             <ThemeBtn>Alternar Tema</ThemeBtn>
-           </ThemeSelect>
           </TouchableOpacity>
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-          <LinearGradient colors={backgroundColor} style={styles.saveButtonGradient}>
-            <Text style={styles.saveButtonText}>Salvar</Text>
-          </LinearGradient>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <LinearGradient colors={backgroundColor} style={styles.saveButtonGradient}>
+              <Text style={styles.saveButtonText}>Salvar</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </Content>
       </Container>
       <Toast />
     </Page>
@@ -284,6 +307,17 @@ const Container = styled.ScrollView`
   flex: 1; /* Para ocupar todo o espaço disponível */
   padding: 24px;
   padding-bottom: 50px;
+`;
+
+const ExcludeButton = styled.Text`
+  background-color: ${props => props.theme.secondary};
+  padding: 10px;
+  border-radius: 5px;
+  color: ${props => props.theme.buttonText};
+`;
+
+const Content = styled.SafeAreaView`
+  margin-bottom: 50px;
 `;
 
 const Title = styled.Text`
