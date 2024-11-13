@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Dimensions, StyleSheet, Text, View } from 'react-native';
-import BtnAgendamento from '../BtnAgendamento';
 import DayBtn from '../DayBtn';
-import { DataContext } from '../../pages/HomeScreen';
+import { DataContext } from '../../context';
 import { getDaysOfWeek } from '../../database';
+import styled from 'styled-components';
 
 const WeekBtn = ({navigation}) => {
   const { data } = useContext(DataContext);
@@ -15,17 +15,38 @@ const WeekBtn = ({navigation}) => {
   
   return (
     <>
-      <View style={styles.container}>
-        <Text style={styles.TextSemana}>Semana</Text>
-        <BtnAgendamento navigation={navigation} />
-      </View>
-      <View style={{ marginTop: 10 }}>
+      <Container>
+        <StyledText>Semana</StyledText>
+      </Container>
+      <DayView>
         <DayBtn dias={dias} />
-      </View>
+      </DayView>
     </>
   );
 };
 
+const Container = styled.View`
+  height: 50px;
+  padding: 10px;
+  flex-Direction: row;
+  align-Items: center;
+  justify-Content: space-between;
+  background-color: ${props => props.theme.background};
+  border-Radius: 10px;
+  margin-Top: 10px;
+  width: '100%';
+`;
+
+const StyledText = styled.Text`
+  font-size:24px;
+  color: ${props => props.theme.text};
+  font-weight: bold;
+`;
+
+const DayView = styled.View`
+  background-color: ${props => props.theme.background};
+  margin-top:10px;
+`;
 const styles = StyleSheet.create({
   container: {
     height: 50,

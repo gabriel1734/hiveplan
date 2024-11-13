@@ -1,34 +1,37 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from 'react-native';
 import { Calendar } from 'react-native-calendars';
 import { LinearGradient } from 'expo-linear-gradient';
 import { StatusBar } from 'expo-status-bar';
-import { Checkbox } from 'react-native-paper'; // Importação do Checkbox
+import { Checkbox } from 'react-native-paper';
 import { TextInputMask } from 'react-native-masked-text';
 import { addAgendamento, viewServicoAll, viewAgendamentoID, viewColaboradorAll, editarAgendamento, updateAgendamento, viewServicoAgendamento, viewColaboradorAgendamento } from '../../database';
 import BtnAddServ from '../../components/BtnAddServ';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import Toast from 'react-native-root-toast';
 import RNDateTimePicker from '@react-native-community/datetimepicker';
-
+import styled from 'styled-components/native';
+import { DataTheme } from '../../context';
+import light from '../../theme/light';
 
 const Agendamento = ({ navigation, route }) => {
-  const date = new Date().toLocaleTimeString().split(':');
-  const localeDate = `${date[0]}:${date[1]}`;
-
-  const [selectedDate, setSelectedDate] = useState(null);
+  const hoje = new Date().toISOString().split('T')[0];
+  const date = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const [selectedDate, setSelectedDate] = useState(hoje);
   const [clientName, setClientName] = useState('');
-  const [time, setTime] = useState(localeDate);
+  const [time, setTime] = useState(date);
   const [observation, setObservation] = useState('');
   const [telefone, setTelefone] = useState('');
   const [tiposServico, setTiposServico] = useState([]);
-  const [selectedServices, setSelectedServices] = useState({}); // Para rastrear os serviços selecionados
+  const [selectedServices, setSelectedServices] = useState({});
   const [refresh, setRefresh] = useState(false);
   const [idAgendamento, setIdAgendamento] = useState(null);
   const [erroTelefone, setErroTelefone] = useState(false);
   const [colaboradores, setColaboradores] = useState([]);
   const [selectedColaboradores, setSelectedColaboradores] = useState({});
-  const [isTimePickerVisible, setTimePickerVisible] = useState(false);	
+  const [isTimePickerVisible, setTimePickerVisible] = useState(false);
+  const { theme } = useContext(DataTheme);
+  const backgroundColor = theme === light ? ['#F7FF89', '#F6FF77', '#E8F622'] : ['#bb86fc', '#bb86fc', '#bb86fc'];
 
   useEffect(() => {
     const { id, refreshColab } = route.params || {};
@@ -38,6 +41,7 @@ const Agendamento = ({ navigation, route }) => {
     if (id) {
       const result = viewAgendamentoID(id);
       setSelectedDate(result.dataAgendamento);
+      setTime(result.horaAgendamento)
       setClientName(result.nomeCliente);
       setTelefone(result.telCliente);
       setObservation(result.descricao);
@@ -66,23 +70,15 @@ const Agendamento = ({ navigation, route }) => {
     if (resultTiposServico.length > 0) {
       setTiposServico(resultTiposServico.sort((a) => a.favorito ? -1 : 1));
     } else {
-      setTiposServico([
-        {
-          id: null,
-          nome: "Sem serviço cadastrado"
-        }
-      ]);
+      setTiposServico([{ id: null, nome: "Sem serviço cadastrado" }]);
     }
 
     const resultColaboradores = viewColaboradorAll();
     if (resultColaboradores.length > 0) {
       setColaboradores(resultColaboradores);
     } else {
-      setColaboradores([{
-        id: 1, nome: 'Sem colaborador cadastrado',
-      }]);
+      setColaboradores([{ id: 1, nome: 'Sem colaborador cadastrado' }]);
     }
-
   }, [refresh]);
 
   const handleCheckboxChange = (id) => {
@@ -97,13 +93,13 @@ const Agendamento = ({ navigation, route }) => {
       ...prevState,
       [id]: !prevState[id],
     }));
-  }
+  };
+
   const handleStartTimePickerChange = (event, selectedDate) => {
     setTimePickerVisible(false);
     if (event.type === 'set' && selectedDate) { 
-      const formattedTime = selectedDate.toISOString().split('T')[1].substring(0, 5);
-      
-        setTime(formattedTime);
+      const formattedTime = selectedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setTime(formattedTime);
     }
   };
 
@@ -119,324 +115,286 @@ const Agendamento = ({ navigation, route }) => {
     const selectedColaboradoresArray = Object.keys(selectedColaboradores).filter((key) => selectedColaboradores[key]);
 
     if (idAgendamento) {
-      if(updateAgendamento(idAgendamento,selectedDate,time,clientName,telefone,observation,selectedServicesArray,selectedColaboradoresArray))
-      Toast.show("Atualizado com sucesso!");
+      if(updateAgendamento(idAgendamento, selectedDate, time, clientName, telefone, observation, selectedServicesArray, selectedColaboradoresArray))
+        Toast.show("Atualizado com sucesso!");
       navigation.navigate('Home');
     } else {
-      
-
       if (addAgendamento(selectedDate, time, clientName, telefone, observation, selectedServicesArray, selectedColaboradoresArray)) {
-        Toast.show("Agendamento realizado com sucesso!",{position:Toast.positions.TOP,backgroundColor:"green",duration: Toast.durations.LONG});
+        Toast.show("Agendamento realizado com sucesso!",{ position: Toast.positions.TOP, backgroundColor: "green", duration: Toast.durations.LONG });
         navigation.navigate('Home');
       } else {
-       Toast.show("Erro ao realizar agendamento!",{position:Toast.positions.TOP,backgroundColor:"red", duration:Toast.durations.LONG})
+        Toast.show("Erro ao realizar agendamento!",{ position: Toast.positions.TOP, backgroundColor: "red", duration: Toast.durations.LONG });
       }
     }
-
-    
   };
 
   const handleClear = () => {
-    setSelectedDate(null);
+    setSelectedDate(hoje);
     setClientName('');
     setTelefone('');
     setObservation('');
     setSelectedServices({});
-    setTime(localeDate);
+    setTime(date);
     setSelectedColaboradores({});
     route.params = {};
-  }
+  };
 
   return (
-    <ScrollView
-      style={styles.container}
-      nestedScrollEnabled={true}
-    >
-      <StatusBar style='auto' backgroundColor='#F7FF89' />
-      <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.header}>
-        <AntDesign name="arrowleft" size={24} color="black" onPress={() =>{navigation.navigate('Home')}} />
-        <View style={{ justifyContent: 'center', alignItems: 'center' }}>
+    <Container  nestedScrollEnabled={true}>
+      <StatusBar style='auto' backgroundColor={theme === light ? '#F7FF89': '#bb86fc'} />
+      <Header colors={backgroundColor}>
+        <Goback>
+          <DesignColor name="arrowleft" size={24} onPress={() => { navigation.goBack() }} />        
+        </Goback>
+        <CalendarContainer>
           <Calendar
             current={new Date().toISOString().split('T')[0]}
             onDayPress={(day) => setSelectedDate(day.dateString)}
             markedDates={{
-              [selectedDate]: {
-                selected: true,
-                selectedColor: '#000',
-                selectedTextColor: '#fff',
-              },
+              [selectedDate]: { selected: true, selectedColor: '#000', selectedTextColor: '#fff' },
             }}
             theme={{
               backgroundColor: 'transparent',
               calendarBackground: 'transparent',
               textSectionTitleColor: '#000',
-              selectedDayBackgroundColor: '#000',
-              selectedDayTextColor: '#ffffff',
+              selectedDayBackgroundColor: `${theme.text}`,
+              selectedDayTextColor: `${theme.background}`,
               todayTextColor: '#000',
               dayTextColor: '#000',
               arrowColor: 'black',
               monthTextColor: '#000',
             }}
           />
-        </View>
-      </LinearGradient>
-      <View style={{ padding: 20 }}>
-        {/* Tipo de Serviço */}
-        <View style={styles.tiposServicoContainer}>
-          <View>
-            <Text style={styles.label}>Serviços Disponíveis</Text>
-          </View>
-          <View>
-            <BtnAddServ refresh={refresh} setRefresh={setRefresh} />
-          </View>
-        </View>
+        </CalendarContainer>
+      </Header>
+      <Content>
+        <ServiceHeader>
+          <Label>Serviços Disponíveis</Label>
+          <AddButton onPress={() => navigation.navigate('Servicos')}>
+            <ButtonText>
+              <AntDesign name="plussquare" size={24} color="white" />
+            </ButtonText>
+          </AddButton>
+        </ServiceHeader>
 
-        <View style={styles.serviceScrollArea}>
-          <ScrollView
-            style={{
-              width: '100%',
-              height: 150,
-          }}
-            showsVerticalScrollIndicator={true}
-            nestedScrollEnabled={true}
-        >
+        <ServiceScroll   showsVerticalScrollIndicator={true}
+            nestedScrollEnabled={true}>
           {tiposServico.map((service) => (
-            <View key={service.id} style={styles.serviceItem}>
+            <ServiceItem key={service.id}>
               <Checkbox
                 status={!!selectedServices[service.id] ? 'checked' : 'unchecked'}
                 onPress={() => handleCheckboxChange(service.id)}
               />
-              <Text style={styles.serviceText}>{service.nome}</Text>
-              <Text>
-                {service.favorito == 1 ? (
-                  <AntDesign name="star" size={24} color="yellow" />
-                ):
-                ''}
-              </Text>
-            </View>
+              <ServiceText>{service.nome}</ServiceText>
+              {service.favorito == 1 && <StyledStar name="star" size={24} />}
+            </ServiceItem>
           ))}
-        </ScrollView>
-        </View>
-       
-        <View style={styles.tiposServicoContainer}>
-          <View>
-            <Text style={styles.label}>Colaboradores Disponíveis</Text>
-          </View>
-          <View>
-            <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Colaboradores')}>
-              <Text style={styles.buttonText}>
-                <AntDesign style={styles.text} name="plussquare" size={24} color="white" />
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+        </ServiceScroll>
 
-        <View style={styles.serviceScrollArea}>
-          <ScrollView
-            style={{
-              width: '100%',
-              height: 150,
-          }}
-            showsVerticalScrollIndicator={true}
-            nestedScrollEnabled={true}
-        >
+        <ServiceHeader>
+          <Label>Colaboradores Disponíveis</Label>
+          <AddButton onPress={() => navigation.navigate('Colaboradores')}>
+            <AntDesign name="plussquare" size={24} color="white" />
+          </AddButton>
+        </ServiceHeader>
+
+        <ServiceScroll showsVerticalScrollIndicator={true}
+            nestedScrollEnabled={true}>
           {colaboradores.map((colaborador) => (
-            <View key={colaborador.id} style={styles.serviceItem}>
+            <ServiceItem key={colaborador.id}>
               <Checkbox
                 status={!!selectedColaboradores[colaborador.id] ? 'checked' : 'unchecked'}
                 onPress={() => handleCheckboxChangeColaborador(colaborador.id)}
               />
-              <Text style={styles.serviceText}>{colaborador.nome}</Text>
-            </View>
+              <ServiceText>{colaborador.nome}</ServiceText>
+            </ServiceItem>
           ))}
-        </ScrollView>
-        </View>
+        </ServiceScroll>
 
-        <Text style={styles.label}>Nome do Cliente</Text>
-        <TextInput
-          style={styles.timeInput}
-          value={clientName}
-          onChangeText={(text) => setClientName(text)}
-          placeholder="Nome do Cliente"
-        />
+        <Label>Nome do Cliente</Label>
+        <Input placeholderTextColor="#888" value={clientName} onChangeText={(text) => setClientName(text)} placeholder="Nome do Cliente" />
 
-        <Text style={styles.label}>Telefone</Text>
-        <TextInputMask
+        <Label>Telefone</Label>
+        <StyledTextInputMask
           type={'cel-phone'}
           options={{ maskType: 'BRL', withDDD: true, dddMask: '(99) ' }}
-          style={erroTelefone ? [styles.timeInput, styles.inputError] : styles.timeInput}
           value={telefone}
           onChangeText={(text) => setTelefone(text)}
-          placeholder="Telefone"
-          keyboardType="numeric"
-        />
-
-        <View>
-          <Text style={styles.label}>Horário</Text>
-          <TouchableOpacity
-            style={styles.timeButton}
-            onPress={() => setTimePickerVisible(true)}
-          >
-            <Text style={styles.timeButtonText}>{time}</Text>
-          </TouchableOpacity>
-
-          {isTimePickerVisible && (
-            <RNDateTimePicker
-              onChange={handleStartTimePickerChange}
-              mode="time"
-              is24Hour={true}
-              display="default"
-              value={new Date()}
-              timeZoneOffsetInMinutes={0}
-            />
-          )}
-        </View>
-
-        <Text style={styles.label}>Observação</Text>
-        <TextInput
-          style={styles.observationInput}
-          value={observation}
-          onChangeText={(text) => setObservation(text)}
-          placeholder="Adicione uma observação"
-          multiline
+          placeholder="(99) 9 9999-9999"
+          placeholderTextColor="#888"
+          style={erroTelefone ? { borderColor: 'red' } : {}}
         />
         
-        <View style={styles.btnActionContainer}>
-          <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
-              <Text style={styles.ButtonText}>Limpar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-            <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.saveButtonGradient}>
-              <Text style={styles.saveButtonText}>Salvar</Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </ScrollView>
+        <Label>Hora do Agendamento</Label>
+        <TouchableOpacity onPress={() => setTimePickerVisible(true)}>
+          <Input placeholderTextColor="#888" value={time} editable={false} />
+        </TouchableOpacity>
+        {isTimePickerVisible && (
+          <RNDateTimePicker
+            value={new Date()}
+            mode="time"
+            is24Hour={true}
+            display="default"
+            onChange={handleStartTimePickerChange}
+          />
+        )}
+
+        <Label>Observações</Label>
+        <ObservationInput placeholderTextColor="#888" multiline={true} value={observation} onChangeText={(text) => setObservation(text)} placeholder="Adicione uma observação" />
+
+        <Footer>
+          <ActionButtonClean onPress={handleClear} >
+            Limpar
+          </ActionButtonClean>
+          <ActionButtonSave onPress={handleSave}>
+            Salvar
+          </ActionButtonSave>
+        </Footer>
+      </Content>
+    </Container>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  serviceScrollArea: {
-    width: '100%',
-  },
-  serviceItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  serviceText: {
-    marginLeft: 10,
-    fontSize: 16,
-  },
-  btnActionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignContent: 'center',
-  },
-  saveButton: {
-    backgroundColor: 'transparent',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-    width: '50%',
-    height: 50,
-  },
-  saveButtonGradient: {
-    width: '100%',
-    height: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 15,
-  },
-  saveButtonText: {
-    color: '#000',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  clearButton: {
-    color: '#6D6B69',
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "white",
-    textAlign: 'center',
-    width: '45%',
-    borderColor: '#6D6B69',
-    borderWidth: 2,
-    fontWeight: 'bold',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  label: {
-    fontSize: 16,
-    marginVertical: 5,
-    color: '#000',
-  },
-  timeInput: {
-    height: 40,
-    borderColor: '#000',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-  },
-  observationInput: {
-    height: 80,
-    borderColor: '#000',
-    borderWidth: 1,
-    borderRadius: 5,
-    padding: 10,
-    marginBottom: 10,
-    textAlignVertical: 'top',
-  },
-  inputError: {
-    borderColor: 'red',
-  },
-  tiposServicoContainer: {
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  header: {
-    padding: 35,
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 10,
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  button: {
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: "#6D6B69",
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: 50,
-    height: 50,
-    marginBottom: 20,
-  },
-  buttonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-   timeButton: {
-    height: 40,
-    borderColor: '#000',
-    borderWidth: 1,
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-});
+// Estilização com styled-components
+
+const Container = styled.ScrollView`
+  flex: 1;
+  background-color: ${props => props.theme.background};
+`;
+
+const Header = styled(LinearGradient)`
+  padding: 35px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+`;
+
+const Goback = styled.View`
+  align-items: flex-start;
+`;
+
+const CalendarContainer = styled.View`
+  align-items: center;
+  margin-top: 10px;
+`;
+
+const Content = styled.SafeAreaView`
+  padding: 10px;
+  flex: 1;
+`;
+
+const ServiceHeader = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+`;
+
+const ServiceScroll = styled.ScrollView`
+  max-height: 120px;
+  margin-bottom: 15px;
+`;
+
+const ServiceItem = styled.View`
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 5px;
+`;
+
+const Label = styled(Text)`
+  font-size: 16px;
+  color: ${props => props.theme.text};
+  margin-bottom: 5px;
+`;
+
+const Input = styled(TextInput)`
+  height: 40px;
+  border: 1px solid ${props => props.theme.borderColor};
+  border-radius: 5px;
+  padding: 0 10px;
+  background-color: ${props => props.theme.inputBackground};
+  color: ${props => props.theme.text};
+`;
+
+const ObservationInput = styled(TextInput)`
+  height: 40px;
+  border: 1px solid ${props => props.theme.borderColor};
+  border-radius: 5px;
+  padding: 10px;
+  background-color: ${props => props.theme.inputBackground};
+  color: ${props => props.theme.text};
+  height: 80;
+  border-Width: 1;
+  margin-Bottom: 10;
+  text-align: top;
+`
+
+const StyledTextInputMask = styled(TextInputMask)`
+  height: 40px;
+  border: 1px solid ${props => props.theme.borderColor};
+  border-radius: 5px;
+  padding: 0 10px;
+  background-color: ${props => props.theme.inputBackground};
+  color: ${props => props.theme.text};
+`;
+
+const Footer = styled.View`
+  flex-direction: row;
+  justify-content: space-around;
+  margin-top: 20px;
+`;
+
+const Button = styled(TouchableOpacity)`
+  padding: 10px;
+  border-radius: 5px;
+  background-color: blue;
+  align-items: center;
+  flex: 1;
+  margin: 0 5px;
+`;
+
+const ActionButtonClean = styled.Text`
+  color: ${props => props.theme.primary};
+  padding: 10px;
+  border-radius: 10px;
+  background-color: ${props => props.theme.buttonText};
+  text-align: center;
+  width: 45%;
+  border: 2px solid ${props => props.theme.primary};
+  font-weight: bold;
+`;
+
+const ActionButtonSave = styled.Text`
+  padding: 10px;
+  border-radius: 10px;
+  background-color: ${props => props.theme.buttonBackground};
+  text-align: center;
+  width: 45%;
+  color: ${props => props.theme.buttonText};
+`;
+
+const ButtonText = styled(Text)`
+  color: ${props => props.theme.text};
+  font-size: 16px;
+`;
+
+const ServiceText = styled(Text)`
+  font-size: 16px;
+  color: ${props => props.theme.text};
+  flex: 1;
+`;
+
+const AddButton = styled(TouchableOpacity)`
+  background-color: ${props => props.theme.buttonBackground};
+  padding: 5px;
+  border-radius: 5px;
+`;
+
+const DesignColor = styled(AntDesign)`
+  color: ${props=> props.theme.text};
+`;
+
+const StyledStar = styled(AntDesign)`
+  color: ${props => props.theme.starcolor}
+`
 
 export default Agendamento;

@@ -1,10 +1,23 @@
 import * as SQLite from "expo-sqlite";
 import { Alert } from "react-native";
+import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
+
+const CURRENT_DB_VERSION = 2;
 
 export function create() {
   const db = SQLite.openDatabaseSync("database.db");
+  useDrizzleStudio(db);
 
+  const db_version =  db.getFirstSync('PRAGMA user_version');
+
+    if(db_version.user_version >= CURRENT_DB_VERSION)
+      return;
+
+   if(db_version.user_version === 0){  
   db.execSync(`
+        PRAGMA journal_mode = WAL;
+        PRAGMA foreign_keys = ON;
+
         CREATE TABLE IF NOT EXISTS dboAgendamento (
          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL ,
          nomeCliente TEXT NOT NULL,
@@ -48,9 +61,26 @@ export function create() {
          PRIMARY KEY(codAgendamento, codColaborador)
         );
         
-    
+        PRAGMA user_version = 1
         `);
   insertDefault();
+  }
+   if(db_version.user_version === 1){
+    db.execSync(`
+      
+      CREATE TABLE IF NOT EXISTS dboEmpresa(
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        nomeEmpresa TEXT NOT NULL,
+        telefoneEmpresa TEXT NOT NULL,
+        enderecoEmpresa TEXT NOT NULL,
+        logo TEXT ,
+        ramoEmpresa TEXT NOT NULL
+        );
+
+      PRAGMA user_version = 2
+      `);
+  }
+ 
 }
 
 export function dropTables() {
@@ -87,12 +117,12 @@ export function insertDefault() {
 }
 
 //Função para adicionar um serviço
-export function addServico(nome, descricao) {
+export function addServico(nome, descricao, favorito = 0) {
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.runSync(
       "INSERT INTO dboServico (nome, descricao, favorito) VALUES (?, ?, ?)",
-      [nome, descricao, 0]
+      [nome, descricao, favorito]
     );
 
     if (result.changes > 0) return true;
@@ -276,7 +306,7 @@ export function viewServicoAll() {
   const db = SQLite.openDatabaseSync("database.db");
 
   const resultFavoritos = db.getAllSync(
-    "SELECT * FROM dboServico ORDER BY favorito"
+    "SELECT * FROM dboServico ORDER BY favorito DESC"
   );
 
   return resultFavoritos;
@@ -291,13 +321,16 @@ export function viewServicoID(id) {
   return result;
 }
 //Função para atualizar o serviço
-export function updateServico(id, nome, descricao) {
+export function updateServico(id, nome, descricao, favorito = 0) {
   const db = SQLite.openDatabaseSync("database.db");
   const result = db.runSync(
     "UPDATE dboServico SET nome = (?), descricao = (?) WHERE id = (?)",
     [nome, descricao, id]
   );
-  if (result.changes > 0) return true;
+  if (result.changes > 0) {
+    updateServicoFavorito(id, favorito);
+    return true;
+  }
   else return false;
 }
 //Função que adiciona o servico como favorito
@@ -459,10 +492,19 @@ export function deleteServico(id) {
   const db = SQLite.openDatabaseSync("database.db");
 
   try {
-    const result = db.runSync("DELETE FROM dboServico WHERE id = (?)", [id]);
+    db.withTransactionSync(() =>
+    {
+      const result = db.runSync("DELETE FROM dboServico WHERE id = (?)", [id]);
+      const delServicoAgendamento = db.runSync("DELETE FROM dboAgendamentoServico WHERE codServico = (?)",[id]);
 
-    if (result.changes > 0) return true;
-    else return false;
+    if (result.changes > 0 && delServicoAgendamento.changes > 0) {
+     
+      return true;
+    }
+    else return false; 
+    }
+  )
+    
   } catch (error) {
     console.log("erro:", error);
   }
@@ -606,7 +648,7 @@ export function viewColaboradoresServico(codServico) {
   );
   const servNFav = db.getAllSync(
     "SELECT codColaborador FROM dboColaboradorServico WHERE codServico = (?) AND favorito = 0",
-    [codServico]
+    [codServico] 
   );
 
   let vetorFav = servFav.sort((a, b) => a.nome.localeCompare(b.nome));
@@ -637,6 +679,124 @@ export function updateColaborador(id, nome) {
     console.log(error);
   }
 }
+
+export function addServicoRamo(ramoSelecionado) {
+
+  // Lista de serviços com descrição
+  const ramo = {
+    restaurante: [
+      { nome: "Serviço de mesa", descricao: "Atendimento e organização das mesas para os clientes." },
+      { nome: "Cozinha", descricao: "Preparação e confecção de refeições com alta qualidade." },
+      { nome: "Limpeza", descricao: "Manutenção e limpeza do ambiente do restaurante." },
+      { nome: "Delivery", descricao: "Serviço de entrega de pedidos a domicílio." },
+      { nome: "Atendimento ao cliente", descricao: "Suporte ao cliente para informações e dúvidas." }
+    ],
+    salaoDeBeleza: [
+      { nome: "Corte de cabelo", descricao: "Serviço de corte e estilização do cabelo." },
+      { nome: "Coloração", descricao: "Tintura e coloração de cabelo com técnicas variadas." },
+      { nome: "Manicure", descricao: "Manicure e pedicure com esmaltação." },
+      { nome: "Maquiagem", descricao: "Serviço de maquiagem para diversas ocasiões." },
+      { nome: "Tratamentos faciais", descricao: "Limpeza e cuidados estéticos para a pele do rosto." }
+    ],
+    oficinaMecanica: [
+      { nome: "Troca de óleo", descricao: "Substituição de óleo do motor para veículos." },
+      { nome: "Balanceamento de rodas", descricao: "Correção do balanceamento para segurança e conforto." },
+      { nome: "Revisão elétrica", descricao: "Análise e reparo de problemas no sistema elétrico." },
+      { nome: "Alinhamento", descricao: "Ajuste do alinhamento das rodas para melhor direção." },
+      { nome: "Inspeção de freios", descricao: "Verificação e manutenção do sistema de freios." }
+    ],
+    academia: [
+      { nome: "Musculação", descricao: "Treinamento de força com acompanhamento profissional." },
+      { nome: "Personal Trainer", descricao: "Sessões personalizadas com treinador especializado." },
+      { nome: "Aulas de Yoga", descricao: "Aulas de Yoga para equilíbrio e relaxamento." },
+      { nome: "Aulas de dança", descricao: "Dança para condicionamento físico e diversão." },
+      { nome: "Avaliação física", descricao: "Análise do condicionamento e composição corporal." }
+    ],
+    petShop: [
+      { nome: "Banho e Tosa", descricao: "Higienização e cuidados estéticos para pets." },
+      { nome: "Vacinação", descricao: "Aplicação de vacinas para proteção animal." },
+      { nome: "Hospedagem", descricao: "Serviço de hospedagem para animais de estimação." },
+      { nome: "Consultas Veterinárias", descricao: "Consultas com veterinários para avaliação de saúde." },
+      { nome: "Pet Shop", descricao: "Venda de produtos para cuidados e diversão dos pets." }
+    ]
+  };
+  
+  const servicos = ramo[ramoSelecionado];
+  
+  if (!servicos) {
+    console.log("Atividade não encontrada.");
+    return;
+  }
+  let count = 0;
+
+  servicos.forEach(servico => {
+    if(addServico(servico.nome, servico.descricao,1)){
+      count++;
+      console.log("Serviços adicionados com sucesso!");
+      }
+  });
+  
+  if(count == servicos.length) return true;
+    else return false;
+}
+
+export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo, ramoEmpresa= ''){
+
+  const db = SQLite.openDatabaseSync("database.db");
+
+  try{
+    db.withTransactionSync(() =>
+    {
+     db.runSync("INSERT INTO dboEmpresa (nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa) VALUES (?, ?, ?, ?, ?)",[nomeEmpresa, telefoneEmpresa, enderecoEmpresa,logo,ramoEmpresa]);
+
+  });
+  return true;
+  }
+  catch(e){
+    console.log("erro inseir dados empresa", e);
+    return false;
+  }
+
+}
+
+export function updateDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo = '', ramoEmpresa = '') {
+  const db = SQLite.openDatabaseSync("database.db");
+  try {
+    const result = db.runSync(
+      "UPDATE dboEmpresa SET nomeEmpresa = (?), telefoneEmpresa = (?), enderecoEmpresa = (?), logo = (?), ramoEmpresa = (?)",
+      [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa]
+    );
+
+    if (result.changes > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+export function viewEmpresa() {
+  const db = SQLite.openDatabaseSync("database.db");
+  try {
+    const result = db.getFirstSync("SELECT * FROM dboEmpresa");
+    return result;
+  } catch (error) {
+    console.log("Erro", error);
+  }
+}
+
+export function checkEmpresa() {
+  const db = SQLite.openDatabaseSync("database.db");
+  try {
+    const result = db.getFirstSync("SELECT COUNT(*) FROM dboEmpresa");
+    return result["COUNT(*)"] > 0;
+  } catch (error) {
+    console.log("Erro", error);
+  }
+}
+
 // daqui pra baixo nada é meu //
 export function verSemanasComAgendamentos() {
   const db = SQLite.openDatabaseSync("database.db");
@@ -673,15 +833,15 @@ export function verSemanasComAgendamentos() {
 }
 
 function getWeekRange(date) {
-  const day = date.getDay(); // Obtém o dia da semana (0 = Domingo, 1 = Segunda, etc.)
+  const day = date.getUTCDay(); // Obtém o dia da semana (0 = Domingo, 1 = Segunda, etc.)
 
   // Calcula a diferença para voltar ao domingo
   const diffToSunday = -day; // Se for domingo (day === 0), diff será 0
   const firstDayOfWeek = new Date(date); // Cria uma nova data
-  firstDayOfWeek.setDate(date.getDate() + diffToSunday); // Ajusta para o domingo mais recente
+  firstDayOfWeek.setDate(date.getUTCDate() + diffToSunday); // Ajusta para o domingo mais recente
 
   const lastDayOfWeek = new Date(firstDayOfWeek); // Clona a data do primeiro dia
-  lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6); // Ajusta para o sábado
+  lastDayOfWeek.setDate(firstDayOfWeek.getUTCDate() + 6); // Ajusta para o sábado
 
   return {
     inicio: firstDayOfWeek.toISOString().split("T")[0], // Formata 'YYYY-MM-DD'
@@ -691,48 +851,56 @@ function getWeekRange(date) {
 
 export function getDaysOfWeek(startDate) {
   const daysOfWeek = [];
+  const diasDaSemana = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
   const monthNames = [
-    "JAN",
-    "FEV",
-    "MAR",
-    "ABR",
-    "MAI",
-    "JUN",
-    "JUL",
-    "AGO",
-    "SET",
-    "OUT",
-    "NOV",
-    "DEZ",
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10",
+    "11",
+    "12",
   ];
 
   // Garantir que a data de início seja um objeto Date
   let currentDate = new Date(startDate);
-  const dayOfWeek = currentDate.getDay(); // Obtém o dia da semana (0 para domingo, 1 para segunda, etc.)
+  const dayOfWeek = currentDate.getUTCDay(); // Obtém o dia da semana (0 para domingo, 1 para segunda, etc.)
 
   // Ajustar para o último domingo
-  currentDate.setDate(currentDate.getDate() - dayOfWeek);
-
-  for (let i = 0; i < 7; i++) {
+  currentDate.setDate(currentDate.getDate() - dayOfWeek - 1);
+ 
+  /*ACREDITO QUE RESOLVI O PROBLEMA, PRECISO TESTAR DEPOIS NO EMULADOR PRA TER CERTEZA, MAS ACREDITO QUE 
+  MODIFICANDO AS FUNÇÕES PARA getUTC O TIMEZONE FICA CERTO, NÃO SEI EXPLICAR SE REALMENTE ERA ESSE O PROBLEMA,
+  MAS ATÉ O MOMENTO FOI O QUE RESOLVEU */
+  for (let i = 0; i < 9; i++) {
     // Loop para os 7 dias da semana (de domingo a sábado)
     const newDate = new Date(currentDate); // Cria uma nova instância de currentDate
-    newDate.setDate(currentDate.getDate() + i); // Adiciona i dias a partir do domingo calculado
+    newDate.setUTCDate(currentDate.getUTCDate() + i); // Adiciona i dias a partir do domingo calculado
 
-    const day = String(newDate.getDate()).padStart(2, "0"); // Pega o dia com dois dígitos
-    const month = monthNames[newDate.getMonth()]; // Nome do mês abreviado
-    newDate.setDate(newDate.getDate());
+    const day = String(newDate.getUTCDate()).padStart(2, "0"); // Pega o dia com dois dígitos
+    const month = monthNames[newDate.getUTCMonth()]; // Nome do mês abreviado
+    const sem = diasDaSemana[newDate.getUTCDay()]; 
+    newDate.setUTCDate(newDate.getUTCDate());
     const date = newDate.toISOString().split("T")[0]; // Formato 'YYYY-MM-DD'
     //console.log(`date: ${date}, i: ${i}, day: ${day}, month: ${month}`);
-    daysOfWeek.push({ dia: day, mes: month, date: date });
+    daysOfWeek.push({ dia: day, mes: month, sem: sem, date: date });
+
   }
 
   return daysOfWeek;
 }
 
 function getFirstDayOfWeek(date) {
-  const day = date.getDay();
-  const diff = date.getDate() - day;
-  return new Date(date.setDate(diff));
+  const day = date.getUTCDay();
+  const diff = date.getUTCDate() - day;
+  const data = new Date(date.getUTCDate(diff));
+
+  return data;
 }
 
 function getLastDayOfWeek(date) {
