@@ -4,12 +4,17 @@ import { useContext, useState, useEffect, startTransition } from "react";
 import { DataContext } from "../../context";
 import { countAgendamentosPorDia, countAgendamentosPorSemana } from "../../database";
 import styled from "styled-components";
+import light from "../../theme/light";
 
 export default function CardAgendamentosCount() {
   const { data, refreshing } = useContext(DataContext);
   const [countDia, setCountDia] = useState(0); 
 
   const [countSemana, setCountSemana] = useState(0);
+  const { theme } = useContext(DataContext);
+
+  const backgroundColor = theme ==  light ? ['#F7FF89', '#F6FF77', '#E8F622'] : ['#6D6B69', '#6D6B69', '#6D6B69'];
+
 
   useEffect(() => {
     startTransition(() => {
@@ -30,7 +35,7 @@ export default function CardAgendamentosCount() {
 
   return (
     <Container style={styles.container}>
-      <LinearGradient colors={['#F7FF89', '#F6FF77', '#E8F622']} style={styles.card}>
+      <LinearGradient colors={backgroundColor} style={styles.card}>
         <Text style={styles.cardTodayText}>Agendamentos para Hoje</Text>   
         <Text style={styles.cardTodayTextNumber}>{countDia}</Text>
       </LinearGradient>
