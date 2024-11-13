@@ -160,10 +160,9 @@ export default function Colaboradores({ navigation }) {
               />
               <AgendamentoText>{agendamento.nome}</AgendamentoText>
               <TouchableOpacity onPress={() => handleStarPress(agendamento.id)}>
-                <AntDesign
-                  name="star"
+                <StyledStar
+                  name={favoriteSevicosColaborador[agendamento.id] ? 'star' : 'staro'}
                   size={24}
-                  color={favoriteSevicosColaborador[agendamento.id] ? 'yellow' : 'black'}
                 />
               </TouchableOpacity>
             </AgendamentoItem>
@@ -300,3 +299,6 @@ const ExcludeButton = styled.Text`
   color: ${props => props.theme.buttonText};
 `;
 
+const StyledStar = styled(AntDesign)`
+  color: ${props => props.theme.starcolor}
+`

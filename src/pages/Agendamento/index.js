@@ -186,7 +186,7 @@ const Agendamento = ({ navigation, route }) => {
                 onPress={() => handleCheckboxChange(service.id)}
               />
               <ServiceText>{service.nome}</ServiceText>
-              {service.favorito == 1 && <AntDesign name="star" size={24} color="yellow" />}
+              {service.favorito == 1 && <StyledStar name="star" size={24} />}
             </ServiceItem>
           ))}
         </ServiceScroll>
@@ -392,5 +392,9 @@ const AddButton = styled(TouchableOpacity)`
 const DesignColor = styled(AntDesign)`
   color: ${props=> props.theme.text};
 `;
+
+const StyledStar = styled(AntDesign)`
+  color: ${props => props.theme.starcolor}
+`
 
 export default Agendamento;

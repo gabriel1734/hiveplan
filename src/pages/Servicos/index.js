@@ -151,10 +151,9 @@ const Servicos = ({ navigation }) => {
                   <ServicoContainer>
                     <ServicoText>{servico.nome}</ServicoText>
                     <TouchableOpacity onPress={() => handleToggleFavorito(servico.id)}>
-                      <AntDesign
+                      <StyledStar
                         name={servico.favorito == 1 ? 'star' : 'staro'}
                         size={24}
-                        color='gold'
                       />
                     </TouchableOpacity>
                   </ServicoContainer>
@@ -300,5 +299,9 @@ const ExcludeButton = styled.Text`
 const DesignColor = styled(AntDesign)`
   color: ${props=> props.theme.text};
 `;
+
+const StyledStar = styled(AntDesign)`
+  color: ${props => props.theme.starcolor}
+`
 
 export default Servicos;
