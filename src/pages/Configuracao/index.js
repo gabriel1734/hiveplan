@@ -11,6 +11,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import light from "../../theme/light";
 import dark from "../../theme/dark";
 import { DataTheme } from "../../context";
+import { Image } from "expo-image";
+import * as ImagePicker from 'expo-image-picker';
 
 
 export default function Configuracao({ navigation }) {
@@ -106,6 +108,54 @@ export default function Configuracao({ navigation }) {
     }
   }
 
+  const pickImage = async () => {
+    // Solicita permissão para acessar a galeria
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      Alert.alert("Permissão negada", "É necessário permitir o acesso às fotos.");
+      return;
+    }
+
+    // Abre a galeria para selecionar a imagem
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaType.Options.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      const { uri } = result.assets[0];
+      setLogo(uri);
+      saveLogo(uri);
+    }
+  };
+
+  const saveLogo = async (uri) => {
+    try {
+      await AsyncStorage.setItem('appLogo', uri);
+    } catch (error) {
+      console.log('Erro ao salvar o logo: ', error);
+    }
+  };
+
+  // Função para carregar o logo salvo no AsyncStorage
+  const loadLogo = async () => {
+    try {
+      const uri = await AsyncStorage.getItem('appLogo');
+      if (uri) {
+        setLogo(uri);
+      }
+    } catch (error) {
+      console.log('Erro ao carregar o logo: ', error);
+    }
+  };
+
+  // Carrega o logo quando o componente monta
+  useEffect(() => {
+    loadLogo();
+  }, [])
+
   const toggleTheme = async () => {
     const newTheme = theme === light ? dark : light;
     setTheme(newTheme);
@@ -138,9 +188,19 @@ export default function Configuracao({ navigation }) {
           keyboardType="phone-pad"
         />
         <StyledInput value={endereco} placeholder="Endereço"  placeholderTextColor="#888" onChangeText={setEndereco} />
-        <StyledInput value={logo} placeholder="Logo"  placeholderTextColor="#888" onChangeText={setLogo} />
+        <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+        <Image
+          source={logo ?  logo  : require('../../../assets/img/HIVEPLAN.png')}
+          style={{ width: 200, height: 200 }}
+        />
+        <TouchableOpacity onPress={pickImage}>
+          <ThemeSelect>
+             <ThemeBtn>Alternar Logo</ThemeBtn>
+           </ThemeSelect>
+          </TouchableOpacity>
+      </View>
         
-        <Label>Selecione a Atividade:</Label>
+        <Label style={{marginTop: 30}}>Selecione a Atividade:</Label>
         <RNPickerSelect
           style={{
             inputIOS: {

@@ -26,7 +26,7 @@ const Header = () => {
 
   return (
       <LinearGradient colors={backgroundColor} style={styles.header}>
-        <Image source={logo ? theme === light ? require('../../../assets/img/HIVEPLAN.png') :  require('../../../assets/img/HIVEPLAN-WHITE.png') : require('../../../assets/img/HIVEPLAN.png')} style={{width: 50, height: 50}} />
+        <Image style={styles.img} source={logo ? theme === light ? require('../../../assets/img/HIVEPLAN.png') :  require('../../../assets/img/HIVEPLAN-WHITE.png') : require('../../../assets/img/HIVEPLAN.png')} />
       </LinearGradient>
   );
 };
@@ -35,15 +35,21 @@ const styles = StyleSheet.create({
   header: {
     width: '100%',
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     borderRadius: 10,
-    height: 100,
+    height: 120,
   },
   text: {
     fontSize: 18,
     fontWeight: 'bold',
   },
+  img: {
+    marginTop: 10,
+    width: 100,
+    height: 100,
+    padding: 20
+  }
 });
 
 export default Header;
