@@ -1,19 +1,20 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { StyleSheet, Text, View } from "react-native";
 import { useContext, useState, useEffect, startTransition } from "react";
-import { DataContext } from "../../context";
+import { DataContext, DataTheme } from "../../context";
 import { countAgendamentosPorDia, countAgendamentosPorSemana } from "../../database";
 import styled from "styled-components";
 import light from "../../theme/light";
+
 
 export default function CardAgendamentosCount() {
   const { data, refreshing } = useContext(DataContext);
   const [countDia, setCountDia] = useState(0); 
 
   const [countSemana, setCountSemana] = useState(0);
-  const { theme } = useContext(DataContext);
+  const { theme } = useContext(DataTheme);
 
-  const backgroundColor = theme ==  light ? ['#F7FF89', '#F6FF77', '#E8F622'] : ['#6D6B69', '#6D6B69', '#6D6B69'];
+  const backgroundColor = theme === light ? ['#F7FF89', '#F6FF77', '#E8F622'] : ['#bb86fc', '#bb86fc', '#bb86fc'];
 
 
   useEffect(() => {
