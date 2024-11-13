@@ -15,18 +15,20 @@ const Header = () => {
 
   const backgroundColor = theme === light ? ['#F7FF89', '#F6FF77', '#E8F622'] : ['#bb86fc', '#bb86fc', '#bb86fc'];
 
+  const getLogo = async () => {
+   const uri = await AsyncStorage.getItem('logo');
+    if (uri) {
+      setLogo(uri);
+    }
+  }
+
   useEffect(() => {
-   const logoEmpresa = AsyncStorage.getItem('logo');
-   if(logoEmpresa){
-     setLogo(true);
-   } else {
-    setLogo(false)
-   }
+    getLogo();
   },[])
 
   return (
       <LinearGradient colors={backgroundColor} style={styles.header}>
-        <Image style={styles.img} source={logo ? theme === light ? require('../../../assets/img/HIVEPLAN.png') :  require('../../../assets/img/HIVEPLAN-WHITE.png') : require('../../../assets/img/HIVEPLAN.png')} />
+        <Image style={styles.img} source={logo ? logo : theme === light ? require('../../../assets/img/HIVEPLAN.png') :  require('../../../assets/img/HIVEPLAN-WHITE.png')} />
       </LinearGradient>
   );
 };
@@ -39,6 +41,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 10,
     height: 120,
+    padding: 10,
   },
   text: {
     fontSize: 18,

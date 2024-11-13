@@ -37,12 +37,17 @@ export default function Configuracao({ navigation }) {
       setNome(dadosEmpresa.nomeEmpresa);
       setTelefone(dadosEmpresa.telefoneEmpresa);
       setEndereco(dadosEmpresa.enderecoEmpresa);
-      setLogo(dadosEmpresa.logo);
       setRamoAtividade(dadosEmpresa.ramoEmpresa);
       setIdEmpresa(dadosEmpresa.id);
     }
     const savedTheme = await AsyncStorage.getItem('theme');
-    setTheme(savedTheme === 'dark' ? dark : light);
+    if (theme !== savedTheme) {
+      setTheme(savedTheme === light ? light : dark);
+    }
+    const uri = await AsyncStorage.getItem('logo');
+    if (uri) {
+      setLogo(uri);
+    }
   }
 
   useEffect(() => {
@@ -109,31 +114,44 @@ export default function Configuracao({ navigation }) {
   }
 
   const pickImage = async () => {
+  try {
     // Solicita permissão para acessar a galeria
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (permissionResult.granted === false) {
-      Alert.alert("Permissão negada", "É necessário permitir o acesso às fotos.");
+      Toast.show('Erro! É necessário fornecer a permissão para utilizar o logo', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#FF0000',
+      });
       return;
     }
 
     // Abre a galeria para selecionar a imagem
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.Options.Images,
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsMultipleSelection: false,
       allowsEditing: true,
-      aspect: [1, 1],
+      aspect: [4, 3],
       quality: 1,
     });
 
     if (!result.canceled) {
-      const { uri } = result.assets[0];
-      setLogo(uri);
-      saveLogo(uri);
+      console.log('result', result.assets[0]);
+      setLogo(result.assets[0].uri);
+      await saveLogo(result.assets[0].uri);
     }
-  };
+  } catch (error) {
+    console.log("Erro ao selecionar a imagem: ", error);
+    Toast.show("Erro ao selecionar a imagem", {
+      duration: Toast.durations.SHORT,
+      position: Toast.positions.BOTTOM,
+      backgroundColor: "#FF0000",
+    });
+  }
+};
 
   const saveLogo = async (uri) => {
     try {
-      await AsyncStorage.setItem('appLogo', uri);
+      await AsyncStorage.setItem('logo', uri);
     } catch (error) {
       console.log('Erro ao salvar o logo: ', error);
     }
@@ -188,16 +206,16 @@ export default function Configuracao({ navigation }) {
           keyboardType="phone-pad"
         />
         <StyledInput value={endereco} placeholder="Endereço"  placeholderTextColor="#888" onChangeText={setEndereco} />
-        <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
-        <Image
-          source={logo ?  logo  : require('../../../assets/img/HIVEPLAN.png')}
-          style={{ width: 200, height: 200 }}
-        />
-        <TouchableOpacity onPress={pickImage}>
-          <ThemeSelect>
-             <ThemeBtn>Alternar Logo</ThemeBtn>
-           </ThemeSelect>
-          </TouchableOpacity>
+        <View style={{ alignItems: 'center', justifyContent: 'center', padding:20, height: 300}}>
+          <Image
+            source={logo ? { uri: logo }: theme === light ? require('../../../assets/img/HIVEPLAN.png') :  require('../../../assets/img/HIVEPLAN-WHITE.png') }
+            style={{ width: 200, height: 200, borderRadius: 10}}
+          />
+          <TouchableOpacity style={{marginTop:10}} onPress={pickImage}>
+            <ThemeSelect>
+              <ThemeBtn>Alternar Logo</ThemeBtn>
+            </ThemeSelect>
+            </TouchableOpacity>
       </View>
         
         <Label style={{marginTop: 30}}>Selecione a Atividade:</Label>
@@ -262,9 +280,10 @@ const Page = styled.View`
   background-color: ${props => props.theme.background};
 `;
 
-const Container = styled.View`
-  flex: 1;
+const Container = styled.ScrollView`
+  flex: 1; /* Para ocupar todo o espaço disponível */
   padding: 24px;
+  padding-bottom: 50px;
 `;
 
 const Title = styled.Text`
@@ -348,7 +367,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
-    marginTop: 60,
+    marginTop: 20,
     height: 50,
   },
   saveButtonGradient: {

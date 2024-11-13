@@ -11,6 +11,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O aplicativo precisa de permissão para acessar suas fotos"
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true
     },
