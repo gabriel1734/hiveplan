@@ -16,12 +16,15 @@ export default function HomeScreen({navigation}) {
   const date = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
   const [data, setData] = useState(date.split('/').reverse().join('-'));
   const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible, setModalVisible] = useState(true);
-  const [welcome, setWelcome] = useState(false);
+  const [modalVisible, setModalVisible] = useState();
+  const [welcome, setWelcome] = useState('');
 
   useEffect(() => {
     setWelcome(checkEmpresa());
-    console.log('Welcome:', welcome);
+    welcome ? setModalVisible(false) : setModalVisible(true);
+    if(welcome && !modalVisible) {
+      navigation.navigate('Configuracao', {msg: 'Faça as configurações iniciais para começar a usar o aplicativo.'});
+    }
   }, []);
 
 
@@ -36,13 +39,11 @@ export default function HomeScreen({navigation}) {
         }
       }>
         <Header />
-        {welcome == null ?
           <WelcomeModal
-            modalVisible={modalVisible}
-            setModalVisible={setModalVisible}
+            visible={modalVisible}
             onClose={() => setModalVisible(false)}
             navigation={navigation}
-          /> : null}
+          />
         <WeekBtn navigation={navigation} />
         <CardAgendamentosCount /> 
         <CardAgendamentos navigation={navigation} />

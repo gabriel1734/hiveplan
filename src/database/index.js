@@ -791,7 +791,7 @@ export function checkEmpresa() {
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.getFirstSync("SELECT COUNT(*) FROM dboEmpresa");
-    return result["COUNT(*)"] > 0;
+    return result ? true : false;
   } catch (error) {
     console.log("Erro", error);
   }

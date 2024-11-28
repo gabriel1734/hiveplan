@@ -2,6 +2,7 @@
 import { Image } from 'expo-image';
 import React, { useState } from 'react';
 import { View, Text, Modal, StyleSheet, TouchableOpacity } from 'react-native';
+import { AntDesign } from '@expo/vector-icons';
 
 
 const WelcomeModal = ({ visible, onClose, navigation }) => {
@@ -58,11 +59,14 @@ const WelcomeModal = ({ visible, onClose, navigation }) => {
       animationType="slide"
       transparent={true}
       visible={visible}
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <View style={styles.overlay}>
         <View style={styles.modalContent}>
           <View style={styles.pagerView}>
+            <TouchableOpacity style={styles.buttonContainer} onPress={handleClose}>
+              <AntDesign name="close" size={24} color="black" />
+            </TouchableOpacity>
             <View style={styles.page}>
               <Text style={styles.title}>{pages[pageIndex].title}</Text>
               <Text style={styles.description}>{pages[pageIndex].description}</Text>
@@ -82,7 +86,7 @@ const WelcomeModal = ({ visible, onClose, navigation }) => {
                 <Text style={styles.btnText}>Próximo</Text>
               </TouchableOpacity>
             ) : (
-              <TouchableOpacity onPress={handleClose()} style={styles.btn}>
+              <TouchableOpacity onPress={handleClose} style={styles.btn}>
                 <Text  style={styles.btnText}>Fechar</Text>
               </TouchableOpacity>
             )}

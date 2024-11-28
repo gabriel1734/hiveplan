@@ -15,7 +15,7 @@ import { Image } from "expo-image";
 import * as ImagePicker from 'expo-image-picker';
 
 
-export default function Configuracao({ navigation }) {
+export default function Configuracao({ navigation, route }) {
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
   const [endereco, setEndereco] = useState('');
@@ -24,6 +24,7 @@ export default function Configuracao({ navigation }) {
   const [ramoChange, setRamoChange] = useState(false);
   const [idEmpresa, setIdEmpresa] = useState('');
   const { theme, setTheme } = useContext(DataTheme);
+  const { msg } = route.params || '';
 
 
   const handleAtividadeChange = (atividade) => {
@@ -52,6 +53,13 @@ export default function Configuracao({ navigation }) {
 
   useEffect(() => {
     handleGet();
+    if(msg){
+      Toast.show(msg, {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.CENTER,
+        backgroundColor: '#00FF00',
+      });
+    }
   },[])
 
   const handleSave = () => {
