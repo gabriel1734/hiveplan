@@ -747,7 +747,10 @@ export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpr
   try{
     db.withTransactionSync(() =>
     {
-     db.runSync("INSERT INTO dboEmpresa (nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa) VALUES (?, ?, ?, ?, ?)",[nomeEmpresa, telefoneEmpresa, enderecoEmpresa,logo,ramoEmpresa]);
+     db.runSync(
+        "INSERT INTO dboEmpresa (nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa) VALUES (?, ?, ?, ?, ?)",
+        [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa]
+      );
 
   });
   return true;
@@ -759,12 +762,13 @@ export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpr
 
 }
 
-export function updateDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo = '', ramoEmpresa = '') {
+export function updateDadosEmpresa(id,nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo = '', ramoEmpresa = '') {
   const db = SQLite.openDatabaseSync("database.db");
+
   try {
     const result = db.runSync(
-      "UPDATE dboEmpresa SET nomeEmpresa = (?), telefoneEmpresa = (?), enderecoEmpresa = (?), logo = (?), ramoEmpresa = (?)",
-      [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa]
+      "UPDATE dboEmpresa SET nomeEmpresa = (?), telefoneEmpresa = (?), enderecoEmpresa = (?), logo = (?), ramoEmpresa = (?) WHERE id = (?)",
+      [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa, id]
     );
 
     if (result.changes > 0) {
@@ -781,6 +785,7 @@ export function viewEmpresa() {
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.getFirstSync("SELECT * FROM dboEmpresa");
+    console.log("result", result);
     return result;
   } catch (error) {
     console.log("Erro", error);
@@ -797,6 +802,18 @@ export function checkEmpresa() {
   }
 }
 
+export function deleteEmpresa() {
+  const db = SQLite.openDatabaseSync("database.db");
+  try {
+    const result = db.runSync("DELETE FROM dboEmpresa");
+    if (result.changes > 0) return true;
+    else return false;
+  } catch (error) {
+    console.log("erro:", error);
+    return false;
+  }
+}
+
 // daqui pra baixo nada é meu //
 export function verSemanasComAgendamentos() {
   const db = SQLite.openDatabaseSync("database.db");
@@ -809,6 +826,7 @@ export function verSemanasComAgendamentos() {
   if (result.length === 0) {
     return [];
   }
+  
 
   const semanasComAgendamentos = [];
 

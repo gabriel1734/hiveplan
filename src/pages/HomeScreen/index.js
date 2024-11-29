@@ -10,6 +10,7 @@ import { DataContext } from "../../context";
 import { checkEmpresa } from "../../database";
 import { useEffect } from "react";
 import styled from "styled-components";
+import { useFocusEffect } from "@react-navigation/native";
 
 
 export default function HomeScreen({navigation}) {
@@ -22,10 +23,11 @@ export default function HomeScreen({navigation}) {
   useEffect(() => {
     setWelcome(checkEmpresa());
     welcome ? setModalVisible(false) : setModalVisible(true);
-    if(welcome && !modalVisible) {
-      navigation.navigate('Configuracao', {msg: 'Faça as configurações iniciais para começar a usar o aplicativo.'});
-    }
   }, []);
+
+  useFocusEffect(() => {
+    setRefreshing(true);
+  });
 
 
   return (

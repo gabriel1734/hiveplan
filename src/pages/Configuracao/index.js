@@ -109,6 +109,8 @@ export default function Configuracao({ navigation, route }) {
           position: Toast.positions.BOTTOM,
           backgroundColor: '#00FF00',
         });
+
+        setIdEmpresa(viewEmpresa().id);
         
       } else {
         Toast.show('Erro!', {
