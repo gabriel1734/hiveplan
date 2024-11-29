@@ -17,12 +17,14 @@ export default function HomeScreen({navigation}) {
   const date = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
   const [data, setData] = useState(date.split('/').reverse().join('-'));
   const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible, setModalVisible] = useState();
+  const [modalVisible, setModalVisible] = useState(false);
   const [welcome, setWelcome] = useState('');
 
   useEffect(() => {
     setWelcome(checkEmpresa());
-    welcome ? setModalVisible(false) : setModalVisible(true);
+    if(welcome){
+      setModalVisible(true);
+    }
   }, []);
 
   useFocusEffect(() => {

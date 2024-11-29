@@ -60,6 +60,7 @@ export default function Configuracao({ navigation, route }) {
         backgroundColor: '#00FF00',
       });
     }
+    setRamoChange(false);
   },[])
 
   const handleSave = () => {
