@@ -26,6 +26,7 @@ export default function Clientes({ navigation }) {
 
     const dataInicio = startDate ? startDate.toISOString().split('T')[0] : null;
     const dataFim = endDate ? endDate.toISOString().split('T')[0] : null;
+    const dataAtual = new Date().toISOString().split('T')[0];
 
     if (!startDate && !endDate && !search) {
       console.log('Sem filtro');
@@ -72,7 +73,7 @@ export default function Clientes({ navigation }) {
     }
 
     if (startDate && !endDate && search) {
-      const result = getClientesPorDataENome(dataInicio, , search);
+      const result = getClientesPorDataENome(dataInicio, dataAtual, search);
       setFilteredClientes(result || []);
       console.log('Filtrado por data e nome');
       Toast.show('Filtrado por data e nome', {
@@ -84,7 +85,7 @@ export default function Clientes({ navigation }) {
     }
 
     if (!startDate && endDate && search) {
-      const result = getClientesPorDataENome(new Date(0), endDate, search);
+      const result = getClientesPorDataENome(dataAtual, endDate, search);
       setFilteredClientes(result || []);
       console.log('Filtrado por data e nome');
       Toast.show('Filtrado por data e nome', {
