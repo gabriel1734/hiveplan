@@ -65,7 +65,7 @@ const StyledText = styled.Text`
 
 const StyledScrollView = styled.ScrollView`
   height: 50%;
-  margin-bottom: 50;
+  margin-bottom: 50px;
 `;
 
 const styles = StyleSheet.create({

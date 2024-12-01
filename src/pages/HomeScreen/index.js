@@ -22,14 +22,11 @@ export default function HomeScreen({navigation}) {
 
   useEffect(() => {
     setWelcome(checkEmpresa());
-    if(welcome){
+    if (welcome){
       setModalVisible(true);
     }
   }, []);
 
-  useFocusEffect(() => {
-    setRefreshing(true);
-  });
 
 
   return (

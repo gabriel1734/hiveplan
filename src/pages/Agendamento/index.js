@@ -310,7 +310,7 @@ const Input = styled(TextInput)`
   height: 40px;
   border: 1px solid ${props => props.theme.borderColor};
   border-radius: 5px;
-  padding: 0 10px;
+  padding: 0px 10px;
   background-color: ${props => props.theme.inputBackground};
   color: ${props => props.theme.text};
 `;
@@ -322,9 +322,9 @@ const ObservationInput = styled(TextInput)`
   padding: 10px;
   background-color: ${props => props.theme.inputBackground};
   color: ${props => props.theme.text};
-  height: 80;
-  border-Width: 1;
-  margin-Bottom: 10;
+  height: 80px;
+  border-Width: 1px;
+  margin-Bottom: 10px;
   text-align: top;
 `
 
@@ -332,7 +332,7 @@ const StyledTextInputMask = styled(TextInputMask)`
   height: 40px;
   border: 1px solid ${props => props.theme.borderColor};
   border-radius: 5px;
-  padding: 0 10px;
+  padding: 0px 10px;
   background-color: ${props => props.theme.inputBackground};
   color: ${props => props.theme.text};
 `;
@@ -349,7 +349,7 @@ const Button = styled(TouchableOpacity)`
   background-color: blue;
   align-items: center;
   flex: 1;
-  margin: 0 5px;
+  margin: 0px 5px;
 `;
 
 const ActionButtonClean = styled.Text`

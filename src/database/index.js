@@ -212,6 +212,30 @@ export function addAgendamento(
   }
 }
 
+export function getClientes() {
+  const db = SQLite.openDatabaseSync("database.db");
+  const result = db.getAllSync("SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento ORDER BY nomeCliente");
+  return result;
+}
+
+export function getClientesPorDataENome(dataInicio, dataFim, nome) {
+  const db = SQLite.openDatabaseSync("database.db");
+  const result = db.getAllSync("SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento WHERE dataAgendamento BETWEEN (?) AND (?) AND nomeCliente LIKE (?) ORDER BY nomeCliente", [dataInicio, dataFim, `%${nome}%`]);
+  return result;
+}
+
+export function getClientesPorData(dataInicio, dataFim) {
+  const db = SQLite.openDatabaseSync("database.db");
+  const result = db.getAllSync("SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento WHERE dataAgendamento BETWEEN (?) AND (?) ORDER BY nomeCliente", [dataInicio, dataFim]);
+  return result;
+}
+
+export function getClientesPorNome(nome) {
+  const db = SQLite.openDatabaseSync("database.db");
+  const result = db.getAllSync("SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento WHERE nomeCliente LIKE (?) ORDER BY nomeCliente", [`%${nome}%`]);
+  return result;
+}
+
 // Função para adicionar um serviço novo no agendamento
 export function addAgendamentoServico(idAgendamento, vetorServico) {
   const db = SQLite.openDatabaseSync("database.db");
@@ -796,7 +820,7 @@ export function checkEmpresa() {
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.getFirstSync("SELECT COUNT(*) FROM dboEmpresa");
-    return result ? true : false;
+    return result["COUNT(*)"] > 0 ? false : true;
   } catch (error) {
     console.log("Erro", error);
   }
