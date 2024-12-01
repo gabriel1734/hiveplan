@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Modal, Alert } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity, Modal, Alert, Share } from "react-native";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
 import { deleteAgendamento, setAtendimento, viewColaborador, viewColaboradorAgendamento, viewServicoAgendamento, viewServicoID } from "../../database";
 import Toast from "react-native-root-toast";
@@ -65,14 +65,29 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
   // Lógica para definir estilo com base no estado do atendimento e se está atrasado
   let style = styles.agendamento;
 
-  const isAtrasado = () => {
-    const agora = new Date();
-    const horaAtual = agora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    const dataAtual = agora.toISOString().split("T")[0];
+const isAtrasado = () => {
+  const agora = new Date();
+  const horaAtual = agora.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const dataAtual = agora.toISOString().split("T")[0];
 
-    // Compara se a hora do agendamento é anterior à hora atual e se a data é a mesma
-    return (dataAgendamento <= dataAtual && horaAgendamento < horaAtual && !atendimento);
-  };
+  // Verifica se o agendamento está atrasado
+  return (
+    dataAgendamento < dataAtual || 
+    (dataAgendamento === dataAtual && horaAgendamento < horaAtual && !atendimento)
+  );
+};
+
+
+  onShare = async () => {
+    try {
+      const result = await Share.share({
+        message:
+          'Mensagem Personalizada',
+      });
+    } catch (error) {
+      alert(error.message);
+    }
+  }
 
   // Ajustando o estilo
   if (atendimento) {
@@ -82,71 +97,80 @@ export default Agendamento = ({ horaAgendamento, dataAgendamento, telCliente, no
   }
 
   return (
-    <TouchableOpacity onPress={() => setModalVisible(true)}>
-    <StyledAgendamento>
-      
-        <Horario>{horaAgendamento}</Horario>
-        <TextCliente >
-          <DesignColor name="user" size={14} /> {nomeCliente}
-        </TextCliente>
-
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <StyledModal>
-          <StyledModalView>
-            <ModalText >Detalhes do Agendamento</ModalText>
-            <InfoText>
-              <DesignIcons name="phone" size={14}/> Telefone: {telCliente}
-            </InfoText>
-            <InfoText>
-              <DesignIcons name="date-range" size={14}/> Data: {dataAgendamento}
-            </InfoText>
-            <InfoText>
-              <DesignIcons name="work" size={14}/> Serviço: {servicos.map((servico, index) => (
-                <Text key={index}>
-                  {servico?.nome} {index < servicos.length - 1 ? ', ' : ''}
-                </Text>
-              ))}
-            </InfoText>
-            <InfoText>
-              <DesignIcons name="people" size={14}/> Colaboradores: {colaboradores.map((colaborador, index) => (
-                <Text key={index}>
-                  {colaborador?.nome} {index < colaboradores.length - 1 ? ', ' : ''}
-                </Text>
-              ))}
-            </InfoText>
-            <InfoText>
-              <DesignIcons name="description" size={14}/> Descrição: {descricao}
-            </InfoText>
-            <Container>
-              {!atendimento ? (
-                <Text style={styles.btnConcluir} onPress={() => handleAtendimento(id, 1)}>
-                  Concluir
-                </Text>
-              ) : (
-                <Text style={styles.btnDesfazer} onPress={() => handleAtendimento(id, 0)}>
-                  Desfazer
-                </Text>
-              )}
-              <Text style={styles.btnAction} onPress={() => handleEdit(id)}>Editar</Text>
-              <Text style={styles.btnActionDelete} onPress={() => handleDelete(id)}>Excluir</Text>
-              <BotaoFechar onPress={() => setModalVisible(false)}>Fechar</BotaoFechar>
-            </Container>
-          </StyledModalView>
-        </StyledModal>
-      </Modal>
+  <TouchableOpacity onPress={() => setModalVisible(true)}>
+    <StyledAgendamento style={style}>
+      <Horario>{horaAgendamento}</Horario>
+      <TextCliente>
+        <DesignColor name="user" size={14} /> {nomeCliente}
+      </TextCliente>
     </StyledAgendamento>
- </TouchableOpacity>
 
-  );
+    {/* Modal */}
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalVisible}
+      onRequestClose={() => setModalVisible(false)}
+    >
+      <StyledModal>
+        <StyledModalView>
+          <ModalText>Detalhes do Agendamento</ModalText>
+          <InfoText>
+            <DesignIcons name="phone" size={14} /> Telefone: {telCliente}
+          </InfoText>
+          <InfoText>
+            <DesignIcons name="date-range" size={14} /> Data: {dataAgendamento}
+          </InfoText>
+          <InfoText>
+            <DesignIcons name="work" size={14} /> Serviço:{" "}
+            {servicos.map((servico, index) => (
+              <Text key={index}>
+                {servico?.nome} {index < servicos.length - 1 ? ", " : ""}
+              </Text>
+            ))}
+          </InfoText>
+          <InfoText>
+            <DesignIcons name="people" size={14} /> Colaboradores:{" "}
+            {colaboradores.map((colaborador, index) => (
+              <Text key={index}>
+                {colaborador?.nome} {index < colaboradores.length - 1 ? ", " : ""}
+              </Text>
+            ))}
+          </InfoText>
+          <InfoText>
+            <DesignIcons name="description" size={14} /> Descrição: {descricao}
+          </InfoText>
+          <Container>
+            {!atendimento ? (
+              <Text style={styles.btnConcluir} onPress={() => handleAtendimento(id, 1)}>
+                Concluir
+              </Text>
+            ) : (
+              <Text style={styles.btnDesfazer} onPress={() => handleAtendimento(id, 0)}>
+                Desfazer
+              </Text>
+            )}
+            <Text style={styles.btnAction} onPress={() => handleEdit(id)}>
+              Editar
+            </Text>
+            <Text style={styles.btnCompartilhar} onPress={onShare}>
+              Compartilhar
+            </Text>
+            <Text style={styles.btnActionDelete} onPress={() => handleDelete(id)}>
+              Excluir
+            </Text>
+            <BotaoFechar onPress={() => setModalVisible(false)}>Fechar</BotaoFechar>
+          </Container>
+        </StyledModalView>
+      </StyledModal>
+    </Modal>
+  </TouchableOpacity>
+);
+
 };
 
 const StyledAgendamento = styled.View`
-  background-color: ${props => props.theme.buttonBackground};
+  background-color: ${props => props.theme.background};
   padding: 15px;
   margin-bottom:10px;
   border-radius: 16px;
@@ -231,18 +255,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   agendamentoConcluido: {
-    backgroundColor: 'green',  // Fundo branco para agendamentos concluídos
-    borderColor: 'black', // Borda verde
-    borderWidth: 2,
-    padding: 15,
+    backgroundColor: 'green',  // Fundo branco para agendamentos concluídos 
     borderRadius: 16,
     alignContent: "center",
     alignItems: "center",
   },
   agendamentoAtrasado: {
-    backgroundColor: 'red', // Fundo vermelho para agendamentos atrasados
-    borderColor: 'yellow', // Borda amarela
-    borderWidth: 2,
+    backgroundColor: '#C0392B',// Fundo vermelho para agendamentos atrasados
     padding: 15,
     borderRadius: 16,
     alignContent: "center",
@@ -304,6 +323,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     width: '90%',
     marginVertical: 5, // Espaçamento entre os botões
+  },
+  btnCompartilhar: {
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#007BFF",
+    color: 'white',
+    textAlign: 'center',
+    width: '90%',
+    marginVertical: 5,
   },
   btnActionDelete: {
     padding: 10,
