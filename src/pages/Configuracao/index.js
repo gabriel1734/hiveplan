@@ -1,6 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useState, useEffect, useContext } from "react";
-import { TouchableOpacity, StyleSheet, Text, TextInput, View, SafeAreaView, useColorScheme } from "react-native";
+import { TouchableOpacity, StyleSheet, Text, TextInput, View, SafeAreaView, useColorScheme, Alert } from "react-native";
 import { TextInputMask } from "react-native-masked-text";
 import RNPickerSelect from 'react-native-picker-select';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -13,6 +13,7 @@ import dark from "../../theme/dark";
 import { DataTheme } from "../../context";
 import { Image } from "expo-image";
 import * as ImagePicker from 'expo-image-picker';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 
 export default function Configuracao({ navigation, route }) {
@@ -26,8 +27,8 @@ export default function Configuracao({ navigation, route }) {
   const { theme, setTheme } = useContext(DataTheme);
   const { msg } = route.params || '';
   const [selectedTheme, setSelectedTheme] = useState();
-  const systemTheme = useColorScheme(); 
-
+  const systemTheme = useColorScheme();
+  const [textMSG, setTextMSG] = useState('');
 
 const handleThemeChange = async (themeOption) => {
   try {
@@ -75,6 +76,11 @@ const handleThemeChange = async (themeOption) => {
       setEndereco(dadosEmpresa.enderecoEmpresa);
       setRamoAtividade(dadosEmpresa.ramoEmpresa);
       setIdEmpresa(dadosEmpresa.id);
+      setTextMSG(`Olá [nomeCliente]. Você possui agendado o serviço [Serviço] às [Hora] do dia [Data] na [Empresa].`);
+    } else {
+      setTextMSG(`
+          Olá [nomeCliente]. Você possui agendado o serviço [Serviço] às [Hora] do dia [Data] na [Empresa].
+        `);
     }
     const savedTheme = await AsyncStorage.getItem('theme');
     if (savedTheme) {
@@ -109,6 +115,7 @@ const handleThemeChange = async (themeOption) => {
   },[])
 
   const handleSave = () => {
+    //lembrar de adicionar o campo de mensagem padrão
     if (nome == '' || nome == null) {
       Toast.show('Preencha o campo Nome', {
         duration: Toast.durations.SHORT,
@@ -166,7 +173,6 @@ const handleThemeChange = async (themeOption) => {
           backgroundColor: '#FF0000',
         });
       }
-
     }
   }
 
@@ -242,6 +248,59 @@ const handleThemeChange = async (themeOption) => {
       });
     }
   }
+
+
+  const handleBackup =  () => {
+    console.log('Implementar backup');
+  }
+
+  const ConfirmReset = () => {
+    Alert.alert(
+      'Reset',
+      'Deseja realmente resetar o aplicativo? Isso apagará todos os dados e todas a configurações salvas para sempre!',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        { text: 'Sim', onPress: () => handleReset() },
+      ],
+      { cancelable: false }
+    );
+  }
+
+  const handleReset = async () => {
+    const isBiometricSupported = await LocalAuthentication.hasHardwareAsync();
+    const supported = await LocalAuthentication.supportedAuthenticationTypesAsync();
+
+    if (!isBiometricSupported && supported.length === 0) {
+      Alert.alert('Seu dispositivo não autenticação biométrica');
+    }
+
+    const savedBiometric = await LocalAuthentication.isEnrolledAsync();
+    if (!savedBiometric) {
+      Alert.alert('Digite sua senha para continuar');
+    }
+
+    const biometricAuth = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Autentique-se para continuar',
+      cancelLabel: 'Usar PIN/Senha',
+      fallbackLabel: 'Digite seu PIN/Senha',
+    });
+
+    if (biometricAuth.success) {
+      console.log('implementar reset aqui!');
+    } else {
+      Toast.show('Autenticação falhou!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#FF0000',
+      });
+    }
+
+  }
+
   // Carrega o logo quando o componente monta
   useEffect(() => {
     loadLogo();
@@ -350,11 +409,25 @@ const handleThemeChange = async (themeOption) => {
               <RadioLabel>Automático</RadioLabel>
             </RadioOption>
           </RadioGroup>
+          <Label>Defina uma Mensagem Padrão</Label>
+          <StyledTextInput placeholder="Mensagem Padrão" placeholderTextColor="#888" multiline={true} numberOfLines={4} value={textMSG} onChangeText={setTextMSG} />
+
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
+            <BtnBackup style={styles.saveButton} onPress={handleBackup}>
+              <AntDesign name="cloudupload" size={24} color="black" />
+              <BtnBackupText>Backup</BtnBackupText>
+            </BtnBackup>
+            <BtnReset style={styles.saveButton} onPress={ConfirmReset}>
+              <AntDesign name="delete" size={24} color="black" />
+              <BtnResetText>Reset</BtnResetText>
+            </BtnReset>
+          </View>
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <LinearGradient colors={backgroundColor} style={styles.saveButtonGradient}>
               <Text style={styles.saveButtonText}>Salvar</Text>
             </LinearGradient>
           </TouchableOpacity>
+
         </Content>
       </Container>
       <Toast />
@@ -380,6 +453,38 @@ const ExcludeButton = styled.Text`
   color: ${props => props.theme.buttonText};
 `;
 
+const BtnBackup = styled.TouchableOpacity`
+  background-color: ${props => props.theme.buttonBackground};
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  border-radius: 5px;
+  width: 48%;
+  text-align: center;
+  color: ${props => props.theme.buttonText};
+`;
+
+const BtnBackupText = styled.Text`
+  color: ${props => props.theme.buttonText};
+  margin-left: 10px;
+`
+
+const BtnReset = styled.TouchableOpacity`
+  background-color: ${props => props.theme.secondary};
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  border-radius: 5px;
+  width: 48%;
+  text-align: center;
+  color: ${props => props.theme.buttonText};
+  `;
+  
+const BtnResetText = styled.Text`
+  color: ${props => props.theme.buttonText};
+  margin-left: 10px;
+`;
+
 const Content = styled.SafeAreaView`
   margin-bottom: 50px;
 `;
@@ -399,6 +504,16 @@ const StyledInput = styled.TextInput`
   margin-Bottom: 10px;
   color: ${props => props.theme.text};
 `;
+
+const StyledTextInput = styled.TextInput`
+  border-Color: ${props => props.theme.borderColor};
+  border-Width: 1px;
+  border-Radius: 5px;
+  background-Color: ${props => props.theme.inputBackground};
+  padding: 10px;
+  margin-Bottom: 10px;
+  color: ${props => props.theme.text};
+`
 
 const StyledTextInputMask = styled(TextInputMask)`
   height: 50px;

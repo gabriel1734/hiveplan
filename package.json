@@ -42,7 +42,8 @@
     "react-native-toast-message": "^2.2.1",
     "react-native-toast-notifications": "^3.4.0",
     "react-native-web": "~0.19.10",
-    "styled-components": "^6.1.13"
+    "styled-components": "^6.1.13",
+    "expo-local-authentication": "~14.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
