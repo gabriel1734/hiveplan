@@ -64,11 +64,13 @@ const handleThemeChange = async (themeOption) => {
 
 
   const handleAtividadeChange = (atividade) => {
-    setRamoAtividade(atividade);
-    setRamoChange(true);
+    if (atividade !== ramoAtividade) {
+      setRamoAtividade(atividade);
+      setRamoChange(true); // Apenas marca como alterado se o ramo realmente mudar
+    }
   };
 
-  handleGet = async () => {
+  const handleGet = async () => {
     const dadosEmpresa = viewEmpresa();
     if(dadosEmpresa){
       setNome(dadosEmpresa.nomeEmpresa);
@@ -100,6 +102,7 @@ const handleThemeChange = async (themeOption) => {
     if (uri) {
       setLogo(uri);
     }
+    setRamoChange(false);
   }
 
   useEffect(() => {
@@ -114,67 +117,70 @@ const handleThemeChange = async (themeOption) => {
     setRamoChange(false);
   },[])
 
-  const handleSave = () => {
-    //lembrar de adicionar o campo de mensagem padrão
-    if (nome == '' || nome == null) {
-      Toast.show('Preencha o campo Nome', {
-        duration: Toast.durations.SHORT,
-        position: Toast.positions.BOTTOM,
-        backgroundColor: '#FF0000',
-      });
-      return;
-    }
-    if (telefone == '' || telefone == null) {
-      Toast.show('Preencha o campo Telefone', {
-        duration: Toast.durations.SHORT,
-        position: Toast.positions.BOTTOM,
-        backgroundColor: '#FF0000',
-      });
-      return;
-    }
-    
-    if (idEmpresa) {
-      if (updateDadosEmpresa(idEmpresa, nome, telefone, endereco, logo, ramoAtividade, textMSG)) {
-        if (ramoChange) {
-          addServicoRamo(ramoAtividade);
-        }
-        Toast.show('Atualizado!', {
-          duration: Toast.durations.SHORT,
-          position: Toast.positions.BOTTOM,
-          backgroundColor: '#00FF00',
-        });
-        navigation.navigate('Home');
-      }
-        
-      else {
-        Toast.show('Erro!', {
-          duration: Toast.durations.SHORT,
-          position: Toast.positions.BOTTOM,
-          backgroundColor: '#FF0000',
-        });
-      }
-    } else {
-      if (adicionarDadosEmpresa(nome, telefone, endereco, logo, ramoAtividade, textMSG)) {
-        if (ramoAtividade) {
-          addServicoRamo(ramoAtividade);
-        }
-        Toast.show('Adicionado!', {
-          duration: Toast.durations.SHORT,
-          position: Toast.positions.BOTTOM,
-          backgroundColor: '#00FF00',
-        });
+ const handleSave = () => {
+  // Verifica se os campos obrigatórios estão preenchidos
+  if (nome === '' || nome == null) {
+    Toast.show('Preencha o campo Nome', {
+      duration: Toast.durations.SHORT,
+      position: Toast.positions.BOTTOM,
+      backgroundColor: '#FF0000',
+    });
+    return;
+  }
+  if (telefone === '' || telefone == null) {
+    Toast.show('Preencha o campo Telefone', {
+      duration: Toast.durations.SHORT,
+      position: Toast.positions.BOTTOM,
+      backgroundColor: '#FF0000',
+    });
+    return;
+  }
 
-        setIdEmpresa(viewEmpresa().id);
-        
-      } else {
-        Toast.show('Erro!', {
-          duration: Toast.durations.SHORT,
-          position: Toast.positions.BOTTOM,
-          backgroundColor: '#FF0000',
-        });
+  if (idEmpresa) {
+    // Atualiza os dados da empresa
+    if (updateDadosEmpresa(idEmpresa, nome, telefone, endereco, logo, ramoAtividade, textMSG)) {
+      if (ramoChange) {
+        addServicoRamo(ramoAtividade); // Adiciona serviços apenas se houve alteração no ramo
       }
+      Toast.show('Atualizado!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#00FF00',
+      });
+      navigation.navigate('Home');
+    } else {
+      Toast.show('Erro ao atualizar!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#FF0000',
+      });
+    }
+  } else {
+    // Adiciona nova empresa
+    if (adicionarDadosEmpresa(nome, telefone, endereco, logo, ramoAtividade, textMSG)) {
+      if (ramoChange) {
+        addServicoRamo(ramoAtividade); // Adiciona serviços apenas se houve alteração no ramo
+      }
+      Toast.show('Adicionado!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#00FF00',
+      });
+
+      setIdEmpresa(viewEmpresa().id);
+    } else {
+      Toast.show('Erro ao adicionar!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#FF0000',
+      });
     }
   }
+
+  // Reseta o estado de alteração de ramo
+  setRamoChange(false);
+};
+
 
   const pickImage = async () => {
   try {
