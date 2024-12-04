@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View, TouchableOpacity, Modal, Alert, Share } from "react-native";
 import { MaterialIcons, AntDesign } from "@expo/vector-icons";
-import { deleteAgendamento, setAtendimento, viewColaborador, viewColaboradorAgendamento, viewServicoAgendamento, viewServicoID } from "../../database";
+import { deleteAgendamento, setAtendimento, viewColaborador, viewColaboradorAgendamento, viewEmpresa, viewServicoAgendamento, viewServicoID } from "../../database";
 import Toast from "react-native-root-toast";
 import styled from "styled-components";
 
@@ -79,10 +79,18 @@ const isAtrasado = () => {
 
 
   onShare = async () => {
+    const empresa = viewEmpresa();
+    console.log(empresa); 
+    let msg = empresa.msgConfiguracao;
+    msg = msg.replace("[nomeCliente]", nomeCliente);
+    msg = msg.replace("[Serviço]", servicos.map(servico => servico.nome).join(", "));
+    msg = msg.replace("[Hora]", horaAgendamento);
+    msg = msg.replace("[Data]", new Date(dataAgendamento).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
+    msg = msg.replace("[Empresa]", empresa.nomeEmpresa);
     try {
       const result = await Share.share({
         message:
-          'Mensagem Personalizada',
+          msg,
       });
     } catch (error) {
       alert(error.message);

@@ -134,7 +134,7 @@ const handleThemeChange = async (themeOption) => {
     }
     
     if (idEmpresa) {
-      if (updateDadosEmpresa(idEmpresa, nome, telefone, endereco, logo, ramoAtividade)) {
+      if (updateDadosEmpresa(idEmpresa, nome, telefone, endereco, logo, ramoAtividade, textMSG)) {
         if (ramoChange) {
           addServicoRamo(ramoAtividade);
         }
@@ -154,7 +154,7 @@ const handleThemeChange = async (themeOption) => {
         });
       }
     } else {
-      if (adicionarDadosEmpresa(nome, telefone, endereco, logo, ramoAtividade)) {
+      if (adicionarDadosEmpresa(nome, telefone, endereco, logo, ramoAtividade, textMSG)) {
         if (ramoAtividade) {
           addServicoRamo(ramoAtividade);
         }

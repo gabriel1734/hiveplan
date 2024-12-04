@@ -879,7 +879,7 @@ export function addServicoRamo(ramoSelecionado) {
     else return false;
 }
 
-export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo, ramoEmpresa= ''){
+export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo, ramoEmpresa= '', msg = '') {
 
   const db = SQLite.openDatabaseSync("database.db");
 
@@ -887,8 +887,8 @@ export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpr
     db.withTransactionSync(() =>
     {
      db.runSync(
-        "INSERT INTO dboEmpresa (nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa) VALUES (?, ?, ?, ?, ?)",
-        [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa]
+        "INSERT INTO dboEmpresa (nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa, msgConfiguracao) VALUES (?, ?, ?, ?, ?, ?)",
+        [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa, msg]
       );
 
   });
@@ -901,13 +901,13 @@ export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpr
 
 }
 
-export function updateDadosEmpresa(id,nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo = '', ramoEmpresa = '') {
+export function updateDadosEmpresa(id,nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo = '', ramoEmpresa = '', msg = '') {
   const db = SQLite.openDatabaseSync("database.db");
 
   try {
     const result = db.runSync(
-      "UPDATE dboEmpresa SET nomeEmpresa = (?), telefoneEmpresa = (?), enderecoEmpresa = (?), logo = (?), ramoEmpresa = (?) WHERE id = (?)",
-      [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa, id]
+      "UPDATE dboEmpresa SET nomeEmpresa = (?), telefoneEmpresa = (?), enderecoEmpresa = (?), logo = (?), ramoEmpresa = (?), msgConfiguracao = (?) WHERE id = (?)",
+      [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa, msg, id]
     );
 
     if (result.changes > 0) {
