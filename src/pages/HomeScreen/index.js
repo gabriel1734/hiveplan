@@ -11,6 +11,7 @@ import { checkEmpresa } from "../../database";
 import { useEffect } from "react";
 import styled from "styled-components";
 import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 export default function HomeScreen({navigation}) {
@@ -20,11 +21,16 @@ export default function HomeScreen({navigation}) {
   const [modalVisible, setModalVisible] = useState(false);
   const [welcome, setWelcome] = useState('');
 
-  useEffect(() => {
-    setWelcome(checkEmpresa());
-    if (welcome){
+  const handleWelcome = async () => {
+    const welcome = await AsyncStorage.getItem('welcome');
+    if(!welcome){
       setModalVisible(true);
+      await AsyncStorage.setItem('welcome', 'true');
     }
+  }
+
+  useEffect(() => {
+    handleWelcome();
   }, []);
 
 

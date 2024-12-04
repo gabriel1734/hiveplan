@@ -74,7 +74,8 @@ export function create() {
         telefoneEmpresa TEXT NOT NULL,
         enderecoEmpresa TEXT NOT NULL,
         logo TEXT ,
-        ramoEmpresa TEXT NOT NULL
+        ramoEmpresa TEXT NOT NULL,
+        msgConfiguracao TEXT
         );
 
       PRAGMA user_version = 2
@@ -85,13 +86,127 @@ export function create() {
 
 export function dropTables() {
   const db = SQLite.openDatabaseSync("database.db");
-  db.execSync("DROP TABLE dboAgendamento");
-  db.execSync("DROP TABLE dboServico");
-  db.execSync("DROP TABLE dboColaborador");
-  db.execSync("DROP TABLE dboColaboradorServico");
-  db.execSync("DROP TABLE dboAgendamentoServico");
-  db.execSync("DROP TABLE dboAgendamentoColaborador");
+  try {
+    db.withTransactionSync(() => {
+      // Desabilita temporariamente as restrições de chave estrangeira
+      db.execSync("PRAGMA foreign_keys = OFF");
+
+      // Exclui todas as tabelas existentes
+      db.execSync("DROP TABLE IF EXISTS dboAgendamento");
+      db.execSync("DROP TABLE IF EXISTS dboServico");
+      db.execSync("DROP TABLE IF EXISTS dboColaborador");
+      db.execSync("DROP TABLE IF EXISTS dboColaboradorServico");
+      db.execSync("DROP TABLE IF EXISTS dboAgendamentoServico");
+      db.execSync("DROP TABLE IF EXISTS dboAgendamentoColaborador");
+      db.execSync("DROP TABLE IF EXISTS dboEmpresa");
+
+      // Redefine o PRAGMA user_version para 0
+      db.execSync("PRAGMA user_version = 0");
+
+      // Reabilita as restrições de chave estrangeira
+      db.execSync("PRAGMA foreign_keys = ON");
+    });
+    console.log("Todas as tabelas foram redefinidas e a versão do banco de dados foi reiniciada.");
+  } catch (error) {
+    console.log("Erro ao redefinir tabelas e versão do banco: ", error);
+    throw error;
+  }
 }
+
+export function resetDatabase() {
+  const db = SQLite.openDatabaseSync("database.db");
+
+  try {
+    db.withTransactionSync(() => {
+      // Desabilita as restrições de chave estrangeira para evitar erros
+      db.execSync("PRAGMA foreign_keys = OFF");
+
+      // Exclui todas as tabelas existentes
+      db.execSync("DROP TABLE IF EXISTS dboAgendamento");
+      db.execSync("DROP TABLE IF EXISTS dboServico");
+      db.execSync("DROP TABLE IF EXISTS dboColaborador");
+      db.execSync("DROP TABLE IF EXISTS dboColaboradorServico");
+      db.execSync("DROP TABLE IF EXISTS dboAgendamentoServico");
+      db.execSync("DROP TABLE IF EXISTS dboAgendamentoColaborador");
+      db.execSync("DROP TABLE IF EXISTS dboEmpresa");
+
+      // Redefine a versão do banco para 0
+      db.execSync("PRAGMA user_version = 0");
+
+      // Reabilita as restrições de chave estrangeira
+      db.execSync("PRAGMA foreign_keys = ON");
+
+      // Scripts para recriar as tabelas
+      db.execSync(`
+        PRAGMA journal_mode = WAL;
+
+        CREATE TABLE IF NOT EXISTS dboAgendamento (
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          nomeCliente TEXT NOT NULL,
+          telCliente TEXT NOT NULL,
+          dataAgendamento TEXT NOT NULL,
+          horaAgendamento TEXT NOT NULL,
+          atendimento NUMERIC,
+          descricao TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS dboServico (
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          nome TEXT NOT NULL,
+          descricao TEXT,
+          favorito NUMERIC
+        );
+
+        CREATE TABLE IF NOT EXISTS dboColaborador (
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          nome TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS dboColaboradorServico (
+          codColaborador INTEGER NOT NULL DEFAULT 1 REFERENCES dboColaborador ON DELETE SET DEFAULT,
+          codServico INTEGER NOT NULL DEFAULT 1 REFERENCES dboServico ON DELETE SET DEFAULT,
+          favorito NUMERIC,
+          PRIMARY KEY (codColaborador, codServico)
+        );
+
+        CREATE TABLE IF NOT EXISTS dboAgendamentoServico (
+          codAgendamento INTEGER NOT NULL REFERENCES dboAgendamento,
+          codServico INTEGER NOT NULL DEFAULT 1 REFERENCES dboServico ON DELETE SET DEFAULT,
+          PRIMARY KEY (codAgendamento, codServico)
+        );
+
+        CREATE TABLE IF NOT EXISTS dboAgendamentoColaborador (
+          codAgendamento INTEGER NOT NULL REFERENCES dboAgendamento,
+          codColaborador INTEGER NOT NULL DEFAULT 1 REFERENCES dboColaborador ON DELETE SET DEFAULT,
+          PRIMARY KEY (codAgendamento, codColaborador)
+        );
+
+        CREATE TABLE IF NOT EXISTS dboEmpresa (
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          nomeEmpresa TEXT NOT NULL,
+          telefoneEmpresa TEXT NOT NULL,
+          enderecoEmpresa TEXT NOT NULL,
+          logo TEXT,
+          ramoEmpresa TEXT NOT NULL,
+          msgConfiguracao TEXT
+        );
+
+        PRAGMA user_version = 2;
+      `);
+
+      console.log("Banco de dados redefinido e tabelas recriadas com sucesso.");
+    });
+
+    // Insere os dados iniciais necessários
+    insertDefault();
+
+  } catch (error) {
+    console.log("Erro ao redefinir e recriar o banco de dados: ", error);
+    throw error;
+  }
+}
+
+
 
 //Função para inserir um serviço e um colaborador padrão no sistema
 export function insertDefault() {

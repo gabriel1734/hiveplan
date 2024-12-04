@@ -1,10 +1,10 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useState, useEffect, useContext } from "react";
-import { TouchableOpacity, StyleSheet, Text, TextInput, View, SafeAreaView, useColorScheme, Alert } from "react-native";
+import { TouchableOpacity, StyleSheet, Text, TextInput, View, SafeAreaView, useColorScheme, Alert, BackHandler } from "react-native";
 import { TextInputMask } from "react-native-masked-text";
 import RNPickerSelect from 'react-native-picker-select';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { addServicoRamo, adicionarDadosEmpresa, updateDadosEmpresa, viewEmpresa } from "../../database";
+import { addServicoRamo, adicionarDadosEmpresa, dropTables, resetDatabase, updateDadosEmpresa, viewEmpresa } from "../../database";
 import styled from "styled-components";
 import Toast from 'react-native-root-toast';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -76,7 +76,7 @@ const handleThemeChange = async (themeOption) => {
       setEndereco(dadosEmpresa.enderecoEmpresa);
       setRamoAtividade(dadosEmpresa.ramoEmpresa);
       setIdEmpresa(dadosEmpresa.id);
-      setTextMSG(`Olá [nomeCliente]. Você possui agendado o serviço [Serviço] às [Hora] do dia [Data] na [Empresa].`);
+      setTextMSG(dadosEmpresa.msgConfiguracao);
     } else {
       setTextMSG(`
           Olá [nomeCliente]. Você possui agendado o serviço [Serviço] às [Hora] do dia [Data] na [Empresa].
@@ -290,7 +290,14 @@ const handleThemeChange = async (themeOption) => {
     });
 
     if (biometricAuth.success) {
-      console.log('implementar reset aqui!');
+      await AsyncStorage.clear();
+        ();
+      Toast.show('Aplicativo resetado!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#00FF00',
+      });
+      BackHandler.exitApp();
     } else {
       Toast.show('Autenticação falhou!', {
         duration: Toast.durations.SHORT,
