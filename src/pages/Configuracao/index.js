@@ -291,7 +291,7 @@ const handleThemeChange = async (themeOption) => {
 
     if (biometricAuth.success) {
       await AsyncStorage.clear();
-        ();
+      resetDatabase();
       Toast.show('Aplicativo resetado!', {
         duration: Toast.durations.SHORT,
         position: Toast.positions.BOTTOM,

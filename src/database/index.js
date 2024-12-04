@@ -118,7 +118,7 @@ export function resetDatabase() {
 
   try {
     db.withTransactionSync(() => {
-      // Desabilita as restrições de chave estrangeira para evitar erros
+      // Desabilita as restrições de chave estrangeira
       db.execSync("PRAGMA foreign_keys = OFF");
 
       // Exclui todas as tabelas existentes
@@ -133,10 +133,7 @@ export function resetDatabase() {
       // Redefine a versão do banco para 0
       db.execSync("PRAGMA user_version = 0");
 
-      // Reabilita as restrições de chave estrangeira
-      db.execSync("PRAGMA foreign_keys = ON");
-
-      // Scripts para recriar as tabelas
+      // Recria as tabelas
       db.execSync(`
         PRAGMA journal_mode = WAL;
 
@@ -194,17 +191,20 @@ export function resetDatabase() {
         PRAGMA user_version = 2;
       `);
 
-      console.log("Banco de dados redefinido e tabelas recriadas com sucesso.");
+      // Reabilita as restrições de chave estrangeira
+      db.execSync("PRAGMA foreign_keys = ON");
     });
 
     // Insere os dados iniciais necessários
     insertDefault();
 
+    console.log("Banco de dados redefinido e tabelas recriadas com sucesso.");
   } catch (error) {
-    console.log("Erro ao redefinir e recriar o banco de dados: ", error);
+    console.log("Erro ao redefinir tabelas e versão do banco: ", error);
     throw error;
   }
 }
+
 
 
 
