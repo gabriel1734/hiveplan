@@ -74,7 +74,8 @@ export function create() {
         telefoneEmpresa TEXT NOT NULL,
         enderecoEmpresa TEXT NOT NULL,
         logo TEXT ,
-        ramoEmpresa TEXT NOT NULL
+        ramoEmpresa TEXT NOT NULL,
+        msgConfiguracao TEXT
         );
 
       PRAGMA user_version = 2
@@ -85,13 +86,127 @@ export function create() {
 
 export function dropTables() {
   const db = SQLite.openDatabaseSync("database.db");
-  db.execSync("DROP TABLE dboAgendamento");
-  db.execSync("DROP TABLE dboServico");
-  db.execSync("DROP TABLE dboColaborador");
-  db.execSync("DROP TABLE dboColaboradorServico");
-  db.execSync("DROP TABLE dboAgendamentoServico");
-  db.execSync("DROP TABLE dboAgendamentoColaborador");
+  try {
+    db.withTransactionSync(() => {
+      // Desabilita temporariamente as restrições de chave estrangeira
+      db.execSync("PRAGMA foreign_keys = OFF");
+
+      // Exclui todas as tabelas existentes
+      db.execSync("DROP TABLE IF EXISTS dboAgendamento");
+      db.execSync("DROP TABLE IF EXISTS dboServico");
+      db.execSync("DROP TABLE IF EXISTS dboColaborador");
+      db.execSync("DROP TABLE IF EXISTS dboColaboradorServico");
+      db.execSync("DROP TABLE IF EXISTS dboAgendamentoServico");
+      db.execSync("DROP TABLE IF EXISTS dboAgendamentoColaborador");
+      db.execSync("DROP TABLE IF EXISTS dboEmpresa");
+
+      // Redefine o PRAGMA user_version para 0
+      db.execSync("PRAGMA user_version = 0");
+
+      // Reabilita as restrições de chave estrangeira
+      db.execSync("PRAGMA foreign_keys = ON");
+    });
+    console.log("Todas as tabelas foram redefinidas e a versão do banco de dados foi reiniciada.");
+  } catch (error) {
+    console.log("Erro ao redefinir tabelas e versão do banco: ", error);
+    throw error;
+  }
 }
+
+export function resetDatabase() {
+  const db = SQLite.openDatabaseSync("database.db");
+
+  try {
+    db.withTransactionSync(() => {
+      // Desabilita as restrições de chave estrangeira
+      db.execSync("PRAGMA foreign_keys = OFF");
+
+      // Exclui todas as tabelas existentes
+      db.execSync("DROP TABLE IF EXISTS dboAgendamento");
+      db.execSync("DROP TABLE IF EXISTS dboServico");
+      db.execSync("DROP TABLE IF EXISTS dboColaborador");
+      db.execSync("DROP TABLE IF EXISTS dboColaboradorServico");
+      db.execSync("DROP TABLE IF EXISTS dboAgendamentoServico");
+      db.execSync("DROP TABLE IF EXISTS dboAgendamentoColaborador");
+      db.execSync("DROP TABLE IF EXISTS dboEmpresa");
+
+      // Redefine a versão do banco para 0
+      db.execSync("PRAGMA user_version = 0");
+
+      // Recria as tabelas
+      db.execSync(`
+        PRAGMA journal_mode = WAL;
+
+        CREATE TABLE IF NOT EXISTS dboAgendamento (
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          nomeCliente TEXT NOT NULL,
+          telCliente TEXT NOT NULL,
+          dataAgendamento TEXT NOT NULL,
+          horaAgendamento TEXT NOT NULL,
+          atendimento NUMERIC,
+          descricao TEXT
+        );
+
+        CREATE TABLE IF NOT EXISTS dboServico (
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          nome TEXT NOT NULL,
+          descricao TEXT,
+          favorito NUMERIC
+        );
+
+        CREATE TABLE IF NOT EXISTS dboColaborador (
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          nome TEXT NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS dboColaboradorServico (
+          codColaborador INTEGER NOT NULL DEFAULT 1 REFERENCES dboColaborador ON DELETE SET DEFAULT,
+          codServico INTEGER NOT NULL DEFAULT 1 REFERENCES dboServico ON DELETE SET DEFAULT,
+          favorito NUMERIC,
+          PRIMARY KEY (codColaborador, codServico)
+        );
+
+        CREATE TABLE IF NOT EXISTS dboAgendamentoServico (
+          codAgendamento INTEGER NOT NULL REFERENCES dboAgendamento,
+          codServico INTEGER NOT NULL DEFAULT 1 REFERENCES dboServico ON DELETE SET DEFAULT,
+          PRIMARY KEY (codAgendamento, codServico)
+        );
+
+        CREATE TABLE IF NOT EXISTS dboAgendamentoColaborador (
+          codAgendamento INTEGER NOT NULL REFERENCES dboAgendamento,
+          codColaborador INTEGER NOT NULL DEFAULT 1 REFERENCES dboColaborador ON DELETE SET DEFAULT,
+          PRIMARY KEY (codAgendamento, codColaborador)
+        );
+
+        CREATE TABLE IF NOT EXISTS dboEmpresa (
+          id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+          nomeEmpresa TEXT NOT NULL,
+          telefoneEmpresa TEXT NOT NULL,
+          enderecoEmpresa TEXT NOT NULL,
+          logo TEXT,
+          ramoEmpresa TEXT NOT NULL,
+          msgConfiguracao TEXT
+        );
+
+        PRAGMA user_version = 2;
+      `);
+
+      // Reabilita as restrições de chave estrangeira
+      db.execSync("PRAGMA foreign_keys = ON");
+    });
+
+    // Insere os dados iniciais necessários
+    insertDefault();
+
+    console.log("Banco de dados redefinido e tabelas recriadas com sucesso.");
+  } catch (error) {
+    console.log("Erro ao redefinir tabelas e versão do banco: ", error);
+    throw error;
+  }
+}
+
+
+
 
 //Função para inserir um serviço e um colaborador padrão no sistema
 export function insertDefault() {
@@ -210,6 +325,30 @@ export function addAgendamento(
     console.log("Erro ao adicionar agendamento: ", error);
     return false; // Falha
   }
+}
+
+export function getClientes() {
+  const db = SQLite.openDatabaseSync("database.db");
+  const result = db.getAllSync("SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento ORDER BY nomeCliente");
+  return result;
+}
+
+export function getClientesPorDataENome(dataInicio, dataFim, nome) {
+  const db = SQLite.openDatabaseSync("database.db");
+  const result = db.getAllSync("SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento WHERE dataAgendamento BETWEEN (?) AND (?) AND nomeCliente LIKE (?) ORDER BY nomeCliente", [dataInicio, dataFim, `%${nome}%`]);
+  return result;
+}
+
+export function getClientesPorData(dataInicio, dataFim) {
+  const db = SQLite.openDatabaseSync("database.db");
+  const result = db.getAllSync("SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento WHERE dataAgendamento BETWEEN (?) AND (?) ORDER BY nomeCliente", [dataInicio, dataFim]);
+  return result;
+}
+
+export function getClientesPorNome(nome) {
+  const db = SQLite.openDatabaseSync("database.db");
+  const result = db.getAllSync("SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento WHERE nomeCliente LIKE (?) ORDER BY nomeCliente", [`%${nome}%`]);
+  return result;
 }
 
 // Função para adicionar um serviço novo no agendamento
@@ -740,14 +879,17 @@ export function addServicoRamo(ramoSelecionado) {
     else return false;
 }
 
-export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo, ramoEmpresa= ''){
+export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo, ramoEmpresa= '', msg = '') {
 
   const db = SQLite.openDatabaseSync("database.db");
 
   try{
     db.withTransactionSync(() =>
     {
-     db.runSync("INSERT INTO dboEmpresa (nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa) VALUES (?, ?, ?, ?, ?)",[nomeEmpresa, telefoneEmpresa, enderecoEmpresa,logo,ramoEmpresa]);
+     db.runSync(
+        "INSERT INTO dboEmpresa (nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa, msgConfiguracao) VALUES (?, ?, ?, ?, ?, ?)",
+        [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa, msg]
+      );
 
   });
   return true;
@@ -759,12 +901,13 @@ export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpr
 
 }
 
-export function updateDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo = '', ramoEmpresa = '') {
+export function updateDadosEmpresa(id,nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo = '', ramoEmpresa = '', msg = '') {
   const db = SQLite.openDatabaseSync("database.db");
+
   try {
     const result = db.runSync(
-      "UPDATE dboEmpresa SET nomeEmpresa = (?), telefoneEmpresa = (?), enderecoEmpresa = (?), logo = (?), ramoEmpresa = (?)",
-      [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa]
+      "UPDATE dboEmpresa SET nomeEmpresa = (?), telefoneEmpresa = (?), enderecoEmpresa = (?), logo = (?), ramoEmpresa = (?), msgConfiguracao = (?) WHERE id = (?)",
+      [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa, msg, id]
     );
 
     if (result.changes > 0) {
@@ -781,6 +924,7 @@ export function viewEmpresa() {
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.getFirstSync("SELECT * FROM dboEmpresa");
+    console.log("result", result);
     return result;
   } catch (error) {
     console.log("Erro", error);
@@ -791,9 +935,21 @@ export function checkEmpresa() {
   const db = SQLite.openDatabaseSync("database.db");
   try {
     const result = db.getFirstSync("SELECT COUNT(*) FROM dboEmpresa");
-    return result["COUNT(*)"] > 0;
+    return result["COUNT(*)"] > 0 ? false : true;
   } catch (error) {
     console.log("Erro", error);
+  }
+}
+
+export function deleteEmpresa() {
+  const db = SQLite.openDatabaseSync("database.db");
+  try {
+    const result = db.runSync("DELETE FROM dboEmpresa");
+    if (result.changes > 0) return true;
+    else return false;
+  } catch (error) {
+    console.log("erro:", error);
+    return false;
   }
 }
 
@@ -809,6 +965,7 @@ export function verSemanasComAgendamentos() {
   if (result.length === 0) {
     return [];
   }
+  
 
   const semanasComAgendamentos = [];
 

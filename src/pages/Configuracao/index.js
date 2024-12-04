@@ -1,10 +1,10 @@
 import { LinearGradient } from "expo-linear-gradient";
 import { useState, useEffect, useContext } from "react";
-import { TouchableOpacity, StyleSheet, Text, TextInput, View, SafeAreaView } from "react-native";
+import { TouchableOpacity, StyleSheet, Text, TextInput, View, SafeAreaView, useColorScheme, Alert, BackHandler } from "react-native";
 import { TextInputMask } from "react-native-masked-text";
 import RNPickerSelect from 'react-native-picker-select';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { addServicoRamo, adicionarDadosEmpresa, updateDadosEmpresa, viewEmpresa } from "../../database";
+import { addServicoRamo, adicionarDadosEmpresa, dropTables, resetDatabase, updateDadosEmpresa, viewEmpresa } from "../../database";
 import styled from "styled-components";
 import Toast from 'react-native-root-toast';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -13,9 +13,10 @@ import dark from "../../theme/dark";
 import { DataTheme } from "../../context";
 import { Image } from "expo-image";
 import * as ImagePicker from 'expo-image-picker';
+import * as LocalAuthentication from 'expo-local-authentication';
 
 
-export default function Configuracao({ navigation }) {
+export default function Configuracao({ navigation, route }) {
   const [nome, setNome] = useState('');
   const [telefone, setTelefone] = useState('');
   const [endereco, setEndereco] = useState('');
@@ -24,14 +25,52 @@ export default function Configuracao({ navigation }) {
   const [ramoChange, setRamoChange] = useState(false);
   const [idEmpresa, setIdEmpresa] = useState('');
   const { theme, setTheme } = useContext(DataTheme);
+  const { msg } = route.params || '';
+  const [selectedTheme, setSelectedTheme] = useState();
+  const systemTheme = useColorScheme();
+  const [textMSG, setTextMSG] = useState('');
+
+const handleThemeChange = async (themeOption) => {
+  try {
+    setSelectedTheme(themeOption); // Atualiza o tema selecionado no estado
+    console.log("Tema selecionado:", themeOption);
+
+    if (themeOption === "default") {
+      // Determina o tema com base nas configurações do dispositivo
+      const deviceTheme = useColorScheme();
+      console.log("Tema do dispositivo:", deviceTheme);
+
+      if (deviceTheme === "dark") {
+        setTheme(dark);
+      } else {
+        setTheme(light);
+      }
+
+      // Remove o tema armazenado para usar o padrão do dispositivo
+      await AsyncStorage.removeItem("theme");
+    } else if (themeOption === "light") {
+      // Define o tema claro e armazena a escolha
+      setTheme(light);
+      await AsyncStorage.setItem("theme", "light");
+    } else if (themeOption === "dark") {
+      // Define o tema escuro e armazena a escolha
+      setTheme(dark);
+      await AsyncStorage.setItem("theme", "dark");
+    }
+  } catch (error) {
+    console.error("Erro ao alterar o tema:", error);
+  }
+};
 
 
   const handleAtividadeChange = (atividade) => {
-    setRamoAtividade(atividade);
-    setRamoChange(true);
+    if (atividade !== ramoAtividade) {
+      setRamoAtividade(atividade);
+      setRamoChange(true); // Apenas marca como alterado se o ramo realmente mudar
+    }
   };
 
-  handleGet = async () => {
+  const handleGet = async () => {
     const dadosEmpresa = viewEmpresa();
     if(dadosEmpresa){
       setNome(dadosEmpresa.nomeEmpresa);
@@ -39,79 +78,109 @@ export default function Configuracao({ navigation }) {
       setEndereco(dadosEmpresa.enderecoEmpresa);
       setRamoAtividade(dadosEmpresa.ramoEmpresa);
       setIdEmpresa(dadosEmpresa.id);
+      setTextMSG(dadosEmpresa.msgConfiguracao);
+    } else {
+      setTextMSG(`
+          Olá [nomeCliente]. Você possui agendado o serviço [Serviço] às [Hora] do dia [Data] na [Empresa].
+        `);
     }
     const savedTheme = await AsyncStorage.getItem('theme');
-    if (theme !== savedTheme) {
-      setTheme(savedTheme === light ? light : dark);
+    if (savedTheme) {
+      setSelectedTheme(savedTheme);
+      setThemeOption(savedTheme);
+    } else {
+      const device = useColorScheme();
+      console.log('device', device);  
+      if (device === 'dark') {
+        setSelectedTheme('dark');
+      } else {
+        setSelectedTheme('light');
+      }
+      setThemeOption('default');
     }
     const uri = await AsyncStorage.getItem('logo');
     if (uri) {
       setLogo(uri);
     }
+    setRamoChange(false);
   }
 
   useEffect(() => {
     handleGet();
+    if(msg){
+      Toast.show(msg, {
+        duration: Toast.durations.LONG,
+        position: Toast.positions.CENTER,
+        backgroundColor: '#00FF00',
+      });
+    }
+    setRamoChange(false);
   },[])
 
-  const handleSave = () => {
-    if (nome == '' || nome == null) {
-      Toast.show('Preencha o campo Nome', {
-        duration: Toast.durations.SHORT,
-        position: Toast.positions.BOTTOM,
-        backgroundColor: '#FF0000',
-      });
-      return;
-    }
-    if (telefone == '' || telefone == null) {
-      Toast.show('Preencha o campo Telefone', {
-        duration: Toast.durations.SHORT,
-        position: Toast.positions.BOTTOM,
-        backgroundColor: '#FF0000',
-      });
-      return;
-    }
-    
-    if (idEmpresa) {
-      if (updateDadosEmpresa(idEmpresa, nome, telefone, endereco, logo, ramoAtividade)) {
-        if (ramoChange) {
-          addServicoRamo(ramoAtividade);
-        }
-        Toast.show('Atualizado!', {
-          duration: Toast.durations.SHORT,
-          position: Toast.positions.BOTTOM,
-          backgroundColor: '#00FF00',
-        });
-      }
-        
-      else {
-        Toast.show('Erro!', {
-          duration: Toast.durations.SHORT,
-          position: Toast.positions.BOTTOM,
-          backgroundColor: '#FF0000',
-        });
-      }
-    } else {
-      if (adicionarDadosEmpresa(nome, telefone, endereco, logo, ramoAtividade)) {
-        if (ramoAtividade) {
-          addServicoRamo(ramoAtividade);
-        }
-        Toast.show('Adicionado!', {
-          duration: Toast.durations.SHORT,
-          position: Toast.positions.BOTTOM,
-          backgroundColor: '#00FF00',
-        });
-        
-      } else {
-        Toast.show('Erro!', {
-          duration: Toast.durations.SHORT,
-          position: Toast.positions.BOTTOM,
-          backgroundColor: '#FF0000',
-        });
-      }
+ const handleSave = () => {
+  // Verifica se os campos obrigatórios estão preenchidos
+  if (nome === '' || nome == null) {
+    Toast.show('Preencha o campo Nome', {
+      duration: Toast.durations.SHORT,
+      position: Toast.positions.BOTTOM,
+      backgroundColor: '#FF0000',
+    });
+    return;
+  }
+  if (telefone === '' || telefone == null) {
+    Toast.show('Preencha o campo Telefone', {
+      duration: Toast.durations.SHORT,
+      position: Toast.positions.BOTTOM,
+      backgroundColor: '#FF0000',
+    });
+    return;
+  }
 
+  if (idEmpresa) {
+    // Atualiza os dados da empresa
+    if (updateDadosEmpresa(idEmpresa, nome, telefone, endereco, logo, ramoAtividade, textMSG)) {
+      if (ramoChange) {
+        addServicoRamo(ramoAtividade); // Adiciona serviços apenas se houve alteração no ramo
+      }
+      Toast.show('Atualizado!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#00FF00',
+      });
+      navigation.navigate('Home');
+    } else {
+      Toast.show('Erro ao atualizar!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#FF0000',
+      });
+    }
+  } else {
+    // Adiciona nova empresa
+    if (adicionarDadosEmpresa(nome, telefone, endereco, logo, ramoAtividade, textMSG)) {
+      if (ramoChange) {
+        addServicoRamo(ramoAtividade); // Adiciona serviços apenas se houve alteração no ramo
+      }
+      Toast.show('Adicionado!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#00FF00',
+      });
+
+      setIdEmpresa(viewEmpresa().id);
+    } else {
+      Toast.show('Erro ao adicionar!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#FF0000',
+      });
     }
   }
+
+  // Reseta o estado de alteração de ramo
+  setRamoChange(false);
+};
+
 
   const pickImage = async () => {
   try {
@@ -135,7 +204,6 @@ export default function Configuracao({ navigation }) {
     });
 
     if (!result.canceled) {
-      console.log('result', result.assets[0]);
       setLogo(result.assets[0].uri);
       await saveLogo(result.assets[0].uri);
     }
@@ -186,21 +254,72 @@ export default function Configuracao({ navigation }) {
       });
     }
   }
+
+
+  const handleBackup =  () => {
+    console.log('Implementar backup');
+  }
+
+  const ConfirmReset = () => {
+    Alert.alert(
+      'Reset',
+      'Deseja realmente resetar o aplicativo? Isso apagará todos os dados e todas a configurações salvas para sempre!',
+      [
+        {
+          text: 'Cancelar',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+        { text: 'Sim', onPress: () => handleReset() },
+      ],
+      { cancelable: false }
+    );
+  }
+
+  const handleReset = async () => {
+    const isBiometricSupported = await LocalAuthentication.hasHardwareAsync();
+    const supported = await LocalAuthentication.supportedAuthenticationTypesAsync();
+
+    if (!isBiometricSupported && supported.length === 0) {
+      Alert.alert('Seu dispositivo não autenticação biométrica');
+    }
+
+    const savedBiometric = await LocalAuthentication.isEnrolledAsync();
+    if (!savedBiometric) {
+      Alert.alert('Digite sua senha para continuar');
+    }
+
+    const biometricAuth = await LocalAuthentication.authenticateAsync({
+      promptMessage: 'Autentique-se para continuar',
+      cancelLabel: 'Usar PIN/Senha',
+      fallbackLabel: 'Digite seu PIN/Senha',
+    });
+
+    if (biometricAuth.success) {
+      await AsyncStorage.clear();
+      resetDatabase();
+      Toast.show('Aplicativo resetado!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#00FF00',
+      });
+      BackHandler.exitApp();
+    } else {
+      Toast.show('Autenticação falhou!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#FF0000',
+      });
+    }
+
+  }
+
   // Carrega o logo quando o componente monta
   useEffect(() => {
     loadLogo();
   }, [])
 
-  const toggleTheme = async () => {
-    const newTheme = theme === light ? dark : light;
-    setTheme(newTheme);
-    await AsyncStorage.setItem('theme', newTheme === dark ? 'dark' : 'light');
-    Toast.show(`Tema alterado para ${newTheme === dark ? 'Escuro' : 'Claro'}`, {
-      duration: Toast.durations.SHORT,
-      position: Toast.positions.BOTTOM,
-      backgroundColor: '#00FF00',
-    });
-  };
+  
 
   const backgroundColor = theme === light ? ['#F7FF89', '#F6FF77', '#E8F622'] : ['#bb86fc', '#bb86fc', '#bb86fc'];
 
@@ -230,7 +349,7 @@ export default function Configuracao({ navigation }) {
               style={{ width: 200, height: 200, borderRadius: 10}}
             />
             <View style={{ marginTop: 10, flexDirection: 'row', alignItems:'center', justifyContent: 'center', width: '100%', gap:10}}>
-              <TouchableOpacity style={{marginTop:10}} onPress={pickImage}>
+              <TouchableOpacity onPress={pickImage}>
                 <ThemeSelect>
                   <ThemeBtn>Alternar Logo</ThemeBtn>
                 </ThemeSelect>
@@ -281,16 +400,47 @@ export default function Configuracao({ navigation }) {
             value={ramoAtividade}
             placeholder={{ label: "Escolha uma atividade...", value: "" }}
           />
-          <TouchableOpacity onPress={toggleTheme}>
-            <ThemeSelect>
-              <ThemeBtn>Alternar Tema</ThemeBtn>
-            </ThemeSelect>
-          </TouchableOpacity>
+          <Label>Selecione o Tema:</Label>
+          <RadioGroup>
+            <RadioOption onPress={() => handleThemeChange("light")}>
+              <RadioCircle>
+                {selectedTheme === "light" && <RadioCircleSelected />}
+              </RadioCircle>
+              <RadioLabel>Claro</RadioLabel>
+            </RadioOption>
+
+            <RadioOption onPress={() => handleThemeChange("dark")}>
+              <RadioCircle>
+                {selectedTheme === "dark" && <RadioCircleSelected />}
+              </RadioCircle>
+              <RadioLabel>Escuro</RadioLabel>
+            </RadioOption>
+            <RadioOption onPress={() => handleThemeChange("default")}>
+              <RadioCircle>
+                {selectedTheme === "default" && <RadioCircleSelected />}
+              </RadioCircle>
+              <RadioLabel>Automático</RadioLabel>
+            </RadioOption>
+          </RadioGroup>
+          <Label>Defina uma Mensagem Padrão</Label>
+          <StyledTextInput placeholder="Mensagem Padrão" placeholderTextColor="#888" multiline={true} numberOfLines={4} value={textMSG} onChangeText={setTextMSG} />
+
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
+            <BtnBackup style={styles.saveButton} onPress={handleBackup}>
+              <AntDesign name="cloudupload" size={24} color="black" />
+              <BtnBackupText>Backup</BtnBackupText>
+            </BtnBackup>
+            <BtnReset style={styles.saveButton} onPress={ConfirmReset}>
+              <AntDesign name="delete" size={24} color="black" />
+              <BtnResetText>Reset</BtnResetText>
+            </BtnReset>
+          </View>
           <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
             <LinearGradient colors={backgroundColor} style={styles.saveButtonGradient}>
               <Text style={styles.saveButtonText}>Salvar</Text>
             </LinearGradient>
           </TouchableOpacity>
+
         </Content>
       </Container>
       <Toast />
@@ -316,6 +466,38 @@ const ExcludeButton = styled.Text`
   color: ${props => props.theme.buttonText};
 `;
 
+const BtnBackup = styled.TouchableOpacity`
+  background-color: ${props => props.theme.buttonBackground};
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  border-radius: 5px;
+  width: 48%;
+  text-align: center;
+  color: ${props => props.theme.buttonText};
+`;
+
+const BtnBackupText = styled.Text`
+  color: ${props => props.theme.buttonText};
+  margin-left: 10px;
+`
+
+const BtnReset = styled.TouchableOpacity`
+  background-color: ${props => props.theme.secondary};
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  border-radius: 5px;
+  width: 48%;
+  text-align: center;
+  color: ${props => props.theme.buttonText};
+  `;
+  
+const BtnResetText = styled.Text`
+  color: ${props => props.theme.buttonText};
+  margin-left: 10px;
+`;
+
 const Content = styled.SafeAreaView`
   margin-bottom: 50px;
 `;
@@ -336,6 +518,16 @@ const StyledInput = styled.TextInput`
   color: ${props => props.theme.text};
 `;
 
+const StyledTextInput = styled.TextInput`
+  border-Color: ${props => props.theme.borderColor};
+  border-Width: 1px;
+  border-Radius: 5px;
+  background-Color: ${props => props.theme.inputBackground};
+  padding: 10px;
+  margin-Bottom: 10px;
+  color: ${props => props.theme.text};
+`
+
 const StyledTextInputMask = styled(TextInputMask)`
   height: 50px;
   border-Color: ${props => props.theme.borderColor};
@@ -355,10 +547,10 @@ const Label = styled.Text`
 `
 const ThemeSelect = styled.View`
   border-color: ${props => props.theme.borderColor};
-  border-width: 1px;
   background-color: ${props => props.theme.inputBackground};
-  border-radius: 5px;
+  border-radius: 10px;
   width: '100%';
+  height: '100%';
 `
 const ThemeBtn = styled.Text`
   padding: 10px;
@@ -368,6 +560,40 @@ const ThemeBtn = styled.Text`
   width: '100%';
   color: ${props => props.theme.buttonText};
 `
+const RadioGroup = styled.View`
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+`;
+
+const RadioOption = styled.TouchableOpacity`
+  flex-direction: row;
+  align-items: center;
+`;
+
+const RadioCircle = styled.View`
+  height: 24px;
+  width: 24px;
+  border-radius: 12px;
+  border-width: 2px;
+  border-color: ${(props) => props.theme.borderColor || "#888"};
+  justify-content: center;
+  align-items: center;
+  margin-right: 8px;
+`;
+
+const RadioCircleSelected = styled.View`
+  height: 12px;
+  width: 12px;
+  border-radius: 6px;
+  background-color: ${(props) => props.theme.buttonBackground || "#007BFF"};
+`;
+
+const RadioLabel = styled.Text`
+  font-size: 16px;
+  color: ${(props) => props.theme.text};
+`;
 
 const styles = StyleSheet.create({
   container: {

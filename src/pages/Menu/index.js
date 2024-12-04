@@ -24,6 +24,14 @@ export default function MenuScreen({ navigation }) {
           </TextMenu>
         </TextContainer>
       </Button>
+      <Button onPress={() => navigation.navigate('Clientes')}>
+        <DesignColor name="user" size={24}/>
+        <TextContainer>
+          <TextMenu>
+            Clientes
+          </TextMenu>
+        </TextContainer>
+      </Button>
       <Button onPress={() => navigation.navigate('Colaboradores')}>
         <DesignColor name="team" size={24} />
         <TextContainer>
@@ -61,8 +69,8 @@ const Container = styled.View`
 
 const GoBack = styled(AntDesign)`
   position: absolute;
-  top: 80;
-  left: 40;
+  top: 80px;
+  left: 40px;
   color: ${props => props.theme.text};
 `
 
@@ -94,7 +102,7 @@ const TextContainer = styled.View`
 `;
 
 const TextMenu = styled.Text`
-  font-Size: 24;
+  font-Size: 24px;
   font-Weight: bold;
   color: ${props => props.theme.text};
 `;

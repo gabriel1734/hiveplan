@@ -18,6 +18,7 @@ import themes
  from './src/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { DataTheme } from './src/context';
+import Clientes from './src/pages/Clientes';
 
 export const AgendamentoScreenContext = createContext();
 
@@ -26,25 +27,8 @@ const Stack = createNativeStackNavigator();  // Create a stack navigator
 export default function App() {
  //dropTables();
   create();
-
-  const [theme, setTheme] = useState(themes.dark);
-
-  const handleTheme = async () => {
-    const themeStorage = await AsyncStorage.getItem('theme');
-    if (!themeStorage) {
-      const device = useColorScheme();
-      await AsyncStorage.setItem('theme', device);
-      setTheme(themes[device] || themes.dark);
-    } else {
-      setTheme(themes[themeStorage] || themes.dark);
-    }
-  }
-
-  useEffect(() => {
-    handleTheme();
-  }, []);
-
-  console.log(theme);
+  const device = useColorScheme();
+  const [theme, setTheme] = useState(device === 'dark' ? dark : light);
 
   return (
     <RootSiblingParent>
@@ -62,6 +46,7 @@ export default function App() {
               <Stack.Screen name="Colaboradores" component={Colaboradores} />
               <Stack.Screen name="Configuracao" component={Configuracao} />
               <Stack.Screen name="Servicos" component={Servicos} />
+              <Stack.Screen name="Clientes" component={Clientes} />
             </Stack.Navigator>
           </NavigationContainer>
         </ThemeProvider>

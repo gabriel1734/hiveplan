@@ -40,7 +40,7 @@ const StyledButton = styled.TouchableOpacity`
 `;
 
 const StyledText = styled.Text`
-  font-Size: 40;
+  font-Size: 40px;
   font-Weight: bold;
   color: ${props=> props.theme.buttonText};
 `;

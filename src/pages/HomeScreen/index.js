@@ -10,19 +10,29 @@ import { DataContext } from "../../context";
 import { checkEmpresa } from "../../database";
 import { useEffect } from "react";
 import styled from "styled-components";
+import { useFocusEffect } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 export default function HomeScreen({navigation}) {
   const date = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
   const [data, setData] = useState(date.split('/').reverse().join('-'));
   const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible, setModalVisible] = useState(true);
-  const [welcome, setWelcome] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [welcome, setWelcome] = useState('');
+
+  const handleWelcome = async () => {
+    const welcome = await AsyncStorage.getItem('welcome');
+    if(!welcome){
+      setModalVisible(true);
+      await AsyncStorage.setItem('welcome', 'true');
+    }
+  }
 
   useEffect(() => {
-    setWelcome(checkEmpresa());
-    console.log('Welcome:', welcome);
+    handleWelcome();
   }, []);
+
 
 
   return (
@@ -36,13 +46,11 @@ export default function HomeScreen({navigation}) {
         }
       }>
         <Header />
-        {welcome == null ?
           <WelcomeModal
-            modalVisible={modalVisible}
-            setModalVisible={setModalVisible}
+            visible={modalVisible}
             onClose={() => setModalVisible(false)}
             navigation={navigation}
-          /> : null}
+          />
         <WeekBtn navigation={navigation} />
         <CardAgendamentosCount /> 
         <CardAgendamentos navigation={navigation} />
