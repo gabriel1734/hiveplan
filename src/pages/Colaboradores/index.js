@@ -256,7 +256,7 @@ const ButtonContainer = styled.View`
   padding-top: 20px;
   flex-direction: row;
   justify-content: space-between;
-  width: '100%';
+  width: 100%;
   padding-bottom: 20px;
 `;
 
@@ -265,7 +265,7 @@ const ActionButtonSave = styled.Text`
   border-radius: 10px;
   background-color: ${props => props.theme.buttonBackground};
   text-align: center;
-  width: '45%';
+  width: 45%;
   color: ${props => props.theme.buttonText};
 `;
 
@@ -275,7 +275,7 @@ const ActionButtonCancel = styled.Text`
   border-radius: 10px;
   background-color: ${props => props.theme.buttonText};
   text-align: center;
-  width: '45%';
+  width: 45%;
   border: 2px solid ${props => props.theme.primary};
   font-weight: bold;
 `;

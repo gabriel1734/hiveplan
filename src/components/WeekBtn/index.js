@@ -34,7 +34,7 @@ const Container = styled.View`
   background-color: ${props => props.theme.background};
   border-Radius: 10px;
   margin-Top: 10px;
-  width: '100%';
+  width: 100%;
 `;
 
 const StyledText = styled.Text`

@@ -168,7 +168,6 @@ import * as Clipboard from 'expo-clipboard';
           position: Toast.positions.BOTTOM,
           backgroundColor: '#00FF00',
         });
-        navigation.navigate('Home');
       } else {
         Toast.show('Erro ao atualizar!', {
           duration: Toast.durations.SHORT,
@@ -197,6 +196,7 @@ import * as Clipboard from 'expo-clipboard';
           backgroundColor: '#FF0000',
         });
       }
+      navigation.navigate('Home');
     }
 
     // Reseta o estado de alteração de ramo
@@ -627,15 +627,15 @@ const TitleModal = styled.Text`
     border-color: ${props => props.theme.borderColor};
     background-color: ${props => props.theme.inputBackground};
     border-radius: 10px;
-    width: '100%';
-    height: '100%';
+    width: 100%;
+    height: 100%;
   `
   const ThemeBtn = styled.Text`
     padding: 10px;
     border-radius: 10px;
     background-color: ${props => props.theme.buttonBackground};
     text-align: center;
-    width: '100%';
+    width: 100%;
     color: ${props => props.theme.buttonText};
   `
   const RadioGroup = styled.View`

@@ -219,7 +219,7 @@ const StyledModalView = styled.View`
   border-Radius: 20px;
   padding: 20px;
   align-Items: center;
-  width: '80%';
+  width: 80%;
 `;
 
 const ModalText = styled.Text`
@@ -248,7 +248,7 @@ const BotaoFechar = styled.Text`
   border-Radius: 10px;
   background-Color: ${props=>props.theme.primary};
   text-Align: center;
-  width: '90%';
+  width: 90%;
   color: white;
   border-Color: #6D6B69;
   border-Width: 1px;
