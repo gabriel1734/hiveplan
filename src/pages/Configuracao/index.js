@@ -4,7 +4,7 @@ import { TouchableOpacity, StyleSheet, Text, TextInput, View, SafeAreaView, useC
 import { TextInputMask } from "react-native-masked-text";
 import RNPickerSelect from 'react-native-picker-select';
 import AntDesign from '@expo/vector-icons/AntDesign';
-import { addServicoRamo, adicionarDadosEmpresa, dropTables, resetDatabase, updateDadosEmpresa, viewEmpresa } from "../../database";
+import { addServicoRamo, adicionarDadosEmpresa, backupDatabase, dropTables, resetDatabase, updateDadosEmpresa, viewEmpresa } from "../../database";
 import styled from "styled-components";
 import Toast from 'react-native-root-toast';
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -257,6 +257,7 @@ const handleThemeChange = async (themeOption) => {
 
 
   const handleBackup =  () => {
+    backupDatabase();
     console.log('Implementar backup');
   }
 
