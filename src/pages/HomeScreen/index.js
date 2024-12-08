@@ -25,7 +25,6 @@ export default function HomeScreen({navigation}) {
     const welcome = await AsyncStorage.getItem('welcome');
     if(!welcome){
       setModalVisible(true);
-      await AsyncStorage.setItem('welcome', 'true');
     }
   }
 

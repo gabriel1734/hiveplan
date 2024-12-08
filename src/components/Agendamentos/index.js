@@ -82,11 +82,13 @@ const isAtrasado = () => {
     const empresa = viewEmpresa();
     console.log(empresa); 
     let msg = empresa.msgConfiguracao;
-    msg = msg.replace("[nomeCliente]", nomeCliente);
-    msg = msg.replace("[Serviço]", servicos.map(servico => servico.nome).join(", "));
-    msg = msg.replace("[Hora]", horaAgendamento);
-    msg = msg.replace("[Data]", new Date(dataAgendamento).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
-    msg = msg.replace("[Empresa]", empresa.nomeEmpresa);
+    msg = msg.replaceAll("[nomeCliente]", nomeCliente);
+    msg = msg.replaceAll("[Serviço]", servicos.map(servico => servico.nome).join(", "));
+    msg = msg.replaceAll("[Hora]", horaAgendamento);
+    msg = msg.replaceAll("[Data]", new Date(dataAgendamento).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' }));
+    msg = msg.replaceAll("[Empresa]", empresa.nomeEmpresa);
+    msg = msg.replaceAll("[Telefone]", empresa.telefoneEmpresa);
+    msg = msg.replaceAll("[Endereço]", empresa.enderecoEmpresa);
     try {
       const result = await Share.share({
         message:
@@ -217,14 +219,14 @@ const StyledModalView = styled.View`
   border-Radius: 20px;
   padding: 20px;
   align-Items: center;
-  width: 80%;
+  width: '80%';
 `;
 
 const ModalText = styled.Text`
   color: ${props => props.theme.text};
-  margin-Bottom: 15;
+  margin-Bottom: 15px;
   text-Align: center;
-  font-Size: 24;
+  font-Size: 24px;
 `;
 
 const InfoText = styled.Text`
@@ -234,7 +236,7 @@ const InfoText = styled.Text`
 `;
 
 const Container = styled.View`
-  margin-Top: 20;
+  margin-Top: 20px;
   flex-Direction: column;
   justify-Content: space-between;
   align-Items: center;
@@ -246,7 +248,7 @@ const BotaoFechar = styled.Text`
   border-Radius: 10px;
   background-Color: ${props=>props.theme.primary};
   text-Align: center;
-  width: 90%;
+  width: '90%';
   color: white;
   border-Color: #6D6B69;
   border-Width: 1px;

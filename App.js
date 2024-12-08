@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, createContext } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from './src/pages/HomeScreen';
 import Agendamento from './src/pages/Agendamento';
 import { create, dropTables } from './src/database';
-import { createContext } from 'react';
 import Colaboradores from './src/pages/Colaboradores';
 import { RootSiblingParent } from 'react-native-root-siblings';
 import Servicos from './src/pages/Servicos';
@@ -14,28 +13,46 @@ import { ThemeProvider } from 'styled-components';
 import dark from './src/theme/dark';
 import light from './src/theme/light';
 import { useColorScheme } from 'react-native';
-import themes
- from './src/theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { DataTheme } from './src/context';
 import Clientes from './src/pages/Clientes';
+import { DataTheme } from './src/context';
 
-export const AgendamentoScreenContext = createContext();
-
-const Stack = createNativeStackNavigator();  // Create a stack navigator
+const Stack = createNativeStackNavigator(); // Create a stack navigator
 
 export default function App() {
- //dropTables();
+  // dropTables();
   create();
-  const device = useColorScheme();
+
+  const device = useColorScheme(); // Detect device theme
   const [theme, setTheme] = useState(device === 'dark' ? dark : light);
+
+  // Load theme from AsyncStorage
+  useEffect(() => {
+    const loadTheme = async () => {
+      const savedTheme = await AsyncStorage.getItem('theme');
+      if (savedTheme) {
+        setTheme(savedTheme === 'dark' ? dark : light);
+      } else {
+        setTheme(device === 'dark' ? dark : light); // Fallback to device theme
+      }
+    };
+    loadTheme();
+  }, [device]);
+
+  // Save theme preference to AsyncStorage
+  const toggleTheme = async () => {
+    const newTheme = theme === light ? dark : light;
+    setTheme(newTheme);
+    await AsyncStorage.setItem('theme', newTheme === dark ? 'dark' : 'light');
+  };
 
   return (
     <RootSiblingParent>
-      <DataTheme.Provider value={{ theme, setTheme }}>
+      <DataTheme.Provider value={{ theme, setTheme, toggleTheme }}>
         <ThemeProvider theme={theme}>
           <NavigationContainer>
-            <Stack.Navigator initialRouteName="Home"
+            <Stack.Navigator
+              initialRouteName="Home"
               screenOptions={{
                 headerShown: false,
               }}
@@ -50,7 +67,7 @@ export default function App() {
             </Stack.Navigator>
           </NavigationContainer>
         </ThemeProvider>
-        </DataTheme.Provider>
+      </DataTheme.Provider>
     </RootSiblingParent>
   );
 }

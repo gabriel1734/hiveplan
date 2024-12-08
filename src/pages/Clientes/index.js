@@ -143,7 +143,7 @@ export default function Clientes({ navigation }) {
     <Page>
       <LinearGradient colors={background} style={styles.containerHeader}>
         <AntDesign name="arrowleft" size={24} color="black" onPress={() => navigation.goBack()} />
-        <Title>Configuração</Title>
+        <Title>Clientes</Title>
       </LinearGradient>
       <Filters>
         <StyledInput

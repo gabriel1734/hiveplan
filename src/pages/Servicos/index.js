@@ -196,10 +196,10 @@ const StyledInput = styled.TextInput`
   height: 40px;
   border: 1px solid ${props => props.theme.borderColor};
   border-radius: 5px;
-  padding: 0 10px;
+  padding: 0px 10px;
   background-color: ${props => props.theme.inputBackground};
   color: ${props => props.theme.text};
-  height: 40;
+  height: 40px;
   border-Width: 1px;
   margin-Bottom: 15px;
   width: 100%;
@@ -210,7 +210,7 @@ const FavoritoContainer = styled.View`
     flex-Direction: row;
     justify-Content: flex-end;
     align-Items: center;
-    margin-Bottom: 15;
+    margin-Bottom: 15px;
     width: 100%;
 `;
 
@@ -247,9 +247,9 @@ const ActionButtonSave = styled.Text`
 `;
 
 const ScrollContainer = styled.View`
-  margin-Top: 20;
+  margin-Top: 20px;
   width: 100%;
-  margin-Bottom: 20;
+  margin-Bottom: 20px;
 `;
 
 const StyledScrollView = styled.ScrollView`
