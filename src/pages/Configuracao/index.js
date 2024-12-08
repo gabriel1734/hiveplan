@@ -1,19 +1,37 @@
-  import { LinearGradient } from "expo-linear-gradient";
-  import { useState, useEffect, useContext } from "react";
-  import { TouchableOpacity, StyleSheet, Text, TextInput, View, SafeAreaView, useColorScheme, Alert, BackHandler } from "react-native";
-  import { TextInputMask } from "react-native-masked-text";
-  import RNPickerSelect from 'react-native-picker-select';
-  import AntDesign from '@expo/vector-icons/AntDesign';
-  import { addServicoRamo, adicionarDadosEmpresa, backupDatabase, dropTables, resetDatabase, updateDadosEmpresa, viewEmpresa } from "../../database";
-  import styled from "styled-components";
-  import Toast from 'react-native-root-toast';
-  import AsyncStorage from "@react-native-async-storage/async-storage";
-  import light from "../../theme/light";
-  import dark from "../../theme/dark";
-  import { DataTheme } from "../../context";
-  import { Image } from "expo-image";
-  import * as ImagePicker from 'expo-image-picker';
-  import * as LocalAuthentication from 'expo-local-authentication';
+import { LinearGradient } from "expo-linear-gradient";
+import { useState, useEffect, useContext } from "react";
+import {
+  TouchableOpacity,
+  StyleSheet,
+  Text,
+  View,
+  useColorScheme,
+  Alert,
+  BackHandler,
+  Modal,
+  ScrollView
+} from "react-native";
+import { TextInputMask } from "react-native-masked-text";
+import RNPickerSelect from 'react-native-picker-select';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import {
+  addServicoRamo,
+  adicionarDadosEmpresa,
+  backupDatabase,
+  resetDatabase,
+  updateDadosEmpresa,
+  viewEmpresa
+} from "../../database";
+import styled from "styled-components";
+import Toast from 'react-native-root-toast';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import light from "../../theme/light";
+import dark from "../../theme/dark";
+import { DataTheme } from "../../context";
+import { Image } from "expo-image";
+import * as ImagePicker from 'expo-image-picker';
+import * as LocalAuthentication from 'expo-local-authentication';
+import * as Clipboard from 'expo-clipboard';
 
 
   export default function Configuracao({ navigation, route }) {
@@ -29,6 +47,19 @@
     const [selectedTheme, setSelectedTheme] = useState();
     const systemTheme = useColorScheme();
     const [textMSG, setTextMSG] = useState('');
+    const [modalVisible, setModalVisible] = useState(false);
+
+
+     const tags = [
+      { tag: "[nomeCliente]", description: "Substituído pelo nome do cliente." },
+      { tag: "[Serviço]", description: "Lista dos serviços agendados." },
+      { tag: "[Hora]", description: "Hora do agendamento." },
+      { tag: "[Data]", description: "Data do agendamento." },
+      { tag: "[Empresa]", description: "Nome da empresa." },
+      { tag: "[Telefone]", description: "Telefone da empresa." },
+      { tag: "[Endereço]", description: "Endereço da empresa." },
+    ];
+
 
   const handleThemeChange = async (themeOption) => {
     try {
@@ -278,7 +309,14 @@
 
       const savedBiometric = await LocalAuthentication.isEnrolledAsync();
       if (!savedBiometric) {
-        Alert.alert('Digite sua senha para continuar');
+        await AsyncStorage.clear();
+        resetDatabase();
+        Toast.show('Aplicativo resetado!', {
+          duration: Toast.durations.SHORT,
+          position: Toast.positions.BOTTOM,
+          backgroundColor: '#00FF00',
+        });
+        BackHandler.exitApp();
       }
 
       const biometricAuth = await LocalAuthentication.authenticateAsync({
@@ -311,11 +349,16 @@
       loadLogo();
     }, [])
 
-    
-
     const backgroundColor = theme === light ? ['#F7FF89', '#F6FF77', '#E8F622'] : ['#bb86fc', '#bb86fc', '#bb86fc'];
 
-    
+    const copyToClipboard = async (tag) => {
+      await Clipboard.setStringAsync(tag);
+      Toast.show('Tag copiada!', {
+        duration: Toast.durations.SHORT,
+        position: Toast.positions.BOTTOM,
+        backgroundColor: '#00FF00',
+      });
+    };
     return (
       <Page>
         <LinearGradient colors={backgroundColor} style={styles.containerHeader}>
@@ -415,7 +458,15 @@
                 <RadioLabel>Automático</RadioLabel>
               </RadioOption>
           </RadioGroup>
-            <Label>Defina uma Mensagem Padrão</Label>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 5, padding: 10 }}>
+              <Label>Mensagem Padrão</Label>
+              <ShowTagsButton onPress={() => setModalVisible(true)}>
+                <ShowTagsButtonText style={{ color: theme.buttonText }}>
+                  Tags
+                  <AntDesign name="tag" size={16} color={theme.buttonText} />
+                </ShowTagsButtonText>
+              </ShowTagsButton>
+            </View>
             <StyledTextInput placeholder="Mensagem Padrão" placeholderTextColor="#888" multiline={true} numberOfLines={4} value={textMSG} onChangeText={setTextMSG} />
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
@@ -433,7 +484,33 @@
                 <Text style={styles.saveButtonText}>Salvar</Text>
               </LinearGradient>
             </TouchableOpacity>
-
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => setModalVisible(false)}
+            >
+            <ModalOverlay>
+              <ModalContent>
+                <TitleModal>Tags do Sistema</TitleModal>
+                <ScrollView>
+                  {tags.map((item, index) => (
+                    <TagContainer key={index}>
+                      <TouchableOpacity onPress={() => copyToClipboard(item.tag)}>
+                        <TagName>{item.tag}</TagName>
+                        <TagDescription style={styles.tagDescription}>
+                          {item.description}
+                        </TagDescription>
+                     </TouchableOpacity>
+                    </TagContainer>
+                  ))}
+                </ScrollView>
+                  <BtnCloseModal onPress={() => setModalVisible(false)}>
+                    <BtnCloseModalText>Fechar</BtnCloseModalText>
+                </BtnCloseModal>
+              </ModalContent>
+            </ModalOverlay>
+          </Modal>
           </Content>
         </Container>
         <Toast />
@@ -499,6 +576,14 @@
     font-size:24px;
     font-weight: bold;
   `;
+
+const TitleModal = styled.Text`
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    text-align: center;
+    color: ${props => props.theme.text};
+  `
 
   const StyledInput = styled.TextInput`
     height: 50px;
@@ -588,6 +673,65 @@
     color: ${(props) => props.theme.text};
   `;
 
+const ShowTagsButton = styled.TouchableOpacity`
+      background-color: ${props => props.theme.buttonBackground};
+      padding: 10px;
+      border-radius: 8px;
+      align-items: "center";
+      justify-content: "center";
+  `;
+
+const ShowTagsButtonText = styled.Text`
+      color: ${props => props.theme.buttonText};
+      font-size: 16px;
+      font-weight: bold;
+  `;
+
+const ModalOverlay = styled.View`
+      flex: 1;
+      background-color: rgba(0, 0, 0, 0.5);
+      justify-content: center;
+      align-items: center;
+
+  `;
+
+const ModalContent = styled.View`
+      background-color: ${props => props.theme.background};
+      border-radius: 10px;
+      padding: 20px;
+      width: 90%;
+  `;
+const TagContainer = styled.View`
+  margin-bottom: 15px;
+  border-bottom-width: 1px;
+  border-bottom-color: ${props => props.theme.borderColor};
+  padding-bottom: 10px;
+`
+const TagName = styled.Text`
+  font-size: 16px;
+  font-weight: bold;
+  color: ${props => props.theme.text};
+`
+const TagDescription = styled.Text`
+  font-size: 14px;
+  color: ${props => props.theme.text};
+
+`;
+
+const BtnCloseModal = styled.TouchableOpacity`
+  margin-top: 20px;
+  background-color: ${props => props.theme.buttonBackground};
+  padding: 12px;
+  border-radius: 8px;
+  align-items: center;
+
+`;
+
+const BtnCloseModalText = styled.Text`
+  color: ${props => props.theme.buttonText};
+  font-size: 16px;
+  font-weight: bold;
+`;
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -629,6 +773,25 @@
       height: 50,
       justifyContent: 'center',
       alignItems: 'center',
+    },
+    
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: "bold",
+      marginBottom: 20,
+      textAlign: "center",
+    },
+    closeButton: {
+      marginTop: 20,
+      backgroundColor: "#007BFF",
+      padding: 12,
+      borderRadius: 8,
+      alignItems: "center",
+    },
+    closeButtonText: {
+      color: "#FFF",
+      fontSize: 16,
+      fontWeight: "bold",
     },
   });
 
