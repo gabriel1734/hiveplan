@@ -19,6 +19,7 @@ import {
   adicionarDadosEmpresa,
   backupDatabase,
   resetDatabase,
+  restoreDatabase,
   updateDadosEmpresa,
   viewEmpresa
 } from "../../database";
@@ -275,11 +276,23 @@ import * as Clipboard from 'expo-clipboard';
       }
     }
 
-
-    const handleBackup =  () => {
-      backupDatabase();
-      console.log('Implementar backup');
+    const ConfirmBackup = () => {
+      Alert.alert(
+        'Backup',
+        'Fazer um backup ou restaurar ?',
+        [
+          {
+            text: 'Backup',
+            onPress: () => backupDatabase(),
+            style: 'cancel',
+          },
+          { text: 'Restaurar', onPress: () => restoreDatabase()},
+        ],
+        { cancelable: false }
+      );
     }
+
+   
 
     const ConfirmReset = () => {
       Alert.alert(
@@ -468,7 +481,7 @@ import * as Clipboard from 'expo-clipboard';
             <StyledTextInput placeholder="Mensagem Padrão" placeholderTextColor="#888" multiline={true} numberOfLines={4} value={textMSG} onChangeText={setTextMSG} />
 
             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-              <BtnBackup style={styles.saveButton} onPress={handleBackup}>
+              <BtnBackup style={styles.saveButton} onPress={ConfirmBackup}>
                 <AntDesign name="cloudupload" size={24} color="black" />
                 <BtnBackupText>Backup</BtnBackupText>
               </BtnBackup>

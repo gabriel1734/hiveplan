@@ -1,7 +1,10 @@
 import * as SQLite from "expo-sqlite";
 import { Alert } from "react-native";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
-import * as FileSystem from "expo-file-system";
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system';
+import * as DocumentPicker from 'expo-document-picker';
+import { Platform } from "react-native";
 
 const CURRENT_DB_VERSION = 2;
 
@@ -207,60 +210,51 @@ export function resetDatabase() {
 }
 
 export async function backupDatabase() {
-  try {
-    // Caminho do banco de dados SQLite
-    const dbPath = FileSystem.documentDirectory + "SQLite/database.db";
+  if (Platform.OS === "android") {
+    const permissions = await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+    if (permissions.granted) {
+      const base64 = await FileSystem.readAsStringAsync(
+        FileSystem.documentDirectory + 'SQLite/database.db',
+        {
+          encoding: FileSystem.EncodingType.Base64
+        }
+      );
 
-    // Caminho de destino para o backup
-    const backupPath = FileSystem.documentDirectory + "backup_database.db";
+      await FileSystem.StorageAccessFramework.createFileAsync(permissions.directoryUri, 'database.db', 'application/octet-stream')
+      .then(async (uri) => {
+        await FileSystem.writeAsStringAsync(uri, base64, { encoding : FileSystem.EncodingType.Base64 });
+      })
+      .catch((e) => console.log(e));
+    } else {
+      console.log("Sem permissão");
+    }
+  } else {
+    await Sharing.shareAsync(FileSystem.documentDirectory + 'SQLite/database.db');
+  }}
 
-    // Verificar se o banco de dados existe
-    const dbExists = await FileSystem.getInfoAsync(dbPath);
-    if (!dbExists.exists) {
-      alert("Banco de dados não encontrado!");
-      return;
+export async function restoreDatabase() {
+
+  let result = await DocumentPicker.getDocumentAsync({
+    copyToCacheDirectory: true
+  });
+
+  if (result.type === 'success') {
+
+    
+    if (!(await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'SQLite')).exists) {
+      await FileSystem.makeDirectoryAsync(FileSystem.documentDirectory + 'SQLite');
     }
 
-    // Copiar o banco de dados para o backup
-    await FileSystem.copyAsync({
-      from: dbPath,
-      to: backupPath,
-    });
+    const base64 = await FileSystem.readAsStringAsync(
+      result.uri,
+      {
+        encoding: FileSystem.EncodingType.Base64
+      }
+    );
 
-    alert("Backup realizado com sucesso!");
-    console.log("Backup salvo em:", backupPath);
-  } catch (error) {
-    console.error("Erro ao realizar o backup:", error);
-    alert("Erro ao realizar o backup. Verifique e tente novamente.");
-  }
-}
+    await FileSystem.writeAsStringAsync(FileSystem.documentDirectory + 'SQLite/database.db', base64, { encoding: FileSystem.EncodingType.Base64 });
+    await db.closeAsync();
 
-export async function restoreDatabaseSync() {
-  try {
-    // Caminho do arquivo de backup
-    const backupPath = FileSystem.documentDirectory + "backup_database.db";
-
-    // Caminho do banco de dados original
-    const dbPath = FileSystem.documentDirectory + "SQLite/database.db";
-
-    // Verificar se o arquivo de backup existe
-    const backupExists = await FileSystem.getInfoAsync(backupPath);
-    if (!backupExists.exists) {
-      alert("Arquivo de backup não encontrado!");
-      return;
-    }
-
-    // Restaurar o banco de dados a partir do backup
-    await FileSystem.copyAsync({
-      from: backupPath,
-      to: dbPath,
-    });
-
-    alert("Banco de dados restaurado com sucesso!");
-    console.log("Banco de dados restaurado com sucesso!");
-  } catch (error) {
-    console.error("Erro ao restaurar o banco de dados:", error);
-    alert("Erro ao restaurar o banco de dados. Verifique e tente novamente.");
   }
 }
 //Função para inserir um serviço e um colaborador padrão no sistema
