@@ -33,8 +33,6 @@ const Agendamento = ({ navigation, route }) => {
   const { theme } = useContext(DataTheme);
   const backgroundColor = theme === light ? ['#F7FF89', '#F6FF77', '#E8F622'] : ['#bb86fc', '#bb86fc', '#bb86fc'];
 
-  const currentDate = new Date().toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo' });
-
   useEffect(() => {
     const { id, refreshColab } = route.params || {};
     if (refreshColab) {
@@ -150,7 +148,6 @@ const Agendamento = ({ navigation, route }) => {
         </Goback>
         <CalendarContainer>
           <Calendar
-            current={currentDate}
             onDayPress={(day) => setSelectedDate(day.dateString)}
             markedDates={{
               [selectedDate]: { selected: true, selectedColor: '#000', selectedTextColor: '#fff' },
