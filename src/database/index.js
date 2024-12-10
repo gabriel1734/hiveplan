@@ -1,6 +1,7 @@
 import * as SQLite from "expo-sqlite";
 import { Alert } from "react-native";
 import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
+import * as FileSystem from "expo-file-system";
 
 const CURRENT_DB_VERSION = 2;
 
@@ -8,13 +9,12 @@ export function create() {
   const db = SQLite.openDatabaseSync("database.db");
   useDrizzleStudio(db);
 
-  const db_version =  db.getFirstSync('PRAGMA user_version');
+  const db_version = db.getFirstSync("PRAGMA user_version");
 
-    if(db_version.user_version >= CURRENT_DB_VERSION)
-      return;
+  if (db_version.user_version >= CURRENT_DB_VERSION) return;
 
-   if(db_version.user_version === 0){  
-  db.execSync(`
+  if (db_version.user_version === 0) {
+    db.execSync(`
         PRAGMA journal_mode = WAL;
         PRAGMA foreign_keys = ON;
 
@@ -63,9 +63,9 @@ export function create() {
         
         PRAGMA user_version = 1
         `);
-  insertDefault();
+    insertDefault();
   }
-   if(db_version.user_version === 1){
+  if (db_version.user_version === 1) {
     db.execSync(`
       
       CREATE TABLE IF NOT EXISTS dboEmpresa(
@@ -81,7 +81,6 @@ export function create() {
       PRAGMA user_version = 2
       `);
   }
- 
 }
 
 export function dropTables() {
@@ -106,7 +105,9 @@ export function dropTables() {
       // Reabilita as restrições de chave estrangeira
       db.execSync("PRAGMA foreign_keys = ON");
     });
-    console.log("Todas as tabelas foram redefinidas e a versão do banco de dados foi reiniciada.");
+    console.log(
+      "Todas as tabelas foram redefinidas e a versão do banco de dados foi reiniciada."
+    );
   } catch (error) {
     console.log("Erro ao redefinir tabelas e versão do banco: ", error);
     throw error;
@@ -205,9 +206,63 @@ export function resetDatabase() {
   }
 }
 
+export async function backupDatabase() {
+  try {
+    // Caminho do banco de dados SQLite
+    const dbPath = FileSystem.documentDirectory + "SQLite/database.db";
 
+    // Caminho de destino para o backup
+    const backupPath = FileSystem.documentDirectory + "backup_database.db";
 
+    // Verificar se o banco de dados existe
+    const dbExists = await FileSystem.getInfoAsync(dbPath);
+    if (!dbExists.exists) {
+      alert("Banco de dados não encontrado!");
+      return;
+    }
 
+    // Copiar o banco de dados para o backup
+    await FileSystem.copyAsync({
+      from: dbPath,
+      to: backupPath,
+    });
+
+    alert("Backup realizado com sucesso!");
+    console.log("Backup salvo em:", backupPath);
+  } catch (error) {
+    console.error("Erro ao realizar o backup:", error);
+    alert("Erro ao realizar o backup. Verifique e tente novamente.");
+  }
+}
+
+export async function restoreDatabaseSync() {
+  try {
+    // Caminho do arquivo de backup
+    const backupPath = FileSystem.documentDirectory + "backup_database.db";
+
+    // Caminho do banco de dados original
+    const dbPath = FileSystem.documentDirectory + "SQLite/database.db";
+
+    // Verificar se o arquivo de backup existe
+    const backupExists = await FileSystem.getInfoAsync(backupPath);
+    if (!backupExists.exists) {
+      alert("Arquivo de backup não encontrado!");
+      return;
+    }
+
+    // Restaurar o banco de dados a partir do backup
+    await FileSystem.copyAsync({
+      from: backupPath,
+      to: dbPath,
+    });
+
+    alert("Banco de dados restaurado com sucesso!");
+    console.log("Banco de dados restaurado com sucesso!");
+  } catch (error) {
+    console.error("Erro ao restaurar o banco de dados:", error);
+    alert("Erro ao restaurar o banco de dados. Verifique e tente novamente.");
+  }
+}
 //Função para inserir um serviço e um colaborador padrão no sistema
 export function insertDefault() {
   const db = SQLite.openDatabaseSync("database.db");
@@ -233,8 +288,26 @@ export function insertDefault() {
 
 //Função para adicionar um serviço
 export function addServico(nome, descricao, favorito = 0) {
+  if (nome == "" || nome == null) {
+    Alert.alert("Insira um nome!");
+    return false;
+  }
   const db = SQLite.openDatabaseSync("database.db");
+
   try {
+    // Verificar se já existe um serviço com o mesmo nome
+    const queryResult = db.getFirstSync(
+      "SELECT * FROM dboServico WHERE nome = ?",
+      [nome]
+    );
+
+    // Verifica se o resultado contém algum registro
+    if (queryResult != null) {
+      Alert.alert("Já existe um serviço com este nome adicionado");
+      return false;
+    }
+
+    // Inserir novo serviço se o nome não existir
     const result = db.runSync(
       "INSERT INTO dboServico (nome, descricao, favorito) VALUES (?, ?, ?)",
       [nome, descricao, favorito]
@@ -243,7 +316,8 @@ export function addServico(nome, descricao, favorito = 0) {
     if (result.changes > 0) return true;
     else return false;
   } catch (error) {
-    console.log("erro", error);
+    console.log("Erro:", error);
+    return false;
   }
 }
 
@@ -329,25 +403,36 @@ export function addAgendamento(
 
 export function getClientes() {
   const db = SQLite.openDatabaseSync("database.db");
-  const result = db.getAllSync("SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento ORDER BY nomeCliente");
+  const result = db.getAllSync(
+    "SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento ORDER BY nomeCliente"
+  );
   return result;
 }
 
 export function getClientesPorDataENome(dataInicio, dataFim, nome) {
   const db = SQLite.openDatabaseSync("database.db");
-  const result = db.getAllSync("SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento WHERE dataAgendamento BETWEEN (?) AND (?) AND nomeCliente LIKE (?) ORDER BY nomeCliente", [dataInicio, dataFim, `%${nome}%`]);
+  const result = db.getAllSync(
+    "SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento WHERE dataAgendamento BETWEEN (?) AND (?) AND nomeCliente LIKE (?) ORDER BY nomeCliente",
+    [dataInicio, dataFim, `%${nome}%`]
+  );
   return result;
 }
 
 export function getClientesPorData(dataInicio, dataFim) {
   const db = SQLite.openDatabaseSync("database.db");
-  const result = db.getAllSync("SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento WHERE dataAgendamento BETWEEN (?) AND (?) ORDER BY nomeCliente", [dataInicio, dataFim]);
+  const result = db.getAllSync(
+    "SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento WHERE dataAgendamento BETWEEN (?) AND (?) ORDER BY nomeCliente",
+    [dataInicio, dataFim]
+  );
   return result;
 }
 
 export function getClientesPorNome(nome) {
   const db = SQLite.openDatabaseSync("database.db");
-  const result = db.getAllSync("SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento WHERE nomeCliente LIKE (?) ORDER BY nomeCliente", [`%${nome}%`]);
+  const result = db.getAllSync(
+    "SELECT id, nomeCliente, telCliente, dataAgendamento  FROM dboAgendamento WHERE nomeCliente LIKE (?) ORDER BY nomeCliente",
+    [`%${nome}%`]
+  );
   return result;
 }
 
@@ -433,12 +518,10 @@ export function checkAgendamentoExistente(data, horaAgendamento) {
     [data, horaAgendamento]
   );
 
-  console.log("result",result);
+  console.log("result", result);
 
-  if(result != null && result.length != 0 )
-  return true;
-else 
-  return false;
+  if (result != null && result.length != 0) return true;
+  else return false;
 }
 //Função que retorna todos os serviços cadastrados por ordem de favorito e em ordem alfabetica
 export function viewServicoAll() {
@@ -469,8 +552,7 @@ export function updateServico(id, nome, descricao, favorito = 0) {
   if (result.changes > 0) {
     updateServicoFavorito(id, favorito);
     return true;
-  }
-  else return false;
+  } else return false;
 }
 //Função que adiciona o servico como favorito
 export function updateServicoFavorito(id, favorito) {
@@ -631,19 +713,17 @@ export function deleteServico(id) {
   const db = SQLite.openDatabaseSync("database.db");
 
   try {
-    db.withTransactionSync(() =>
-    {
+    db.withTransactionSync(() => {
       const result = db.runSync("DELETE FROM dboServico WHERE id = (?)", [id]);
-      const delServicoAgendamento = db.runSync("DELETE FROM dboAgendamentoServico WHERE codServico = (?)",[id]);
+      const delServicoAgendamento = db.runSync(
+        "DELETE FROM dboAgendamentoServico WHERE codServico = (?)",
+        [id]
+      );
 
-    if (result.changes > 0 && delServicoAgendamento.changes > 0) {
-     
-      return true;
-    }
-    else return false; 
-    }
-  )
-    
+      if (result.changes > 0 && delServicoAgendamento.changes > 0) {
+        return true;
+      } else return false;
+    });
   } catch (error) {
     console.log("erro:", error);
   }
@@ -787,7 +867,7 @@ export function viewColaboradoresServico(codServico) {
   );
   const servNFav = db.getAllSync(
     "SELECT codColaborador FROM dboColaboradorServico WHERE codServico = (?) AND favorito = 0",
-    [codServico] 
+    [codServico]
   );
 
   let vetorFav = servFav.sort((a, b) => a.nome.localeCompare(b.nome));
@@ -820,94 +900,183 @@ export function updateColaborador(id, nome) {
 }
 
 export function addServicoRamo(ramoSelecionado) {
-
   // Lista de serviços com descrição
   const ramo = {
     restaurante: [
-      { nome: "Serviço de mesa", descricao: "Atendimento e organização das mesas para os clientes." },
-      { nome: "Cozinha", descricao: "Preparação e confecção de refeições com alta qualidade." },
-      { nome: "Limpeza", descricao: "Manutenção e limpeza do ambiente do restaurante." },
-      { nome: "Delivery", descricao: "Serviço de entrega de pedidos a domicílio." },
-      { nome: "Atendimento ao cliente", descricao: "Suporte ao cliente para informações e dúvidas." }
+      {
+        nome: "Serviço de mesa",
+        descricao: "Atendimento e organização das mesas para os clientes.",
+      },
+      {
+        nome: "Cozinha",
+        descricao: "Preparação e confecção de refeições com alta qualidade.",
+      },
+      {
+        nome: "Limpeza",
+        descricao: "Manutenção e limpeza do ambiente do restaurante.",
+      },
+      {
+        nome: "Delivery",
+        descricao: "Serviço de entrega de pedidos a domicílio.",
+      },
+      {
+        nome: "Atendimento ao cliente",
+        descricao: "Suporte ao cliente para informações e dúvidas.",
+      },
     ],
     salaoDeBeleza: [
-      { nome: "Corte de cabelo", descricao: "Serviço de corte e estilização do cabelo." },
-      { nome: "Coloração", descricao: "Tintura e coloração de cabelo com técnicas variadas." },
+      {
+        nome: "Corte de cabelo",
+        descricao: "Serviço de corte e estilização do cabelo.",
+      },
+      {
+        nome: "Coloração",
+        descricao: "Tintura e coloração de cabelo com técnicas variadas.",
+      },
       { nome: "Manicure", descricao: "Manicure e pedicure com esmaltação." },
-      { nome: "Maquiagem", descricao: "Serviço de maquiagem para diversas ocasiões." },
-      { nome: "Tratamentos faciais", descricao: "Limpeza e cuidados estéticos para a pele do rosto." }
+      {
+        nome: "Maquiagem",
+        descricao: "Serviço de maquiagem para diversas ocasiões.",
+      },
+      {
+        nome: "Tratamentos faciais",
+        descricao: "Limpeza e cuidados estéticos para a pele do rosto.",
+      },
     ],
     oficinaMecanica: [
-      { nome: "Troca de óleo", descricao: "Substituição de óleo do motor para veículos." },
-      { nome: "Balanceamento de rodas", descricao: "Correção do balanceamento para segurança e conforto." },
-      { nome: "Revisão elétrica", descricao: "Análise e reparo de problemas no sistema elétrico." },
-      { nome: "Alinhamento", descricao: "Ajuste do alinhamento das rodas para melhor direção." },
-      { nome: "Inspeção de freios", descricao: "Verificação e manutenção do sistema de freios." }
+      {
+        nome: "Troca de óleo",
+        descricao: "Substituição de óleo do motor para veículos.",
+      },
+      {
+        nome: "Balanceamento de rodas",
+        descricao: "Correção do balanceamento para segurança e conforto.",
+      },
+      {
+        nome: "Revisão elétrica",
+        descricao: "Análise e reparo de problemas no sistema elétrico.",
+      },
+      {
+        nome: "Alinhamento",
+        descricao: "Ajuste do alinhamento das rodas para melhor direção.",
+      },
+      {
+        nome: "Inspeção de freios",
+        descricao: "Verificação e manutenção do sistema de freios.",
+      },
     ],
     academia: [
-      { nome: "Musculação", descricao: "Treinamento de força com acompanhamento profissional." },
-      { nome: "Personal Trainer", descricao: "Sessões personalizadas com treinador especializado." },
-      { nome: "Aulas de Yoga", descricao: "Aulas de Yoga para equilíbrio e relaxamento." },
-      { nome: "Aulas de dança", descricao: "Dança para condicionamento físico e diversão." },
-      { nome: "Avaliação física", descricao: "Análise do condicionamento e composição corporal." }
+      {
+        nome: "Musculação",
+        descricao: "Treinamento de força com acompanhamento profissional.",
+      },
+      {
+        nome: "Personal Trainer",
+        descricao: "Sessões personalizadas com treinador especializado.",
+      },
+      {
+        nome: "Aulas de Yoga",
+        descricao: "Aulas de Yoga para equilíbrio e relaxamento.",
+      },
+      {
+        nome: "Aulas de dança",
+        descricao: "Dança para condicionamento físico e diversão.",
+      },
+      {
+        nome: "Avaliação física",
+        descricao: "Análise do condicionamento e composição corporal.",
+      },
     ],
     petShop: [
-      { nome: "Banho e Tosa", descricao: "Higienização e cuidados estéticos para pets." },
-      { nome: "Vacinação", descricao: "Aplicação de vacinas para proteção animal." },
-      { nome: "Hospedagem", descricao: "Serviço de hospedagem para animais de estimação." },
-      { nome: "Consultas Veterinárias", descricao: "Consultas com veterinários para avaliação de saúde." },
-      { nome: "Pet Shop", descricao: "Venda de produtos para cuidados e diversão dos pets." }
-    ]
+      {
+        nome: "Banho e Tosa",
+        descricao: "Higienização e cuidados estéticos para pets.",
+      },
+      {
+        nome: "Vacinação",
+        descricao: "Aplicação de vacinas para proteção animal.",
+      },
+      {
+        nome: "Hospedagem",
+        descricao: "Serviço de hospedagem para animais de estimação.",
+      },
+      {
+        nome: "Consultas Veterinárias",
+        descricao: "Consultas com veterinários para avaliação de saúde.",
+      },
+      {
+        nome: "Pet Shop",
+        descricao: "Venda de produtos para cuidados e diversão dos pets.",
+      },
+    ],
   };
-  
+
   const servicos = ramo[ramoSelecionado];
-  
+
   if (!servicos) {
     console.log("Atividade não encontrada.");
     return;
   }
   let count = 0;
 
-  servicos.forEach(servico => {
-    if(addServico(servico.nome, servico.descricao,1)){
+  servicos.forEach((servico) => {
+    if (addServico(servico.nome, servico.descricao, 1)) {
       count++;
       console.log("Serviços adicionados com sucesso!");
-      }
+    }
   });
-  
-  if(count == servicos.length) return true;
-    else return false;
+
+  if (count == servicos.length) return true;
+  else return false;
 }
 
-export function adicionarDadosEmpresa(nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo, ramoEmpresa= '', msg = '') {
-
+export function adicionarDadosEmpresa(
+  nomeEmpresa,
+  telefoneEmpresa,
+  enderecoEmpresa = "",
+  logo,
+  ramoEmpresa = "",
+  msg = ""
+) {
   const db = SQLite.openDatabaseSync("database.db");
 
-  try{
-    db.withTransactionSync(() =>
-    {
-     db.runSync(
+  try {
+    db.withTransactionSync(() => {
+      db.runSync(
         "INSERT INTO dboEmpresa (nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa, msgConfiguracao) VALUES (?, ?, ?, ?, ?, ?)",
         [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa, msg]
       );
-
-  });
-  return true;
-  }
-  catch(e){
+    });
+    return true;
+  } catch (e) {
     console.log("erro inseir dados empresa", e);
     return false;
   }
-
 }
 
-export function updateDadosEmpresa(id,nomeEmpresa, telefoneEmpresa, enderecoEmpresa = '', logo = '', ramoEmpresa = '', msg = '') {
+export function updateDadosEmpresa(
+  id,
+  nomeEmpresa,
+  telefoneEmpresa,
+  enderecoEmpresa = "",
+  logo = "",
+  ramoEmpresa = "",
+  msg = ""
+) {
   const db = SQLite.openDatabaseSync("database.db");
 
   try {
     const result = db.runSync(
       "UPDATE dboEmpresa SET nomeEmpresa = (?), telefoneEmpresa = (?), enderecoEmpresa = (?), logo = (?), ramoEmpresa = (?), msgConfiguracao = (?) WHERE id = (?)",
-      [nomeEmpresa, telefoneEmpresa, enderecoEmpresa, logo, ramoEmpresa, msg, id]
+      [
+        nomeEmpresa,
+        telefoneEmpresa,
+        enderecoEmpresa,
+        logo,
+        ramoEmpresa,
+        msg,
+        id,
+      ]
     );
 
     if (result.changes > 0) {
@@ -965,7 +1134,6 @@ export function verSemanasComAgendamentos() {
   if (result.length === 0) {
     return [];
   }
-  
 
   const semanasComAgendamentos = [];
 
@@ -1030,7 +1198,7 @@ export function getDaysOfWeek(startDate) {
 
   // Ajustar para o último domingo
   currentDate.setDate(currentDate.getDate() - dayOfWeek - 1);
- 
+
   /*ACREDITO QUE RESOLVI O PROBLEMA, PRECISO TESTAR DEPOIS NO EMULADOR PRA TER CERTEZA, MAS ACREDITO QUE 
   MODIFICANDO AS FUNÇÕES PARA getUTC O TIMEZONE FICA CERTO, NÃO SEI EXPLICAR SE REALMENTE ERA ESSE O PROBLEMA,
   MAS ATÉ O MOMENTO FOI O QUE RESOLVEU */
@@ -1041,12 +1209,11 @@ export function getDaysOfWeek(startDate) {
 
     const day = String(newDate.getUTCDate()).padStart(2, "0"); // Pega o dia com dois dígitos
     const month = monthNames[newDate.getUTCMonth()]; // Nome do mês abreviado
-    const sem = diasDaSemana[newDate.getUTCDay()]; 
+    const sem = diasDaSemana[newDate.getUTCDay()];
     newDate.setUTCDate(newDate.getUTCDate());
     const date = newDate.toISOString().split("T")[0]; // Formato 'YYYY-MM-DD'
     //console.log(`date: ${date}, i: ${i}, day: ${day}, month: ${month}`);
     daysOfWeek.push({ dia: day, mes: month, sem: sem, date: date });
-
   }
 
   return daysOfWeek;

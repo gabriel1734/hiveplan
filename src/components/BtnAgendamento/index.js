@@ -35,8 +35,8 @@ const StyledButton = styled.TouchableOpacity`
   background-Color: ${props=> props.theme.buttonBackground};
   align-Items: center;
   justify-Content: center;
-  width: 100;
-  height: 50;
+  width: 100px;
+  height: 50px;
 `;
 
 const StyledText = styled.Text`

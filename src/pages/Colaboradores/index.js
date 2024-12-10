@@ -219,7 +219,7 @@ const StyledInput = styled.TextInput`
   height: 40px;
   border: 1px solid ${props => props.theme.borderColor};
   border-radius: 5px;
-  padding: 0 10px;
+  padding: 0px 10px;
   background-color: ${props => props.theme.inputBackground};
   color: ${props => props.theme.text};
 `;

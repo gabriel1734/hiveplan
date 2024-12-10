@@ -57,7 +57,7 @@ const Container = styled.View`
 
 const Card = styled.View`
   width: 46%;
-  height: 120;
+  height: 120px;
   background-color: ${props => props.theme.buttonBackground};
   border-radius:10px;
   padding:10px;
@@ -72,7 +72,7 @@ const StyledText = styled.Text`
 `;
 
 const TextNumber = styled.Text`
-  font-size:32;
+  font-size:32px;
   font-weight: bold;
   color: ${props => props.theme.buttonText};
   text-align: right;

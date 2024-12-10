@@ -2,7 +2,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import styled from 'styled-components';
 import { useContext, useEffect, useState } from 'react';
-import { DataTheme } from '../../context';
+import { DataContext, DataTheme } from '../../context';
 import light from '../../theme/light';
 import theme from '../../theme';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,24 +14,26 @@ const Header = () => {
   const { theme } = useContext(DataTheme);
   const [logo, setLogo] = useState('');
   const [nome, setNome] = useState('HivePlan');
+  const { refreshing } = useContext(DataContext);
 
   const backgroundColor = theme === light ? ['#F7FF89', '#F6FF77', '#E8F622'] : ['#bb86fc', '#bb86fc', '#bb86fc'];
   const getData = async () => {
    const uri = await AsyncStorage.getItem('logo');
     if (uri) {
       setLogo(uri);
+    } else {
+      setLogo('');
     }
     const empresa = await viewEmpresa();
     if(empresa) {
       setNome(empresa.nomeEmpresa);
     }
-    console.log(empresa);
   }
+
 
   useEffect(() => {
     getData();
-    
-  },[])
+  }, [refreshing]);
 
   return (
     <LinearGradient colors={backgroundColor} style={styles.header}>
