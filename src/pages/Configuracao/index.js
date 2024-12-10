@@ -196,11 +196,9 @@ import * as Clipboard from 'expo-clipboard';
           backgroundColor: '#FF0000',
         });
       }
-      navigation.navigate('Home');
     }
-
-    // Reseta o estado de alteração de ramo
-    setRamoChange(false);
+    
+    navigation.navigate('Home', {refresh: true});
   };
 
 
@@ -628,7 +626,6 @@ const TitleModal = styled.Text`
     background-color: ${props => props.theme.inputBackground};
     border-radius: 10px;
     width: 100%;
-    height: 100%;
   `
   const ThemeBtn = styled.Text`
     padding: 10px;

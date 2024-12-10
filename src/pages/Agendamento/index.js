@@ -119,11 +119,11 @@ const Agendamento = ({ navigation, route }) => {
     if (idAgendamento) {
       if(updateAgendamento(idAgendamento, selectedDate, time, clientName, telefone, observation, selectedServicesArray, selectedColaboradoresArray))
         Toast.show("Atualizado com sucesso!");
-      navigation.navigate('Home');
+      navigation.navigate('Home', { refresh: true });
     } else {
       if (addAgendamento(selectedDate, time, clientName, telefone, observation, selectedServicesArray, selectedColaboradoresArray)) {
         Toast.show("Agendamento realizado com sucesso!",{ position: Toast.positions.TOP, backgroundColor: "green", duration: Toast.durations.LONG });
-        navigation.navigate('Home');
+        navigation.navigate('Home', { refresh: true });
       } else {
         Toast.show("Erro ao realizar agendamento!",{ position: Toast.positions.TOP, backgroundColor: "red", duration: Toast.durations.LONG });
       }
@@ -150,7 +150,7 @@ const Agendamento = ({ navigation, route }) => {
         </Goback>
         <CalendarContainer>
           <Calendar
-            current={currentDate.toISOString().split('T')[0]}
+            current={currentDate}
             onDayPress={(day) => setSelectedDate(day.dateString)}
             markedDates={{
               [selectedDate]: { selected: true, selectedColor: '#000', selectedTextColor: '#fff' },
