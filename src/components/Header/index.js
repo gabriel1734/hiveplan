@@ -21,12 +21,13 @@ const Header = () => {
    const uri = await AsyncStorage.getItem('logo');
     if (uri) {
       setLogo(uri);
+    } else {
+      setLogo('');
     }
     const empresa = await viewEmpresa();
     if(empresa) {
       setNome(empresa.nomeEmpresa);
     }
-    console.log(empresa);
   }
 
 
