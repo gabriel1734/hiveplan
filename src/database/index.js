@@ -1,6 +1,5 @@
 import * as SQLite from "expo-sqlite";
 import { Alert } from "react-native";
-import { useDrizzleStudio } from "expo-drizzle-studio-plugin";
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
@@ -10,7 +9,6 @@ const CURRENT_DB_VERSION = 2;
 
 export function create() {
   const db = SQLite.openDatabaseSync("database.db");
-  useDrizzleStudio(db);
 
   const db_version = db.getFirstSync("PRAGMA user_version");
 
